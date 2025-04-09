@@ -1,0 +1,121 @@
+<div class="calendar-container">
+    <div class="cards-wrapper">
+        <!-- Left Column -->
+        <div class="left-column">
+            <!-- Activities Card -->
+            <div class="card activities-card">
+                <div class="circle-container">
+                    <div class="progress-circle">
+                        <span class="percentage">{{completionPercentage}}%</span>
+                        <div class="circle-dot"></div>
+                    </div>
+                    <div class="info-container">
+                        <div class="title-section">
+                            <h2>Actividades</h2>
+                            <p>24 de Febrero 2025</p>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn-orange">
+                                <i class="fas fa-calendar"></i>
+                                <span>Indicar periodo</span>
+                            </button>
+                            <button class="btn-orange">
+                                <i class="fas fa-print"></i>
+                                <span>Imprimir</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar Card -->
+            <div class="card calendar-card">
+                <div class="month-label">Febrero</div>
+                <div class="calendar-grid">
+                    <div class="weekdays">
+                        <span>Lun</span>
+                        <span>Mar</span>
+                        <span>Mie</span>
+                        <span>Jue</span>
+                        <span>Vie</span>
+                        <span>Sab</span>
+                        <span>Dom</span>
+                    </div>
+                    <div class="days-grid">
+                        @for (day of calendarDays; track day.day) {
+                        <div class="day-cell" [class.completed]="day.completed" [class.today]="day.isToday"
+                            [class.disabled]="day.disabled">
+                            {{day.day}}
+                            @if (day.completed) {
+                            <i class="fas fa-check check-icon"></i>
+                            }
+                            @if (day.isToday) {
+                            <i class="fas fa-bell bell-icon"></i>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+                <div class="notification-box">
+                    <p>CRE amplía plazo para regularizaciones de estaciones de servicio. Dicho acuerdo amplía el plazo
+                        para regularizar dichas acciones del 17 de diciembre de 2024 al 17 de marzo de 2025.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <!-- Activities List Card -->
+            <div class="card activities-list-card">
+                <div class="tab-group">
+                    <button class="tab active">Diarias</button>
+                    <button class="tab">Semanal</button>
+                    <button class="tab">Mensual</button>
+                    <button class="tab">Anual</button>
+                </div>
+                <div class="list-header">
+                    <h3>Actividades Diarias</h3>
+                    <button class="btn-save">
+                        <i class="fas fa-save"></i>
+                        Guardar
+                    </button>
+                </div>
+                <div class="activities-list">
+                    @for (activity of activities; track activity.id) {
+                    <div class="activity-row">
+                        <div class="activity-text">
+                            <i class="fas fa-arrow-right"></i>
+                            <span>{{activity.name}}</span>
+                        </div>
+                        <div class="status-group">
+                            <span class="status-text" [ngClass]="activity.status">
+                                {{ activity.status === 'sin_revision' ? 'Sin revisión' :
+                                activity.status === 'verificado' ? 'Verificado' : 'No aplica' }}
+                            </span>
+                            <div class="checkbox" [ngClass]="activity.status" (click)="toggleActivityStatus(activity)">
+                                <i class="fas fa-check check-icon"></i>
+                                <i class="fas fa-times times-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <!-- Reminder Section -->
+                <div class="reminder-section">
+                    <div class="reminder-content">
+                        <div class="reminder-header">
+                            <i class="fas fa-bell"></i>
+                            <div class="reminder-text">
+                                <h4>Recordatorio:</h4>
+                                <p>Actividad ASEA 1</p>
+                            </div>
+                        </div>
+                        <img src="../../../assets/images/ASEA1_Actividad.png" alt="Hamse Logo" class="reminder-logo">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
