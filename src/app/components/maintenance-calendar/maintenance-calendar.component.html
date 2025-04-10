@@ -11,8 +11,10 @@
                     </div>
                     <div class="info-container">
                         <div class="title-section">
-                            <h2>Actividades</h2>
-                            <p>24 de Febrero 2025</p>
+                            <h2>{{ currentView === 'weekly' ? 'Actividades Semanales' : 'Actividades' }}</h2>
+                            <p>{{ currentView === 'weekly' ? 
+                                'Semana del ' + (currentWeekStart | date:'d') + ' al ' + (currentWeekEnd | date:'d') + ' de ' + (currentWeekEnd | date:'MMMM yyyy') :
+                                '24 de Febrero 2025' }}</p>
                         </div>
                         <div class="button-group">
                             <button class="btn-orange">
@@ -30,32 +32,76 @@
 
             <!-- Calendar Card -->
             <div class="card calendar-card">
-                <div class="month-label">Febrero</div>
-                <div class="calendar-grid">
-                    <div class="weekdays">
-                        <span>Lun</span>
-                        <span>Mar</span>
-                        <span>Mie</span>
-                        <span>Jue</span>
-                        <span>Vie</span>
-                        <span>Sab</span>
-                        <span>Dom</span>
-                    </div>
-                    <div class="days-grid">
-                        @for (day of calendarDays; track day.day) {
-                        <div class="day-cell" [class.completed]="day.completed" [class.today]="day.isToday"
-                            [class.disabled]="day.disabled">
-                            {{day.day}}
-                            @if (day.completed) {
-                            <i class="fas fa-check check-icon"></i>
-                            }
-                            @if (day.isToday) {
-                            <i class="fas fa-bell bell-icon"></i>
+                @if (currentView === 'weekly') {
+                    <div class="week-view">
+                        <div class="week-header">
+                            <button class="btn-nav" (click)="previousWeek()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="week-label">Semana {{ currentWeekStart | date:'w' }}</div>
+                            <button class="btn-nav" (click)="nextWeek()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="week-days">
+                            @for (day of weekDays; track day) {
+                                <div class="week-day" [class.today]="isToday(day)" [class.completed]="isDayCompleted(day)">
+                                    <span class="day-name">{{ day | date:'EEE' }}</span>
+                                    <span class="day-number">{{ day | date:'d' }}</span>
+                                    @if (isDayCompleted(day)) {
+                                        <i class="fas fa-check check-icon"></i>
+                                    }
+                                </div>
                             }
                         </div>
-                        }
                     </div>
-                </div>
+                } @else if (currentView === 'monthly') {
+                    <div class="month-view">
+                        <div class="year-header">
+                            <span class="year-label">2025</span>
+                        </div>
+                        <div class="months-grid">
+                            @for (month of months; track month.name) {
+                                <div class="month-cell" 
+                                     [class.active]="month.name === currentMonth"
+                                     [class.completed]="month.completed"
+                                     (click)="selectMonth(month.name)">
+                                    <span class="month-name">{{month.name}}</span>
+                                    @if (month.completed) {
+                                        <i class="fas fa-check"></i>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                } @else {
+                    <div class="month-label">Febrero</div>
+                    <div class="calendar-grid">
+                        <div class="weekdays">
+                            <span>Lun</span>
+                            <span>Mar</span>
+                            <span>Mie</span>
+                            <span>Jue</span>
+                            <span>Vie</span>
+                            <span>Sab</span>
+                            <span>Dom</span>
+                        </div>
+                        <div class="days-grid">
+                            @for (day of calendarDays; track day.day) {
+                            <div class="day-cell" [class.completed]="day.completed" [class.today]="day.isToday"
+                                [class.disabled]="day.disabled">
+                                {{day.day}}
+                                @if (day.completed) {
+                                <i class="fas fa-check check-icon"></i>
+                                }
+                                @if (day.isToday) {
+                                <i class="fas fa-bell bell-icon"></i>
+                                }
+                            </div>
+                            }
+                        </div>
+                    </div>
+                }
                 <div class="notification-box">
                     <p>CRE amplía plazo para regularizaciones de estaciones de servicio. Dicho acuerdo amplía el plazo
                         para regularizar dichas acciones del 17 de diciembre de 2024 al 17 de marzo de 2025.</p>
@@ -68,19 +114,19 @@
             <!-- Activities List Card -->
             <div class="card activities-list-card">
                 <div class="tab-group">
-                    <button class="tab active">Diarias</button>
-                    <button class="tab">Semanal</button>
-                    <button class="tab">Mensual</button>
-                    <button class="tab">Anual</button>
+                    <button class="tab" [class.active]="currentView === 'daily'" (click)="changeView('daily')">Diarias</button>
+                    <button class="tab" [class.active]="currentView === 'weekly'" (click)="changeView('weekly')">Semanal</button>
+                    <button class="tab" [class.active]="currentView === 'monthly'" (click)="changeView('monthly')">Mensual</button>
+                    <button class="tab" [class.active]="currentView === 'yearly'" (click)="changeView('yearly')">Anual</button>
                 </div>
                 <div class="list-header">
-                    <h3>Actividades Diarias</h3>
+                    <h3>{{ getViewTitle() }}</h3>
                     <button class="btn-save">
                         <i class="fas fa-save"></i>
                         Guardar
                     </button>
                 </div>
-                <div class="activities-list">
+                <div class="activities-list" [ngClass]="currentView">
                     @for (activity of activities; track activity.id) {
                     <div class="activity-row">
                         <div class="activity-text">

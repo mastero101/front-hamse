@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 interface CalendarDay {
@@ -23,10 +23,14 @@ interface Activity {
   templateUrl: './maintenance-calendar.component.html',
   styleUrl: './maintenance-calendar.component.scss'
 })
-export class MaintenanceCalendarComponent {
+export class MaintenanceCalendarComponent implements OnInit {
   completionPercentage = 0;
   currentMonth = 'Febrero';
-  weekDays = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+  weekDayNames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+  weekDays: Date[] = [];
+  currentView: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'daily';
+  currentWeekStart: Date = new Date();
+  currentWeekEnd: Date = new Date();
   
   calendarDays: CalendarDay[] = Array.from({ length: 28 }, (_, i) => ({
     day: i + 1,
@@ -63,5 +67,87 @@ export class MaintenanceCalendarComponent {
   private updateCompletionPercentage() {
     const verifiedActivities = this.activities.filter(a => a.status === 'verificado').length;
     this.completionPercentage = Math.round((verifiedActivities / this.activities.length) * 100);
+  }
+
+  ngOnInit() {
+    this.setCurrentWeek();
+    this.setWeekDays();
+  }
+
+  setWeekDays() {
+    this.weekDays = [];
+    const startDate = new Date(this.currentWeekStart);
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
+      this.weekDays.push(day);
+    }
+  }
+
+  isToday(date: Date): boolean {
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
+  }
+
+  isDayCompleted(date: Date): boolean {
+    // Add your logic to check if activities for this day are completed
+    return false;
+  }
+
+  changeView(view: 'daily' | 'weekly' | 'monthly' | 'yearly') {
+    this.currentView = view;
+    if (view === 'weekly') {
+      this.setCurrentWeek();
+      this.setWeekDays();
+    }
+  }
+
+  getViewTitle(): string {
+    switch(this.currentView) {
+      case 'daily': return 'Actividades Diarias';
+      case 'weekly': return 'Actividades Semanales';
+      case 'monthly': return 'Actividades Mensuales';
+      case 'yearly': return 'Actividades Anuales';
+      default: return 'Actividades';
+    }
+  }
+
+  setCurrentWeek() {
+    const today = new Date();
+    const first = today.getDate() - today.getDay() + 1;
+    this.currentWeekStart = new Date(today.setDate(first));
+    this.currentWeekEnd = new Date(today.setDate(first + 6));
+  }
+
+  previousWeek() {
+    this.currentWeekStart.setDate(this.currentWeekStart.getDate() - 7);
+    this.currentWeekEnd.setDate(this.currentWeekEnd.getDate() - 7);
+  }
+
+  nextWeek() {
+    this.currentWeekStart.setDate(this.currentWeekStart.getDate() + 7);
+    this.currentWeekEnd.setDate(this.currentWeekEnd.getDate() + 7);
+  }
+
+  months = [
+      { name: 'Enero', completed: true },
+      { name: 'Febrero', completed: false },
+      { name: 'Marzo', completed: false },
+      { name: 'Abril', completed: false },
+      { name: 'Mayo', completed: false },
+      { name: 'Junio', completed: false },
+      { name: 'Julio', completed: false },
+      { name: 'Agosto', completed: false },
+      { name: 'Septiembre', completed: false },
+      { name: 'Octubre', completed: false },
+      { name: 'Noviembre', completed: false },
+      { name: 'Diciembre', completed: false }
+  ];
+  
+  selectMonth(monthName: string) {
+      this.currentMonth = monthName;
+      // Add any additional logic needed when selecting a month
   }
 }
