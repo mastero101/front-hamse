@@ -97,11 +97,20 @@ export class MaintenanceCalendarComponent implements OnInit {
   }
 
   changeView(view: 'daily' | 'weekly' | 'monthly' | 'yearly') {
-    this.currentView = view;
-    if (view === 'weekly') {
-      this.setCurrentWeek();
-      this.setWeekDays();
-    }
+      this.currentView = view;
+    
+      if (view === 'weekly') {
+          this.setCurrentWeek();
+          this.setWeekDays();
+      } else if (view === 'yearly') {
+          this.setCurrentYear();
+          //this.updateYearlyCompletionPercentage();
+      }
+  }
+
+  setCurrentYear() {
+    const today = new Date();
+    this.currentMonth = today.toLocaleString('default', { month: 'long' });
   }
 
   getViewTitle(): string {

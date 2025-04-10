@@ -1,7 +1,7 @@
 <div class="calendar-container">
-    <div class="cards-wrapper">
+    <div class="cards-wrapper" [class.yearly-view]="currentView === 'yearly'">
         <!-- Left Column -->
-        <div class="left-column">
+        <div class="left-column" *ngIf="currentView !== 'yearly'">
             <!-- Activities Card -->
             <div class="card activities-card">
                 <div class="circle-container">
@@ -110,8 +110,7 @@
         </div>
 
         <!-- Right Column -->
-        <div class="right-column">
-            <!-- Activities List Card -->
+        <div class="right-column" [class.expanded]="currentView === 'yearly'">
             <div class="card activities-list-card">
                 <div class="tab-group">
                     <button class="tab" [class.active]="currentView === 'daily'" (click)="changeView('daily')">Diarias</button>
@@ -162,6 +161,5 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
