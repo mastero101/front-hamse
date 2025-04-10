@@ -1,0 +1,61 @@
+<div class="maintenance-program-container">
+    <div class="program-header">
+        <h1>Cuadro de mantenimiento 2025</h1>
+        <div class="action-buttons">
+            <button class="btn-action">
+                <i class="fas fa-save"></i>
+                Guardar
+            </button>
+            <button class="btn-action">
+                <i class="fas fa-calendar"></i>
+                Indicar periodo
+            </button>
+            <button class="btn-action">
+                <i class="fas fa-print"></i>
+                Imprimir
+            </button>
+        </div>
+    </div>
+
+    <div class="maintenance-table">
+        <table>
+            <thead>
+                <tr>
+                    <th class="activity-column">Actividad</th>
+                    @for (month of months; track month) {
+                        <th class="month-column">
+                            <div class="month-header">{{month.name}}</div>
+                            <div class="weeks-header">
+                                @for (week of month.weeks; track week) {
+                                    <div class="week">{{week}}</div>
+                                }
+                            </div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (activity of activities; track activity.id) {
+                    <tr>
+                        <td class="activity-name">{{activity.name}}</td>
+                        @for (month of months; track month) {
+                            <td class="month-cell">
+                                <div class="week-group">
+                                    @for (week of month.weeks; track week) {
+                                        <div class="week-checkbox" 
+                                             [class.verified]="getWeekState(activity, month, week) === 'verified'"
+                                             [class.not-applicable]="getWeekState(activity, month, week) === 'notApplicable'"
+                                             (click)="toggleWeek(activity, month, week)">
+                                            <i class="fas fa-check check-icon"></i>
+                                            <i class="fas fa-times times-icon"></i>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
