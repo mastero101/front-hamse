@@ -84,3 +84,70 @@
       }
     }
 }
+
+.auth-section {
+  margin-left: auto;
+  padding: 0 1rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  .auth-buttons {
+    display: flex;
+    gap: 0.5rem;
+    height: 100%;
+    align-items: center;
+  }
+
+  .btn-register, .btn-login, .btn-logout {
+    height: 40px;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+
+    i {
+      font-size: 1rem;
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+
+  .btn-register {
+    background: #2e7d32;
+    color: white;
+
+    &:hover {
+      background: #1b5e20;
+      transform: translateY(-1px);
+    }
+  }
+
+  .btn-login {
+    background: #1a237e;
+    color: white;
+
+    &:hover {
+      background: #ffa000;
+      transform: translateY(-1px);
+    }
+  }
+
+  .btn-logout {
+    background: #c62828;
+    color: white;
+
+    &:hover {
+      background: #b71c1c;
+      transform: translateY(-1px);
+    }
+  }
+}

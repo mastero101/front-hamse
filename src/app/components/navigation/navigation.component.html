@@ -16,4 +16,33 @@
         </li>
       }
     </ul>
+    <div class="auth-section">
+      @if (authService.currentUserValue) {
+        <div class="auth-buttons">
+          @if (isAdmin) {
+            <button class="btn-register" (click)="openRegisterModal()">
+              <i class="fa-solid fa-user-plus"></i>
+              Registrar Usuario
+            </button>
+          }
+          <button class="btn-logout" (click)="logout()">
+            <i class="fa-solid fa-sign-out-alt"></i>
+            
+          </button>
+        </div>
+      } @else {
+        <button class="btn-login" (click)="showAuthModal = true">
+          <i class="fa-solid fa-sign-in-alt"></i>
+          Iniciar Sesión
+        </button>
+      }
+    </div>
 </nav>
+
+@if (showAuthModal) {
+  <app-auth-modal (close)="showAuthModal = false" />
+}
+
+@if (showRegisterModal) {
+  <app-auth-modal [isRegistrationMode]="true" (close)="showRegisterModal = false" />
+}
