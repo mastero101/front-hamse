@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivityService } from '../../services/activity.service';
+import { ScheduleService } from '../../services/schedule.service';
 
 interface CalendarDay {
   day: number;
@@ -10,10 +12,14 @@ interface CalendarDay {
 
 type ActivityStatus = 'sin_revision' | 'verificado' | 'no_aplica';
 
+// Update the Activity interface to match the Schedule service requirements
 interface Activity {
   id: number;
   name: string;
   status: ActivityStatus;
+  frequency: 'weekly' | 'monthly'; // Remove 'daily' to match Schedule service
+  expectedDuration: number;
+  priority: 'low' | 'medium' | 'high';
 }
 
 @Component({
@@ -39,17 +45,278 @@ export class MaintenanceCalendarComponent implements OnInit {
     disabled: i + 1 >= 25
   }));
 
-  activities: Activity[] = [
-    { id: 1, name: 'VERIFICACIÓN DE VÁLVULAS DE CORTE RÁPIDO EN MANGUERAS', status: 'sin_revision' },
-    { id: 2, name: 'SEÑALAMIENTOS RESTRICTIVOS Y PREVENTIVOS', status: 'sin_revision' },
-    { id: 3, name: 'SISTEMA DE TRATAMIENTO DE AGUAS RESIDUALES', status: 'sin_revision' },
-    { id: 4, name: 'VERIFICACIÓN DEL COMPRESOR', status: 'sin_revision' },
-    { id: 5, name: 'BITÁCORA DE OPERACIÓN Y MANTENIMIENTO', status: 'sin_revision' },
-    { id: 6, name: 'VERIFICACIÓN DE PISTOLAS DE DESPACHO', status: 'sin_revision' },
-    { id: 7, name: 'LIMPIEZA DE TRAMPA DE COMBUSTIBLE', status: 'sin_revision' }
-  ];
+  activities: Activity[] = []; // Inicializamos como un array vacío
 
+  // Update loadActivities method
+  loadActivities() {
+    this.activityService.getActivities().subscribe({
+      next: (activities) => {
+        this.activities = activities.map(activity => ({
+          id: parseInt(activity.id),
+          name: activity.name,
+          status: 'sin_revision' as ActivityStatus,
+          frequency: activity.frequency || 'weekly',
+          expectedDuration: activity.expectedDuration || 30,
+          priority: activity.priority || 'high'
+        }));
+        this.updateCompletionPercentage();
+      },
+      error: (error) => {
+        console.error('Error al cargar actividades:', error);
+      }
+    });
+  }
+
+  
+
+  constructor(
+    private activityService: ActivityService,
+    private scheduleService: ScheduleService
+  ) {}
+
+  ngOnInit() {
+    if (this.checkAuthentication()) {
+      this.setCurrentWeek();
+      this.setWeekDays();
+      this.loadActivities();
+      this.loadSchedules();
+    }
+  }
+
+  private checkAuthentication(): boolean {
+    const token = localStorage.getItem('token');
+    const currentUser = localStorage.getItem('currentUser');
+    
+    if (!token || !currentUser) {
+      console.error('Usuario no autenticado');
+      return false;
+    }
+
+    // Guardar la información del usuario actual
+    const userData = JSON.parse(currentUser);
+    if (userData && userData.accessToken) {
+      localStorage.setItem('token', userData.accessToken);
+      return true;
+    }
+
+    return true;
+  }
+
+  private getCurrentUserId(): string {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      return userData.id || '';
+    }
+    return '';
+  }
+
+  private currentScheduleId: string = '';
+
+  loadSchedules() {
+    this.scheduleService.getSchedules().subscribe({
+      next: (schedules) => {
+        if (!schedules || schedules.length === 0) {
+          console.error('No hay horarios disponibles en el sistema');
+          // Crear un horario por defecto si no existe ninguno
+          this.createDefaultSchedule();
+          return;
+        }
+
+        const today = new Date();
+        const currentSchedule = schedules.find(schedule => {
+          const startDate = new Date(schedule.startDate);
+          const endDate = new Date(schedule.endDate);
+          return startDate <= today && endDate >= today;
+        });
+
+        if (currentSchedule) {
+          this.currentScheduleId = currentSchedule.id;
+          this.completionPercentage = currentSchedule.progress;
+          if (currentSchedule.activities) {
+            this.updateActivitiesFromSchedule(currentSchedule.activities);
+          }
+        } else {
+          // Crear un nuevo horario para la semana actual
+          this.createWeeklySchedule();
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar horarios:', error);
+        // Intentar crear un horario por defecto en caso de error
+        this.createDefaultSchedule();
+      }
+    });
+  }
+
+  private createWeeklySchedule() {
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - today.getDay() + 1);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+
+    const currentUser = localStorage.getItem('currentUser');
+    const userId = currentUser ? JSON.parse(currentUser).id : '';
+
+    const newSchedule = {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      type: 'weekly' as 'weekly' | 'monthly',
+      status: 'in_progress' as 'in_progress' | 'pending' | 'completed',
+      assignedTo: userId,
+      activities: this.activities.map(activity => ({
+        id: activity.id.toString(),
+        name: activity.name,
+        status: 'pending',
+        frequency: activity.frequency,
+        expectedDuration: activity.expectedDuration,
+        priority: activity.priority
+      }))
+    };
+
+    this.scheduleService.createSchedule(newSchedule).subscribe({
+      next: (response) => {
+        this.currentScheduleId = response.id;
+        this.completionPercentage = 0;
+        console.log('Nuevo horario semanal creado exitosamente');
+      },
+      error: (error) => {
+        console.error('Error al crear el horario semanal:', error);
+      }
+    });
+  }
+
+  private createDefaultSchedule() {
+    const today = new Date();
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + 7);
+
+    const currentUser = localStorage.getItem('currentUser');
+    const userId = currentUser ? JSON.parse(currentUser).id : '';
+
+    const defaultSchedule = {
+      startDate: today.toISOString(),
+      endDate: endDate.toISOString(),
+      type: 'weekly' as 'weekly' | 'monthly',
+      status: 'in_progress' as 'in_progress' | 'pending' | 'completed',
+      assignedTo: userId,
+      activities: this.activities.map(activity => ({
+        id: activity.id.toString(),
+        name: activity.name,
+        status: 'pending',
+        frequency: activity.frequency,
+        expectedDuration: activity.expectedDuration,
+        priority: activity.priority
+      }))
+    };
+
+    this.scheduleService.createSchedule(defaultSchedule).subscribe({
+      next: (response) => {
+        this.currentScheduleId = response.id;
+        this.completionPercentage = 0;
+        console.log('Horario por defecto creado exitosamente');
+      },
+      error: (error) => {
+        console.error('Error al crear el horario por defecto:', error);
+      }
+    });
+  }
+
+  getCurrentScheduleId(): string {
+    if (!this.currentScheduleId) {
+      console.error('No hay un horario actual seleccionado');
+      // Intentar recargar los horarios
+      this.loadSchedules();
+      return '';
+    }
+    return this.currentScheduleId;
+  }
+
+  saveActivities() {
+    if (!this.checkAuthentication()) {
+      return;
+    }
+
+    const currentScheduleId = this.getCurrentScheduleId();
+    if (!currentScheduleId) {
+      console.error('No se puede guardar: No hay un horario seleccionado');
+      return;
+    }
+
+    const activitiesUpdate = this.activities.map(activity => ({
+      id: activity.id.toString(),
+      name: activity.name,
+      status: this.mapStatusToApi(activity.status),
+      frequency: activity.frequency,
+      expectedDuration: activity.expectedDuration,
+      priority: activity.priority
+    }));
+
+    this.scheduleService.updateSchedule(currentScheduleId, {
+      activities: activitiesUpdate,
+      type: 'weekly',
+      status: 'in_progress',
+      assignedTo: this.getCurrentUserId()
+    }).subscribe({
+      next: (response) => {
+        this.completionPercentage = response.progress;
+        console.log('Actividades actualizadas exitosamente');
+      },
+      error: (error) => {
+        if (error.response?.status === 401) {
+          console.error('Error de autenticación: Token no válido o expirado');
+          localStorage.removeItem('token');
+          localStorage.removeItem('currentUser');
+          window.location.href = '/login';
+        } else if (error.response?.status === 500) {
+          console.error('Error del servidor al actualizar actividades:', error);
+        } else {
+          console.error('Error al actualizar actividades:', error);
+        }
+      }
+    });
+  }
+
+  updateActivitiesFromSchedule(scheduleActivities: any[]) {
+    this.activities = this.activities.map(activity => {
+      const scheduleActivity = scheduleActivities.find(sa => sa.id === activity.id.toString());
+      if (scheduleActivity) {
+        return {
+          ...activity,
+          status: this.mapActivityStatus(scheduleActivity.status)
+        };
+      }
+      return activity;
+    });
+  }
+
+  mapActivityStatus(status: string): ActivityStatus {
+    switch (status) {
+      case 'completed':
+        return 'verificado';
+      case 'not_applicable':
+        return 'no_aplica';
+      default:
+        return 'sin_revision';
+    }
+  }
+
+  private mapStatusToApi(status: ActivityStatus): string {
+    switch (status) {
+      case 'verificado':
+        return 'completed';
+      case 'no_aplica':
+        return 'not_applicable';
+      default:
+        return 'pending';
+    }
+  }
+
+  // Modificar el método toggleActivityStatus existente
   toggleActivityStatus(activity: Activity) {
+    const oldStatus = activity.status;
+    
     switch (activity.status) {
       case 'sin_revision':
         activity.status = 'verificado';
@@ -61,17 +328,14 @@ export class MaintenanceCalendarComponent implements OnInit {
         activity.status = 'sin_revision';
         break;
     }
+    
+    // Ya no actualizamos inmediatamente, solo actualizamos el porcentaje local
     this.updateCompletionPercentage();
   }
 
   private updateCompletionPercentage() {
     const verifiedActivities = this.activities.filter(a => a.status === 'verificado').length;
     this.completionPercentage = Math.round((verifiedActivities / this.activities.length) * 100);
-  }
-
-  ngOnInit() {
-    this.setCurrentWeek();
-    this.setWeekDays();
   }
 
   setWeekDays() {

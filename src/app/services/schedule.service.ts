@@ -45,8 +45,14 @@ export class ScheduleService {
   }
 
   createSchedule(schedule: Omit<Schedule, 'id' | 'progress'>): Observable<Schedule> {
+    const token = localStorage.getItem('token');
     return new Observable(subscriber => {
-      axios.post(this.endpoint, schedule)
+      axios.post(this.endpoint, schedule, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => subscriber.next(response.data.data))
         .catch(error => subscriber.error(error))
         .finally(() => subscriber.complete());
@@ -54,8 +60,14 @@ export class ScheduleService {
   }
 
   updateSchedule(id: string, schedule: Partial<Schedule>): Observable<Schedule> {
+    const token = localStorage.getItem('token');
     return new Observable(subscriber => {
-      axios.put(`${this.endpoint}/${id}`, schedule)
+      axios.put(`${this.endpoint}/${id}`, schedule, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => subscriber.next(response.data.data))
         .catch(error => subscriber.error(error))
         .finally(() => subscriber.complete());

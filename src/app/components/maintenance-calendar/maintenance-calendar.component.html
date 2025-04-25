@@ -120,29 +120,36 @@
                 </div>
                 <div class="list-header">
                     <h3>{{ getViewTitle() }}</h3>
-                    <button class="btn-save">
+                    <button class="btn-save" (click)="saveActivities()">
                         <i class="fas fa-save"></i>
                         Guardar
                     </button>
                 </div>
                 <div class="activities-list" [ngClass]="currentView">
-                    @for (activity of activities; track activity.id) {
-                    <div class="activity-row">
-                        <div class="activity-text">
-                            <i class="fas fa-arrow-right"></i>
-                            <span>{{activity.name}}</span>
+                    @if (activities.length === 0) {
+                        <div class="loading-message">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Cargando actividades...</span>
                         </div>
-                        <div class="status-group">
-                            <span class="status-text" [ngClass]="activity.status">
-                                {{ activity.status === 'sin_revision' ? 'Sin revisión' :
-                                activity.status === 'verificado' ? 'Verificado' : 'No aplica' }}
-                            </span>
-                            <div class="checkbox" [ngClass]="activity.status" (click)="toggleActivityStatus(activity)">
-                                <i class="fas fa-check check-icon"></i>
-                                <i class="fas fa-times times-icon"></i>
+                    } @else {
+                        @for (activity of activities; track activity.id) {
+                            <div class="activity-row">
+                                <div class="activity-text">
+                                    <i class="fas fa-arrow-right"></i>
+                                    <span>{{activity.name}}</span>
+                                </div>
+                                <div class="status-group">
+                                    <span class="status-text" [ngClass]="activity.status">
+                                        {{ activity.status === 'sin_revision' ? 'Sin revisión' :
+                                        activity.status === 'verificado' ? 'Verificado' : 'No aplica' }}
+                                    </span>
+                                    <div class="checkbox" [ngClass]="activity.status" (click)="toggleActivityStatus(activity)">
+                                        <i class="fas fa-check check-icon"></i>
+                                        <i class="fas fa-times times-icon"></i>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        }
                     }
                 </div>
 

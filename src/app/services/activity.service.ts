@@ -21,8 +21,14 @@ export class ActivityService {
   constructor() {}
 
   getActivities(): Observable<Activity[]> {
+    const token = localStorage.getItem('token');
     return new Observable(subscriber => {
-      axios.get(this.endpoint)
+      axios.get(this.endpoint, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => subscriber.next(response.data.data))
         .catch(error => subscriber.error(error))
         .finally(() => subscriber.complete());
@@ -39,8 +45,14 @@ export class ActivityService {
   }
 
   createActivity(activity: Omit<Activity, 'id'>): Observable<Activity> {
+    const token = localStorage.getItem('token');
     return new Observable(subscriber => {
-      axios.post(this.endpoint, activity)
+      axios.post(this.endpoint, activity, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => subscriber.next(response.data.data))
         .catch(error => subscriber.error(error))
         .finally(() => subscriber.complete());
@@ -48,8 +60,14 @@ export class ActivityService {
   }
 
   updateActivity(id: string, activity: Partial<Activity>): Observable<Activity> {
+    const token = localStorage.getItem('token');
     return new Observable(subscriber => {
-      axios.put(`${this.endpoint}/${id}`, activity)
+      axios.put(`${this.endpoint}/${id}`, activity, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
         .then(response => subscriber.next(response.data.data))
         .catch(error => subscriber.error(error))
         .finally(() => subscriber.complete());

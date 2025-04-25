@@ -60,6 +60,7 @@ export class AuthModalComponent {
               setTimeout(() => {
                 this.closeModal();
               }, 1000);
+              window.location.reload()
             } else {
               this.errorMessage = 'Credenciales inválidas';
             }
