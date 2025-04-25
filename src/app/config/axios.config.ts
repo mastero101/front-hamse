@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:1072/api'
+  baseURL: 'https://back-hamse.vercel.app/api'
 });
 
 // Interceptor de solicitud
