@@ -120,7 +120,7 @@
                 </div>
                 <div class="list-header">
                     <h3>{{ getViewTitle() }}</h3>
-                    <button class="btn-save" (click)="saveActivities()">
+                    <button class="btn-save" (click)="saveActivities()" [disabled]="!currentScheduleId"> <!-- Añadido [disabled] -->
                         <i class="fas fa-save"></i>
                         Guardar
                     </button>

@@ -75,8 +75,13 @@ export class ActivityService {
   }
 
   deleteActivity(id: string): Observable<void> {
+    const token = localStorage.getItem('token'); // Asegúrate de obtener el token si es necesario
     return new Observable(subscriber => {
-      axios.delete(`${this.endpoint}/${id}`)
+      axios.delete(`${this.endpoint}/${id}`, { // Añadir config con headers si es necesario
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
         .then(() => subscriber.next())
         .catch(error => subscriber.error(error))
         .finally(() => subscriber.complete());

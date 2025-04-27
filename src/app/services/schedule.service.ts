@@ -11,11 +11,20 @@ export interface Schedule {
   status: 'pending' | 'in_progress' | 'completed';
   progress: number;
   assignedTo: string;
-  activities?: Activity[];
+  activities?: Activity[]; // This might need to be BackendActivity from the component if used here
   User?: {
     id: string;
     username: string;
   };
+  // Add Activities if it's part of the main Schedule type from backend
+  Activities?: Activity[]; // Or use BackendActivity if defined globally/imported
+}
+
+// Define the interface for the status update payload
+interface ActivityStatusUpdate {
+  activityId: string;
+  state: string;
+  // Add other fields like 'notes' if your backend expects them
 }
 
 @Injectable({
@@ -91,4 +100,23 @@ export class ScheduleService {
         .finally(() => subscriber.complete());
     });
   }
+
+  // --- Added Method ---
+  updateActivityStatuses(scheduleId: string, updates: ActivityStatusUpdate[]): Observable<any> { // Use a more specific type for Observable<any> if you know the backend response structure
+    const token = localStorage.getItem('token');
+    // Adjust the endpoint path if your backend route is different (e.g., /statuses, /activity-status)
+    const url = `${this.endpoint}/${scheduleId}/statuses`;
+    return new Observable(subscriber => {
+      axios.put(url, { statuses: updates }, { // Send updates wrapped in an object if backend expects { statuses: [...] }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(response => subscriber.next(response.data)) // Send the whole response data back
+        .catch(error => subscriber.error(error))
+        .finally(() => subscriber.complete());
+    });
+  }
+  // --- End Added Method ---
 }
