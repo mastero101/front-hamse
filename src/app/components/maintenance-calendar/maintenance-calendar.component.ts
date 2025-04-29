@@ -72,9 +72,10 @@ export class MaintenanceCalendarComponent implements OnInit {
   calendarDays: CalendarDay[] = []; // Se calculará dinámicamente
 
   activities: CalendarActivity[] = []; // Usa la interfaz local con status
-  currentScheduleId: string | null = null; // <-- Remove 'private' modifier
+  currentScheduleId: string | null = null;
   isLoadingActivities = false;
   isLoadingSchedule = false;
+  private currentScheduleHasActivities: boolean = false; // <-- Nueva bandera
 
   constructor(
     private activityService: ActivityService,
@@ -145,11 +146,12 @@ export class MaintenanceCalendarComponent implements OnInit {
           this.fetchAndUpdateScheduleDetails(targetSchedule.id);
         } else {
           console.warn(`No se encontró un schedule para la fecha: ${date.toDateString()}`);
-          this.currentScheduleId = null;
-          this.completionPercentage = 0;
+          this.createNewSchedule(date);
+          //this.currentScheduleId = null;
+          //this.completionPercentage = 0;
           // Resetea los estados de las actividades locales a 'sin_revision'
-          this.resetActivityStatuses();
-          this.isLoadingSchedule = false;
+          //this.resetActivityStatuses();
+          //this.isLoadingSchedule = false;
           // Considera si quieres crear un schedule aquí automáticamente o mostrar un mensaje
         }
       },
@@ -162,9 +164,69 @@ export class MaintenanceCalendarComponent implements OnInit {
     });
   }
 
+  private createNewSchedule(date: Date) {
+    this.isLoadingSchedule = true; // Indicar que estamos creando/cargando
+    const startDate = new Date(date);
+    // Ajusta la lógica para definir startDate y endDate según tu vista (semanal en este caso)
+    const dayOfWeek = startDate.getDay();
+    const firstDayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    startDate.setDate(startDate.getDate() + firstDayOffset);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    endDate.setHours(23, 59, 59, 999);
+
+    const newScheduleData = {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      // Asegúrate que mapViewTypeToScheduleType existe o ajusta el tipo directamente si es necesario
+      type: this.mapViewTypeToScheduleType(this.currentView),
+      status: 'in_progress' as 'in_progress' | 'pending' | 'completed',
+      assignedTo: this.getCurrentUserId(), // Asegúrate que getCurrentUserId existe
+      activities: this.activities.map(activity => ({
+        ...activity,
+        Statuses: [{ state: 'pending' }]  // Match backend Activity interface
+      }))
+    };
+
+    console.log('Intentando crear nuevo schedule con datos:', newScheduleData);
+
+    this.scheduleService.createSchedule(newScheduleData).subscribe({
+      next: (createdSchedule) => {
+        console.log('Nuevo schedule creado:', createdSchedule);
+        this.currentScheduleId = createdSchedule.id;
+        // Una vez creado, carga sus detalles (que incluirán las actividades base con estado inicial)
+        this.fetchAndUpdateScheduleDetails(createdSchedule.id);
+        // isLoadingSchedule se pondrá en false dentro de fetchAndUpdateScheduleDetails
+      },
+      error: (error) => {
+        console.error('Error al crear nuevo schedule:', error);
+        alert('No se pudo crear un nuevo horario para esta semana. Por favor, inténtelo de nuevo más tarde.');
+        this.resetActivityStatuses(); // Resetea si falla la creación
+        this.currentScheduleId = null;
+        this.isLoadingSchedule = false; // Finaliza la carga en caso de error
+      }
+    });
+  }
+
+  private mapViewTypeToScheduleType(viewType: 'daily' | 'weekly' | 'monthly' | 'yearly'): 'weekly' | 'monthly' {
+    switch (viewType) {
+      case 'daily':
+      case 'weekly':
+        return 'weekly';
+      case 'monthly':
+      case 'yearly':
+        return 'monthly';
+      default:
+        return 'weekly'; // O un valor por defecto apropiado
+    }
+  }
+
   // Obtiene los detalles de un Schedule específico por ID
   fetchAndUpdateScheduleDetails(scheduleId: string) {
     console.log(`Obteniendo detalles para schedule: ${scheduleId}`);
+    this.currentScheduleHasActivities = false; // <-- Resetear la bandera al iniciar la carga
     // Use 'as any' to bypass the type check as a workaround
     (this.scheduleService.getSchedule(scheduleId) as any).subscribe({
       next: (detailedSchedule: DetailedSchedule) => { // Keep the explicit type here for clarity within the handler
@@ -175,15 +237,18 @@ export class MaintenanceCalendarComponent implements OnInit {
             if (detailedSchedule.Activities.length > 0) {
               // Actualiza los estados de las actividades locales con los del schedule
               this.updateActivitiesFromSchedule(detailedSchedule.Activities);
+              this.currentScheduleHasActivities = true; // <-- Marcar que sí tiene actividades
             } else {
               console.warn('El schedule detallado no contiene actividades.');
               this.resetActivityStatuses(); // Resetea estados locales si no hay actividades
+              // this.currentScheduleHasActivities sigue siendo false
             }
         } else {
             // Handle cases where the data might not be DetailedSchedule despite the cast
             console.error('Error: La data recibida de getSchedule no tiene la estructura esperada (DetailedSchedule).', detailedSchedule);
             this.currentScheduleId = null;
             this.resetActivityStatuses();
+            // this.currentScheduleHasActivities sigue siendo false
         }
         this.isLoadingSchedule = false;
       },
@@ -191,6 +256,7 @@ export class MaintenanceCalendarComponent implements OnInit {
         console.error(`Error al obtener detalles del schedule ${scheduleId}:`, error);
         this.currentScheduleId = null; // Resetea ID si falla la carga
         this.resetActivityStatuses(); // Resetea estados locales
+        this.currentScheduleHasActivities = false; // <-- Asegurar que es false en caso de error
         this.isLoadingSchedule = false;
       }
     });
@@ -363,21 +429,31 @@ export class MaintenanceCalendarComponent implements OnInit {
       return;
     }
 
-    console.log(`Guardando estados para Schedule ID: ${this.currentScheduleId}`);
+    // *** VERIFICACIÓN CRÍTICA ***
+    // Asegúrate que esta comprobación está aquí, ANTES de cualquier lógica de guardado.
+    if (!this.currentScheduleHasActivities) {
+        // Añadir log para confirmar que se entra aquí
+        console.log(`[DEBUG] saveActivities: currentScheduleHasActivities es false. Cancelando guardado para schedule ${this.currentScheduleId}.`);
+        console.warn(`Intento de guardar cancelado: El schedule actual (${this.currentScheduleId}) no tiene actividades asociadas en el backend.`);
+        alert('No se pueden guardar los cambios porque este horario no tiene actividades asignadas.');
+        return; // Detener la ejecución aquí
+    }
+    // *** FIN VERIFICACIÓN ***
 
-    // Opción B: Actualiza los ESTADOS de las actividades DENTRO de este schedule.
+    // Si la ejecución llega aquí, significa que currentScheduleHasActivities es true.
+    console.log(`Guardando estados para Schedule ID: ${this.currentScheduleId}`); // Este log solo debería aparecer si la verificación anterior pasa.
+
     const activityUpdates = this.activities.map(activity => ({
       activityId: activity.id,
-      // *** USA LA FUNCIÓN DE MAPEO CORRECTA ***
-      state: this.mapLocalStatusToApi(activity.status), // Use mapLocalStatusToApi here
+      state: this.mapLocalStatusToApi(activity.status),
       // notes: activity.notes // Incluir notas si aplica
     }));
 
-    console.log('Guardando estados para Schedule ID:', this.currentScheduleId);
-    console.log('Payload de actualización de estados:', activityUpdates);
+    console.log('Payload de actualización de estados:', activityUpdates); // Log del payload
 
-    // *** Use this call ***
-    this.scheduleService.updateActivityStatuses(this.currentScheduleId!, activityUpdates).subscribe({ // Added non-null assertion for currentScheduleId
+    const payload = { statuses: activityUpdates };
+
+    this.scheduleService.updateActivityStatuses(this.currentScheduleId!, payload).subscribe({
         next: (response) => {
             console.log('Estados de actividad actualizados con éxito:', response);
             // Update local data based on the response (e.g., progress, specific activity statuses)

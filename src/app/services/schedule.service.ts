@@ -21,10 +21,16 @@ export interface Schedule {
 }
 
 // Define the interface for the status update payload
-interface ActivityStatusUpdate {
+// Define the type for a single status update (if not already defined)
+export interface ActivityStatusUpdate { // <-- Asegúrate que esta interfaz exista y sea exportada si es necesario
   activityId: string;
   state: string;
-  // Add other fields like 'notes' if your backend expects them
+  notes?: string; // Optional notes
+}
+
+// Define the type for the payload object the backend expects
+export interface ActivityStatusPayload { // <-- Define esta interfaz
+  statuses: ActivityStatusUpdate[];
 }
 
 @Injectable({
@@ -102,21 +108,23 @@ export class ScheduleService {
   }
 
   // --- Added Method ---
-  updateActivityStatuses(scheduleId: string, updates: ActivityStatusUpdate[]): Observable<any> { // Use a more specific type for Observable<any> if you know the backend response structure
+  // Cambia el tipo del segundo parámetro de ActivityStatusUpdate[] a ActivityStatusPayload
+  updateActivityStatuses(scheduleId: string, payload: ActivityStatusPayload): Observable<any> { // <-- Firma corregida
     const token = localStorage.getItem('token');
-    // Adjust the endpoint path if your backend route is different (e.g., /statuses, /activity-status)
     const url = `${this.endpoint}/${scheduleId}/statuses`;
+    console.log(`Sending PUT request to ${url} with payload:`, payload); // Log opcional
     return new Observable(subscriber => {
-      axios.put(url, { statuses: updates }, { // Send updates wrapped in an object if backend expects { statuses: [...] }
+      // Ahora 'payload' ya tiene la estructura { statuses: [...] } que espera axios.put
+      axios.put(url, payload, { // <-- Pasa el objeto payload directamente
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
-        .then(response => subscriber.next(response.data)) // Send the whole response data back
+        .then(response => subscriber.next(response.data))
         .catch(error => subscriber.error(error))
         .finally(() => subscriber.complete());
     });
   }
-  // --- End Added Method ---
+  // --- End Method ---
 }
