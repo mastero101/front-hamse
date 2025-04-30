@@ -11,28 +11,14 @@ interface CalendarActivity extends Activity {
   status: ActivityStatus;
 }
 
-// --- Interfaces para la data del Backend ---
-// Ajusta estas interfaces según la estructura exacta que devuelve tu API GET /schedules/:id
-
-// Interfaz para una Actividad como viene del backend dentro de un Schedule detallado
-// Asume que el estado viene en una propiedad 'state' dentro de un objeto 'Status'
-// o directamente en la tabla de unión 'ActivitySchedule'. ¡Ajusta según tu caso!
 interface BackendActivityStatus {
-  // Opción 1: Si el estado viene de la tabla Status asociada a Activity
-  // Status?: { // <-- Comentado o eliminado si no se usa
-  //   state: string;
-  // };
-  Statuses?: { // <-- Cambiado a plural y es un array
-    state: string; // 'completed', 'pending', 'not_applicable', etc.
-    // otros campos de Status si los necesitas...
-  }[]; // <-- Indicando que es un array
-  // Opción 2: Si el estado viene de la tabla de unión (ej. ActivitySchedule)
+  
+  Statuses?: { 
+    state: string;
+  }[]; 
   ActivitySchedule?: {
-    // status: string; // <-- Comentado o eliminado si no se usa
-     // otros campos de la tabla de unión si los necesitas...
+
   };
-   // Opción 3: Si el estado viene directamente en el objeto Activity (menos común en M:N con estado)
-   // status?: string;
 }
 
 // Extiende la interfaz Activity base con la información de estado del backend
@@ -40,9 +26,8 @@ interface BackendActivity extends Activity, BackendActivityStatus {}
 
 // Interfaz para el Schedule detallado como viene del backend
 interface DetailedSchedule extends Schedule {
-  Activities: BackendActivity[]; // Usa la interfaz que incluye el estado
+  Activities: BackendActivity[]; 
 }
-// --- Fin Interfaces Backend ---
 
 
 interface CalendarDay {
@@ -64,18 +49,18 @@ export class MaintenanceCalendarComponent implements OnInit {
   currentMonth = 'Febrero'; // Considera hacerlo dinámico
   weekDayNames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
   weekDays: Date[] = [];
-  currentView: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly'; // Default a semanal
+  currentView: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly'; 
   currentWeekStart: Date = new Date();
   currentWeekEnd: Date = new Date();
-  selectedDate: Date = new Date(); // Para rastrear la fecha seleccionada
+  selectedDate: Date = new Date(); 
 
-  calendarDays: CalendarDay[] = []; // Se calculará dinámicamente
+  calendarDays: CalendarDay[] = []; 
 
-  activities: CalendarActivity[] = []; // Usa la interfaz local con status
+  activities: CalendarActivity[] = []; 
   currentScheduleId: string | null = null;
   isLoadingActivities = false;
   isLoadingSchedule = false;
-  private currentScheduleHasActivities: boolean = false; // <-- Nueva bandera
+  private currentScheduleHasActivities: boolean = false; 
 
   constructor(
     private activityService: ActivityService,
@@ -84,7 +69,7 @@ export class MaintenanceCalendarComponent implements OnInit {
 
   ngOnInit() {
     if (this.checkAuthentication()) {
-      this.setCurrentWeek(this.selectedDate); // Inicializa la semana actual
+      this.setCurrentWeek(this.selectedDate); 
       // 1. Carga la lista base de actividades (sin estados específicos)
       this.loadBaseActivities().then(() => {
         // 2. Una vez cargadas las actividades base, busca y carga el schedule para la fecha actual
@@ -128,13 +113,12 @@ export class MaintenanceCalendarComponent implements OnInit {
     this.scheduleService.getSchedules().subscribe({
       next: (schedules) => {
         const targetSchedule = schedules.find(schedule => {
-          // Asegúrate que las fechas se comparan correctamente (ignorar hora si es necesario)
           const startDate = new Date(schedule.startDate);
           const endDate = new Date(schedule.endDate);
           startDate.setHours(0, 0, 0, 0); // Normalizar inicio del día
           endDate.setHours(23, 59, 59, 999); // Normalizar fin del día
           const checkDate = new Date(date);
-          checkDate.setHours(12, 0, 0, 0); // Usar mediodía para evitar problemas de zona horaria/DST
+          checkDate.setHours(12, 0, 0, 0);
 
           return startDate <= checkDate && endDate >= checkDate;
         });
@@ -142,17 +126,10 @@ export class MaintenanceCalendarComponent implements OnInit {
         if (targetSchedule) {
           console.log(`Schedule encontrado: ${targetSchedule.id}`);
           this.currentScheduleId = targetSchedule.id;
-          // Si encontramos un schedule, pedimos sus detalles (incluyendo estados de actividad)
           this.fetchAndUpdateScheduleDetails(targetSchedule.id);
         } else {
           console.warn(`No se encontró un schedule para la fecha: ${date.toDateString()}`);
           this.createNewSchedule(date);
-          //this.currentScheduleId = null;
-          //this.completionPercentage = 0;
-          // Resetea los estados de las actividades locales a 'sin_revision'
-          //this.resetActivityStatuses();
-          //this.isLoadingSchedule = false;
-          // Considera si quieres crear un schedule aquí automáticamente o mostrar un mensaje
         }
       },
       error: (error) => {
@@ -165,7 +142,7 @@ export class MaintenanceCalendarComponent implements OnInit {
   }
 
   private createNewSchedule(date: Date) {
-    this.isLoadingSchedule = true; // Indicar que estamos creando/cargando
+    this.isLoadingSchedule = true;
     const startDate = new Date(date);
     // Ajusta la lógica para definir startDate y endDate según tu vista (semanal en este caso)
     const dayOfWeek = startDate.getDay();
@@ -180,13 +157,12 @@ export class MaintenanceCalendarComponent implements OnInit {
     const newScheduleData = {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      // Asegúrate que mapViewTypeToScheduleType existe o ajusta el tipo directamente si es necesario
       type: this.mapViewTypeToScheduleType(this.currentView),
       status: 'in_progress' as 'in_progress' | 'pending' | 'completed',
-      assignedTo: this.getCurrentUserId(), // Asegúrate que getCurrentUserId existe
+      assignedTo: this.getCurrentUserId(),
       activities: this.activities.map(activity => ({
         ...activity,
-        Statuses: [{ state: 'pending' }]  // Match backend Activity interface
+        Statuses: [{ state: 'pending' }]
       }))
     };
 
@@ -219,7 +195,7 @@ export class MaintenanceCalendarComponent implements OnInit {
       case 'yearly':
         return 'monthly';
       default:
-        return 'weekly'; // O un valor por defecto apropiado
+        return 'weekly';
     }
   }
 
@@ -270,10 +246,7 @@ export class MaintenanceCalendarComponent implements OnInit {
       let newStatus: ActivityStatus = 'sin_revision'; // Por defecto
 
       if (backendActivity) {
-        // *** ¡¡¡ AJUSTE IMPORTANTE AQUÍ !!! ***
-        // Accede al estado desde el primer elemento del array 'Statuses'
         const backendState = backendActivity.Statuses?.[0]?.state;
-        // --- Fin del ajuste ---
 
         if (backendState) {
           newStatus = this.mapBackendStatusToLocal(backendState);
@@ -285,12 +258,10 @@ export class MaintenanceCalendarComponent implements OnInit {
           if (!hasStateInFirstStatus) {
              console.warn(`No se encontró 'state' en el primer elemento de 'Statuses' para la actividad ${localActivity.id} en la respuesta del backend. Se mantendrá 'sin_revision'. Backend data:`, backendActivity);
           }
-           // Mantener 'sin_revision' si el estado está explícitamente ausente o es null/undefined
            newStatus = 'sin_revision';
         }
       } else {
          console.warn(`La actividad local ${localActivity.id} (${localActivity.name}) no se encontró en las actividades del schedule ${this.currentScheduleId}. Se mantendrá 'sin_revision'.`);
-         // Mantener 'sin_revision' si la actividad no está en el schedule actual
          newStatus = 'sin_revision';
       }
 
@@ -300,8 +271,6 @@ export class MaintenanceCalendarComponent implements OnInit {
       };
     });
     console.log('Estados de actividad locales actualizados:', this.activities);
-    // No recalcules el porcentaje aquí, usa el que viene del schedule
-    // this.updateCompletionPercentage();
   }
 
   // Resetea todos los estados locales a 'sin_revision'
@@ -317,7 +286,6 @@ export class MaintenanceCalendarComponent implements OnInit {
   // Mapea el estado string del backend al tipo local ActivityStatus
   mapBackendStatusToLocal(backendStatus: string): ActivityStatus {
     switch (backendStatus?.toLowerCase()) {
-      // Ajusta los strings del backend ('completed', 'verified', etc.) según tu API
       case 'completed':
       case 'verified':
         return 'verificado';
@@ -330,31 +298,25 @@ export class MaintenanceCalendarComponent implements OnInit {
     }
   }
 
-  // REVOYER ESTA DEFINICION // <-- Mantenga esta definición o borrarlo, su elección
   // Mapea el estado local ActivityStatus al string esperado por el backend para guardar
-  mapLocalStatusToApi(localStatus: ActivityStatus): string { // O el tipo exacto que espera tu backend: 'pending' | 'completed' | 'not_applicable'
+  mapLocalStatusToApi(localStatus: ActivityStatus): string {
     switch (localStatus) {
       case 'verificado':
-        return 'completed'; // Ajusta 'completed' si tu backend espera otro string
+        return 'completed';
       case 'no_aplica':
-        return 'not_applicable'; // Ajusta 'not_applicable' si tu backend espera otro string
+        return 'not_applicable';
       case 'sin_revision':
       default:
-        return 'pending'; // Ajusta 'pending' si tu backend espera otro string
+        return 'pending';
     }
   }
 
-  // --- Métodos existentes (revisar y adaptar si es necesario) ---
-
   private checkAuthentication(): boolean {
-    // ... (código existente) ...
-    // Asegúrate que este método sigue siendo válido
     const token = localStorage.getItem('token');
-    return !!token; // Simplificado, añade lógica más robusta si es necesario
+    return !!token;
   }
 
   private getCurrentUserId(): string {
-    // ... (código existente) ...
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
       try {
@@ -372,16 +334,16 @@ export class MaintenanceCalendarComponent implements OnInit {
   setCurrentWeek(refDate: Date) {
     const today = new Date(refDate); // Usa la fecha de referencia
     const dayOfWeek = today.getDay(); // 0 = Domingo, 1 = Lunes, ...
-    const firstDayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Ajusta para que Lunes sea el primer día
+    const firstDayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
     this.currentWeekStart = new Date(today.setDate(today.getDate() + firstDayOffset));
-    this.currentWeekStart.setHours(0, 0, 0, 0); // Normaliza inicio
+    this.currentWeekStart.setHours(0, 0, 0, 0);
 
     this.currentWeekEnd = new Date(this.currentWeekStart);
     this.currentWeekEnd.setDate(this.currentWeekStart.getDate() + 6);
-    this.currentWeekEnd.setHours(23, 59, 59, 999); // Normaliza fin
+    this.currentWeekEnd.setHours(23, 59, 59, 999);
 
-    this.setWeekDays(); // Actualiza los días mostrados en la vista semanal
+    this.setWeekDays();
   }
 
   setWeekDays() {
@@ -413,13 +375,8 @@ export class MaintenanceCalendarComponent implements OnInit {
   selectDate(date: Date) {
       this.selectedDate = date;
       this.loadScheduleForDate(date);
-      // Podrías querer cambiar la vista a 'daily' aquí si tienes esa vista
-      // this.currentView = 'daily';
   }
 
-
-  // --- Lógica de Guardado ---
-  // REVISAR: ¿Cómo se guardan los estados? ¿Junto con el schedule o por separado?
   saveActivities() {
     if (!this.checkAuthentication()) return;
     if (!this.currentScheduleId) {
@@ -429,27 +386,21 @@ export class MaintenanceCalendarComponent implements OnInit {
       return;
     }
 
-    // *** VERIFICACIÓN CRÍTICA ***
-    // Asegúrate que esta comprobación está aquí, ANTES de cualquier lógica de guardado.
     if (!this.currentScheduleHasActivities) {
-        // Añadir log para confirmar que se entra aquí
         console.log(`[DEBUG] saveActivities: currentScheduleHasActivities es false. Cancelando guardado para schedule ${this.currentScheduleId}.`);
         console.warn(`Intento de guardar cancelado: El schedule actual (${this.currentScheduleId}) no tiene actividades asociadas en el backend.`);
         alert('No se pueden guardar los cambios porque este horario no tiene actividades asignadas.');
-        return; // Detener la ejecución aquí
+        return; 
     }
-    // *** FIN VERIFICACIÓN ***
-
-    // Si la ejecución llega aquí, significa que currentScheduleHasActivities es true.
-    console.log(`Guardando estados para Schedule ID: ${this.currentScheduleId}`); // Este log solo debería aparecer si la verificación anterior pasa.
+    
+    console.log(`Guardando estados para Schedule ID: ${this.currentScheduleId}`);
 
     const activityUpdates = this.activities.map(activity => ({
       activityId: activity.id,
       state: this.mapLocalStatusToApi(activity.status),
-      // notes: activity.notes // Incluir notas si aplica
     }));
 
-    console.log('Payload de actualización de estados:', activityUpdates); // Log del payload
+    console.log('Payload de actualización de estados:', activityUpdates);
 
     const payload = { statuses: activityUpdates };
 
@@ -464,23 +415,11 @@ export class MaintenanceCalendarComponent implements OnInit {
             if (response.data && response.data.Activities) {
                this.updateActivitiesFromSchedule(response.data.Activities);
             }
-            // Add success feedback to the user (e.g., toast message)
         },
         error: (error) => {
             console.error('Error al actualizar estados de actividad:', error);
-            // Add error feedback to the user
         }
     });
-
-
-    /* --- Comment out or remove the alternative ---
-     const scheduleUpdatePayload = {
-         activityStatuses: activityUpdates
-     };
-     this.scheduleService.updateSchedule(this.currentScheduleId, scheduleUpdatePayload).subscribe({
-         // ...
-     });
-    */
   }
 
   toggleActivityStatus(activity: CalendarActivity) {
@@ -503,12 +442,7 @@ export class MaintenanceCalendarComponent implements OnInit {
         break;
     }
     console.log(`Actividad ${activity.id} cambió estado de ${oldStatus} a ${activity.status}`);
-    // NO actualices el porcentaje global aquí. El progreso debe venir del backend
-    // o calcularse después de guardar exitosamente.
-    // this.updateCompletionPercentage();
   }
-  // --- END ADDED Missing Method ---
-
 
   // --- Métodos de vista y UI (sin cambios mayores necesarios) ---
   isToday(date: Date): boolean {
@@ -519,25 +453,22 @@ export class MaintenanceCalendarComponent implements OnInit {
   }
 
   isDayCompleted(date: Date): boolean {
-    // TODO: Implementar lógica si quieres marcar días completos en la vista semanal/mensual
     return false;
   }
 
   changeView(view: 'daily' | 'weekly' | 'monthly' | 'yearly') {
       this.currentView = view;
       if (view === 'weekly') {
-          this.setCurrentWeek(this.selectedDate); // Asegura que la semana correcta esté seleccionada
-          // No necesitas recargar el schedule aquí si ya está cargado para selectedDate
+          this.setCurrentWeek(this.selectedDate);
       }
-      // Añadir lógica para otras vistas si es necesario
   }
 
   getViewTitle(): string {
     switch(this.currentView) {
-        case 'daily': return `Actividades para ${this.selectedDate.toLocaleDateString()}`; // Ejemplo
+        case 'daily': return `Actividades para ${this.selectedDate.toLocaleDateString()}`;
         case 'weekly': return `Actividades Semanales (${this.currentWeekStart.toLocaleDateString()} - ${this.currentWeekEnd.toLocaleDateString()})`;
-        case 'monthly': return `Actividades Mensuales (${this.currentMonth})`; // Asegúrate que currentMonth se actualice
-        case 'yearly': return 'Resumen Anual'; // Ejemplo
+        case 'monthly': return `Actividades Mensuales (${this.currentMonth})`;
+        case 'yearly': return 'Resumen Anual';
         default: return 'Actividades';
       }
   }
@@ -559,6 +490,5 @@ export class MaintenanceCalendarComponent implements OnInit {
   
   selectMonth(monthName: string) {
       this.currentMonth = monthName;
-      // Add any additional logic needed when selecting a month
   }
 }
