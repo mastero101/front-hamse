@@ -31,10 +31,11 @@ interface DetailedSchedule extends Schedule {
 
 
 interface CalendarDay {
-  day: number;
-  completed: boolean;
+  date: Date; // Usaremos el objeto Date completo
+  dayOfMonth: number; // El número del día a mostrar
+  isCurrentMonth: boolean; // Para saber si pertenece al mes actual
   isToday: boolean;
-  disabled: boolean;
+  isSelected: boolean; // Para resaltar el día seleccionado
 }
 
 @Component({
@@ -54,7 +55,10 @@ export class MaintenanceCalendarComponent implements OnInit {
   currentWeekEnd: Date = new Date();
   selectedDate: Date = new Date(); 
 
-  calendarDays: CalendarDay[] = []; 
+  // *** Monthly View Properties ***
+  currentYear: number = new Date().getFullYear(); // Añadir año actual
+  currentMonthName: string = new Date().toLocaleDateString('es-ES', { month: 'long' }); // Nombre del mes actual
+  calendarDays: CalendarDay[] = []; // Usaremos esta para la cuadrícula mensual
 
   activities: CalendarActivity[] = []; 
   currentScheduleId: string | null = null;
@@ -69,7 +73,8 @@ export class MaintenanceCalendarComponent implements OnInit {
 
   ngOnInit() {
     if (this.checkAuthentication()) {
-      this.setCurrentWeek(this.selectedDate); 
+      this.setCurrentWeek(this.selectedDate);
+      this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth()); // Generar calendario inicial
       // 1. Carga la lista base de actividades (sin estados específicos)
       this.loadBaseActivities().then(() => {
         // 2. Una vez cargadas las actividades base, busca y carga el schedule para la fecha actual
@@ -374,6 +379,10 @@ export class MaintenanceCalendarComponent implements OnInit {
   // Lógica para seleccionar un día (si implementas vista diaria o selección en calendario)
   selectDate(date: Date) {
       this.selectedDate = date;
+      // Si la vista mensual está activa, regenerar para resaltar
+      if (this.currentView === 'monthly') {
+        this.generateCalendarDays(date.getFullYear(), date.getMonth());
+      }
       this.loadScheduleForDate(date);
   }
 
@@ -444,12 +453,98 @@ export class MaintenanceCalendarComponent implements OnInit {
     console.log(`Actividad ${activity.id} cambió estado de ${oldStatus} a ${activity.status}`);
   }
 
-  // --- Métodos de vista y UI (sin cambios mayores necesarios) ---
+  // *** NUEVO MÉTODO: Generar días para la vista mensual ***
+  generateCalendarDays(year: number, month: number) {
+    this.calendarDays = [];
+    this.currentYear = year;
+    this.currentMonthName = new Date(year, month).toLocaleDateString('es-ES', { month: 'long' });
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const daysInMonth = lastDayOfMonth.getDate();
+
+    // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+    let startDayOfWeek = firstDayOfMonth.getDay();
+    startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Ajustar para que Lunes sea 0
+
+    // Días del mes anterior para rellenar
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      const date = new Date(year, month - 1, daysInPrevMonth - i);
+      this.calendarDays.push({
+        date: date,
+        dayOfMonth: date.getDate(),
+        isCurrentMonth: false,
+        isToday: this.isSameDate(date, new Date()),
+        isSelected: this.isSameDate(date, this.selectedDate)
+      });
+    }
+
+    // Días del mes actual
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      this.calendarDays.push({
+        date: date,
+        dayOfMonth: day,
+        isCurrentMonth: true,
+        isToday: this.isSameDate(date, new Date()),
+        isSelected: this.isSameDate(date, this.selectedDate)
+      });
+    }
+
+    // Días del mes siguiente para rellenar (hasta completar 6 semanas = 42 días)
+    const daysRendered = this.calendarDays.length;
+    const daysToAdd = daysRendered > 35 ? 42 - daysRendered : 35 - daysRendered; // Apuntar a 5 o 6 filas
+    for (let i = 1; i <= daysToAdd; i++) {
+      const date = new Date(year, month + 1, i);
+      this.calendarDays.push({
+        date: date,
+        dayOfMonth: date.getDate(),
+        isCurrentMonth: false,
+        isToday: this.isSameDate(date, new Date()),
+        isSelected: this.isSameDate(date, this.selectedDate)
+      });
+    }
+  }
+
+  // *** NUEVO MÉTODO: Helper para comparar fechas (ignora la hora) ***
+  isSameDate(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  }
+
+  // *** NUEVO MÉTODO: Cambiar al mes anterior/siguiente ***
+  previousMonth() {
+    const newDate = new Date(this.selectedDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    this.selectedDate = newDate; // Actualiza la fecha seleccionada también
+    this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
+    // Opcional: Cargar schedule para el primer día del nuevo mes o mantener la selección
+    this.loadScheduleForDate(this.selectedDate);
+  }
+
+  nextMonth() {
+    const newDate = new Date(this.selectedDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    this.selectedDate = newDate;
+    this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
+    this.loadScheduleForDate(this.selectedDate);
+  }
+
+  // *** NUEVO MÉTODO: Seleccionar un día desde la vista mensual ***
+  selectDayFromMonthView(day: CalendarDay) {
+    this.selectedDate = day.date;
+    // Regenerar calendario para actualizar la clase 'isSelected'
+    this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
+    // Cargar el schedule para el día seleccionado
+    this.loadScheduleForDate(this.selectedDate);
+    // Opcional: Cambiar a vista semanal o diaria automáticamente
+    // this.changeView('weekly');
+  }
+
+  // --- Métodos de vista y UI ---
   isToday(date: Date): boolean {
-    const today = new Date();
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+    return this.isSameDate(date, new Date());
   }
 
   isDayCompleted(date: Date): boolean {
@@ -460,14 +555,20 @@ export class MaintenanceCalendarComponent implements OnInit {
       this.currentView = view;
       if (view === 'weekly') {
           this.setCurrentWeek(this.selectedDate);
+      } else if (view === 'monthly') {
+          // Asegurarse de que los días del calendario estén generados para el mes actual
+          this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
       }
+      // Añadir lógica para yearly si es necesario
   }
 
   getViewTitle(): string {
     switch(this.currentView) {
-        case 'daily': return `Actividades para ${this.selectedDate.toLocaleDateString()}`;
-        case 'weekly': return `Actividades Semanales (${this.currentWeekStart.toLocaleDateString()} - ${this.currentWeekEnd.toLocaleDateString()})`;
-        case 'monthly': return `Actividades Mensuales (${this.currentMonth})`;
+        // Añadir el formato correcto para la fecha seleccionada
+        case 'daily': return `Actividades para ${this.selectedDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+        case 'weekly': return `Actividades Semanales (${this.currentWeekStart.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} - ${this.currentWeekEnd.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })})`;
+        // Actualizar título mensual si es necesario (puede ser dinámico más adelante)
+        case 'monthly': return `Actividades Mensuales (${this.selectedDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })})`;
         case 'yearly': return 'Resumen Anual';
         default: return 'Actividades';
       }

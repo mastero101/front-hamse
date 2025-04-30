@@ -75,30 +75,42 @@
                         </div>
                     </div>
                 } @else {
-                    <div class="month-label">Febrero</div>
-                    <div class="calendar-grid">
-                        <div class="weekdays">
-                            <span>Lun</span>
-                            <span>Mar</span>
-                            <span>Mie</span>
-                            <span>Jue</span>
-                            <span>Vie</span>
-                            <span>Sab</span>
-                            <span>Dom</span>
+                    <!-- Asumiendo que este bloque es para la vista mensual detallada -->
+                    <div class="month-view-calendar"> <!-- Usando la estructura sugerida anteriormente -->
+                        <div class="month-header">
+                            <button class="btn-nav" (click)="previousMonth()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <!-- Asegúrate que currentMonthName y currentYear se actualizan correctamente -->
+                            <span class="month-year-label">{{ currentMonthName | titlecase }} {{ currentYear }}</span>
+                            <button class="btn-nav" (click)="nextMonth()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
-                        <div class="days-grid">
-                            @for (day of calendarDays; track day.day) {
-                            <div class="day-cell" [class.completed]="day.completed" [class.today]="day.isToday"
-                                [class.disabled]="day.disabled">
-                                {{day.day}}
-                                @if (day.completed) {
-                                <i class="fas fa-check check-icon"></i>
-                                }
-                                @if (day.isToday) {
-                                <i class="fas fa-bell bell-icon"></i>
+                        <div class="calendar-grid">
+                            <div class="weekdays">
+                                <span>Lun</span>
+                                <span>Mar</span>
+                                <span>Mie</span>
+                                <span>Jue</span>
+                                <span>Vie</span>
+                                <span>Sab</span>
+                                <span>Dom</span>
+                            </div>
+                            <div class="days-grid monthly"> <!-- Usando la clase 'monthly' -->
+                                <!-- Corregido el @for y las propiedades -->
+                                @for (day of calendarDays; track day.date) {
+                                <div class="day-cell"
+                                     [class.other-month]="!day.isCurrentMonth"
+                                     [class.today]="day.isToday"
+                                     [class.selected]="day.isSelected"
+                                     (click)="selectDayFromMonthView(day)">
+                                    {{ day.dayOfMonth }} <!-- Usar dayOfMonth -->
+                                    <!-- Ícono de campana eliminado de aquí, 'today' ya aplica clase -->
+                                    <!-- Lógica de 'completed' eliminada, no está en la interfaz -->
+                                </div>
                                 }
                             </div>
-                            }
                         </div>
                     </div>
                 }
