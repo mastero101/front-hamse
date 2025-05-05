@@ -19,7 +19,7 @@
 
     <!-- Área de Edición de Número (Solo Admin y si isEditingNumber es true) -->
     <div *ngIf="isAdmin && isEditingNumber" class="edit-number-section">
-      <label for="whatsapp-number">Nuevo número WhatsApp:</label>
+      <label for="whatsapp-number">Número WhatsApp de Contacto:</label>
       <input type="tel" id="whatsapp-number" [(ngModel)]="newPhoneNumber" placeholder="Ej: 521XXXXXXXXXX">
       <button (click)="savePhoneNumber()" class="save-btn">Guardar</button>
       <button (click)="toggleEditNumber()" class="cancel-btn">Cancelar</button>
