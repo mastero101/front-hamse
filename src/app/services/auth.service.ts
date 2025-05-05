@@ -63,9 +63,14 @@ export class AuthService {
       password
     })).pipe(
       tap(response => {
-        if (response.data.status === 'success') {
-          localStorage.setItem('currentUser', JSON.stringify(response.data.data));
-          this.currentUserSubject.next(response.data.data);
+        if (response.data.status === 'success' && response.data.data) {
+          const userData = response.data.data;
+          localStorage.setItem('currentUser', JSON.stringify(userData));
+          // Guardar el accessToken por separado
+          if (userData.accessToken) {
+            localStorage.setItem('token', userData.accessToken);
+          }
+          this.currentUserSubject.next(userData);
         }
       })
     );
@@ -80,6 +85,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
     this.currentUserSubject.next(null);
   }
 }

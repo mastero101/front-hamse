@@ -1,0 +1,261 @@
+:host {
+  position: fixed; // Fija el componente en la ventana
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000; // Asegura que esté por encima de otros elementos
+}
+
+.whatsapp-bubble-container {
+  position: relative;
+}
+
+.whatsapp-bubble {
+  background-color: #25d366; // Color verde de WhatsApp
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  svg {
+    width: 30px; // Ajusta el tamaño del icono
+    height: 30px;
+  }
+
+  &:hover {
+    transform: scale(1.1); // Animación de hover
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.chat-window {
+  position: absolute;
+  bottom: 75px; // Posición encima de la burbuja
+  right: 0;
+  width: 300px;
+  height: 450%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px); // Empieza ligeramente abajo
+  visibility: hidden;
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+
+  &.open {
+    opacity: 1;
+    transform: translateY(0); // Sube a su posición final
+    visibility: visible;
+  }
+
+  .chat-header {
+    background-color: #25d366; 
+    color: white;
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem; // Texto un poco más pequeño
+
+    .powered-by {
+      color: rgba(255, 255, 255, 0.9); // Blanco semi-transparente
+      strong {
+        color: white; // Nombre de la marca en blanco sólido
+        font-weight: bold;
+      }
+    }
+
+    .close-btn {
+      background: rgba(0, 0, 0, 0.2); // Fondo oscuro semi-transparente para el botón
+      border: none;
+      color: white;
+      font-size: 1.2rem; // Tamaño ajustado
+      cursor: pointer;
+      padding: 2px 6px; // Padding ajustado
+      line-height: 1;
+      border-radius: 50%; // Botón redondo
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 30, 30, 0.912);
+      }
+    }
+  }
+
+  .chat-body {
+    padding: 15px;
+    font-size: 0.9rem;
+    color: #333;
+    background-color: #f0f2f5; // Fondo ligeramente gris como en la imagen
+
+    .message-bubble {
+      background-color: #ffffff; // Fondo blanco para la burbuja
+      padding: 10px 12px;
+      border-radius: 8px; // Bordes redondeados
+      margin-bottom: 10px;
+      display: inline-block; // Para que no ocupe todo el ancho
+      max-width: 90%; // Máximo ancho
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); // Sombra sutil
+      position: relative; // Para el pequeño triángulo si se desea añadir
+
+    }
+
+    .privacy-link {
+      display: block; // Ocupa su propia línea
+      font-size: 0.8rem;
+      color: #667781; // Color grisáceo
+      text-decoration: underline;
+      margin-bottom: 15px; // Espacio antes del textarea
+      margin-left: 5px; // Pequeña indentación
+
+      &:hover {
+        color: #111;
+      }
+    }
+
+    .message-input {
+      width: 100%;
+      padding: 10px; // Más padding
+      border: 1px solid #d1d7db; // Borde más sutil
+      border-radius: 20px; // Bordes más redondeados
+      margin-bottom: 10px;
+      min-height: 40px; // Altura inicial más pequeña
+      height: 40px; // Altura fija inicial
+      resize: none; // Evitar redimensionar manualmente
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      overflow-y: auto; // Scroll si el texto crece
+      transition: border-color 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #25d366; // Borde verde al enfocar
+      }
+    }
+
+    .start-chat-btn {
+      display: flex; // Usar flex para alinear texto e icono
+      align-items: center;
+      justify-content: center; // Centrar contenido
+      background-color: #25d366;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 20px; // Bordes redondeados
+      text-decoration: none;
+      font-weight: bold;
+      text-align: center;
+      transition: background-color 0.2s ease;
+      width: auto; // Ancho automático basado en contenido
+      float: right; // Alinear a la derecha como en la imagen
+      cursor: pointer;
+      border: none;
+
+      svg {
+        margin-left: 8px; // Espacio entre texto e icono
+      }
+
+      &:hover {
+        background-color: #128c7e;
+      }
+    }
+  }
+
+  .chat-footer {
+    background-color: #f0f0f0;
+    padding: 8px 15px;
+    font-size: 0.75rem;
+    color: #666;
+    text-align: center;
+  }
+}
+
+.chat-body {
+  .message-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    min-height: 60px; // Altura mínima
+    resize: vertical; // Permite redimensionar verticalmente
+    box-sizing: border-box; // Asegura que padding y border se incluyan en el width
+    font-family: inherit; // Usa la misma fuente que el resto
+    font-size: 0.9rem;
+  }
+
+  .start-chat-btn {
+    width: 100%;
+    cursor: pointer;
+    border: none;
+  }
+}
+
+.chat-header {
+  position: relative; // Needed for absolute positioning of edit button if desired
+
+  .edit-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem; // Ajusta según necesidad
+    padding: 5px;
+    margin-left: 10px; // Espacio respecto al texto
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.edit-number-section {
+  padding: 15px;
+  background-color: #f0f2f5; // Similar al chat body
+  border-bottom: 1px solid #e0e0e0; // Separador visual
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.85rem;
+    color: #333;
+    font-weight: bold;
+  }
+
+  input[type="tel"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-right: 5px;
+  }
+
+  .save-btn {
+    background-color: #25d366;
+    color: white;
+    &:hover { background-color: #128c7e; }
+  }
+
+  .cancel-btn {
+    background-color: #ccc;
+    color: #333;
+    &:hover { background-color: #bbb; }
+  }
+}
