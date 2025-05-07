@@ -17,24 +17,63 @@
     border-radius: 8px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 550px;
-    max-height: 90vh;
-    overflow-y: auto;
+    max-width: 650px;
+    height: 93%;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .modal-header {
-    background-color: #1a237e; // Azul corporativo
-    color: white;
-    padding: 12px 20px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-weight: 600;
-    font-size: 1.1rem;
+    padding: 1px 2px;
+    background-color: #1a237e;
+    color: white;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    position: relative;
+
+    .header-logo {
+        width: 100px;
+        margin-right: 15px;
+        margin-top: 7px;
+        margin-left: 5px;
+        
+        img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+    }
+
+    .header-title {
+        flex-grow: 1;
+        font-size: 1.2rem;
+        font-weight: 500;
+        text-align: center;
+        margin-right: 100px;
+    }
+}
+
+.modal-content {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+}
+
+.reminder-flyer {
+    width: 100%;
+    margin: 20px 0;
+    
+    img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+}
 
     .close-button {
         background: transparent;
@@ -49,12 +88,34 @@
             opacity: 0.8;
         }
     }
-}
+
 
 .modal-content {
     padding: 25px;
     text-align: center;
     flex-grow: 1;
+
+    .title-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: -5px;
+        
+        .reminder-icon {
+            font-size: 2.2rem;
+            color: #ffa000;
+            margin-right: 15px;
+            margin-bottom: 0;
+        }
+
+        h2 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #ffa000;
+            margin: 0;
+        }
+    }
+}
 
     .reminder-icon {
         font-size: 2.8rem;
@@ -96,7 +157,6 @@
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.2s ease-in-out, transform 0.1s ease;
-        margin-bottom: 15px;
         text-transform: uppercase;
 
         &:hover {
@@ -112,7 +172,6 @@
     .deadline-text {
         font-size: 0.95rem;
         color: #444444;
-        margin-bottom: 8px;
         font-weight: 500;
     }
 
@@ -120,12 +179,5 @@
         font-size: 0.9rem;
         color: #666666;
         line-height: 1.5;
+        margin-top: -1em;
     }
-}
-
-/* Para asegurar que el scroll aparezca si el contenido es muy largo en pantallas pequeñas */
-@media (max-height: 600px) {
-    .modal-container {
-        max-height: 85vh;
-    }
-}

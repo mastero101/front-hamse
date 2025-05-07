@@ -1,16 +1,21 @@
 <div class="modal-overlay" *ngIf="isVisible" (click)="closeModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <span>Recordatorios</span>
+            <div class="header-logo">
+                <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo">
+            </div>
+            <span class="header-title">Recordatorios</span>
             <button class="close-button" (click)="closeModal()" aria-label="Cerrar modal">
                 <i class="fa-solid fa-times"></i>
             </button>
         </div>
         <div class="modal-content">
-            <div class="reminder-icon">
-                <i class="fa-solid fa-bell"></i>
+            <div class="title-container">
+                <div class="reminder-icon">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+                <h2>{{ reminderTitle }}</h2>
             </div>
-            <h2>{{ reminderTitle }}</h2>
             <div class="reminder-flyer">
                 <img src="../../../assets/images/HAMSE_Cedula_Operacion.png" alt="Hamse Logo">
             </div>
