@@ -6,3 +6,8 @@
   <app-whatsapp-chat-bubble></app-whatsapp-chat-bubble>
 </div>
 
+<!-- Modal de Recordatorios -->
+@if (showRemindersModal) {
+  <app-reminders-modal [isVisible]="showRemindersModal" (close)="closeRemindersModal()" />
+}
+

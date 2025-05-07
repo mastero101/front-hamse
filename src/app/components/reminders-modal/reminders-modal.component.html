@@ -1,0 +1,22 @@
+<div class="modal-overlay" *ngIf="isVisible" (click)="closeModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <span>Recordatorios</span>
+            <button class="close-button" (click)="closeModal()" aria-label="Cerrar modal">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <div class="reminder-icon">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <h2>{{ reminderTitle }}</h2>
+            <div class="reminder-flyer">
+                <img src="../../../assets/images/HAMSE_Cedula_Operacion.png" alt="Hamse Logo">
+            </div>
+            <button class="action-button" (click)="onActionClick()">{{ reminderButtonText }}</button>
+            <p class="deadline-text">{{ reminderDeadline }}</p>
+            <p class="details-text">{{ reminderDetails }}</p>
+        </div>
+    </div>
+</div>
