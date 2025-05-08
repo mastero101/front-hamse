@@ -1,0 +1,503 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+:host {
+  display: block;
+  font-family: 'Arial', sans-serif; // Considera usar la fuente de tu proyecto
+  background-color: #ffffff; // Fondo general blanco
+  padding: 20px; // Un poco de padding general
+}
+
+.reports-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1200px; // O el ancho que prefieras
+  margin: 0 auto;
+  border: 1px solid #e0e0e0; // Borde como en la imagen
+  border-radius: 8px;
+  overflow: hidden; // Para que los bordes redondeados afecten a los hijos
+}
+
+.tabs {
+  display: flex;
+  background-color: #e0e0e0; // Fondo gris claro para las pestañas no activas
+
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    color: #333;
+    font-weight: 500;
+    border-right: 1px solid #c7c7c7;
+    text-align: center;
+    flex-grow: 1; // Para que ocupen el espacio disponible
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &.active {
+      background-color: #ff9800; // Naranja para la pestaña activa
+      color: white;
+      font-weight: bold;
+    }
+
+    &:hover:not(.active) {
+      background-color: #d4d4d4;
+    }
+  }
+}
+
+.content-area {
+  padding: 25px;
+  background-color: #f7f9fc; // Un fondo muy sutil para el área de contenido
+  // Si tienes una imagen de fondo como en el figma, la añades aquí:
+  // background-image: url('/path/to/your/background-image.png');
+  // background-size: cover;
+  // background-position: center;
+  position: relative; // Para el posicionamiento del icono de WhatsApp
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+
+  .dependency-title {
+    font-size: 2.5rem; // Tamaño grande para el título
+    font-weight: bold;
+    color: #ff9800; // Naranja
+    margin: 0;
+  }
+
+  .whatsapp-icon {
+    font-size: 2.8rem;
+    color: #25d366; // Color de WhatsApp
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.requirements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.requirement-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.2fr; // Ajusta las proporciones según sea necesario
+  gap: 20px;
+  align-items: start; // Alinea los items al inicio de la celda del grid
+  // border-left: 5px solid #1a237e; // Eliminado para que coincida con la imagen
+}
+
+.requirement-main-title {
+  h3 {
+    font-size: 1.3rem;
+    color: #1a237e; // Azul oscuro
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.requirement-description {
+  p {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// Nueva clase para la columna de metadatos y acciones
+.requirement-meta-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; // Espacio entre el bloque de info y el bloque de acciones
+}
+
+.requirement-info {
+  font-size: 0.9rem;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  gap: 5px; // Espacio entre Periodicidad y Periodo
+
+  span {
+    color: #777;
+  }
+  strong {
+    color: #1a237e; // Azul oscuro
+    font-weight: 600;
+  }
+}
+
+.requirement-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; // Alinea los elementos a la izquierda dentro de esta columna
+  gap: 10px;
+
+  .status-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #c00000; // Borde rojo por defecto (Sin realizar)
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+      outline: none;
+      margin: 0; // Quitar margen por defecto del navegador
+
+      &:checked {
+        background-color: #28a745; // Fondo verde
+        border-color: #28a745; // Borde verde
+
+        &::before {
+          content: '\2713'; // Símbolo de check
+          font-size: 14px;
+          color: white;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-weight: bold;
+        }
+      }
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #c00000; // Rojo por defecto (Sin realizar)
+
+      &.completed {
+        color: #28a745; // Verde para "Realizado"
+      }
+    }
+  }
+
+  .btn-annotations {
+    background-color: #ffc107; // Amarillo/Naranja para Anotaciones
+    color: #333;
+    font-weight: bold;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    width: 100%; // Para que ocupe el ancho disponible en su columna
+    text-align: center;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #ffb300;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .btn-action {
+    background-color: #1a237e; // Azul oscuro
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; // Espacio entre icono y texto
+    transition: background-color 0.2s ease;
+
+    i {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      background-color: #121858;
+    }
+  }
+}
+
+// Media queries para responsividad (opcional, pero recomendado)
+@media (max-width: 992px) {
+  .requirement-card {
+    grid-template-columns: 1fr 1.5fr; // Dos columnas en tablets
+    .requirement-main-title {
+      grid-column: 1 / -1; // Título ocupa todo el ancho
+      margin-bottom: 10px;
+    }
+    .requirement-description {
+       grid-column: 1 / -1; // Descripción ocupa todo el ancho
+       margin-bottom: 10px;
+    }
+     .requirement-info {
+      grid-column: 1 / span 1;
+    }
+    .requirement-actions {
+      grid-column: 2 / span 1;
+      align-items: center; // Centrar acciones en tablet
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .tabs {
+    flex-wrap: wrap; // Permitir que las pestañas pasen a la siguiente línea
+    .tab {
+      flex-grow: 0; // No crecer tanto
+      flex-basis: calc(33.33% - 1px); // Tres pestañas por línea aprox.
+    }
+  }
+  .content-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+    .dependency-title {
+      font-size: 2rem;
+    }
+    .whatsapp-icon {
+      align-self: flex-end; // Mover WhatsApp a la derecha
+    }
+  }
+  .requirement-card {
+    grid-template-columns: 1fr; // Una columna en móviles
+    .requirement-main-title, .requirement-description, .requirement-info, .requirement-actions {
+      grid-column: 1 / -1; // Todos los elementos en una sola columna
+    }
+    .requirement-actions {
+      align-items: stretch; // Estirar botones de acción
+      .btn-annotations, .btn-action {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Estilos del Modal de Video Integrado
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #0D2D6C;
+  color: white;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+
+  .header-logo {
+    height: 28px;
+    margin-right: 15px;
+  }
+
+  span {
+    flex-grow: 1;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left;
+    margin-left: 10px;
+  }
+
+  .close-button {
+    background: #D9D9D9;
+    border: none;
+    color: #0D2D6C;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+
+    &:hover {
+      background: #c0c0c0;
+    }
+  }
+}
+
+.modal-content {
+  padding: 0;
+  flex-grow: 1;
+  display: flex;
+  background-color: #000; // Fondo negro para el iframe mientras carga
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    min-height: 315px;
+  }
+}
+
+@media (min-width: 560px) {
+  .modal-content {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+.calendar-modal-container {
+  max-width: 400px; // Más pequeño para un calendario
+  height: auto;
+  background-color: #fff; // Fondo blanco para el modal del calendario
+}
+
+.calendar-modal-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  background-color: #fff; // Asegurar fondo blanco
+}
+
+.calendar-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 10px;
+  margin-bottom: 10px;
+
+  .nav-button {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #0D2D6C;
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  }
+
+  .month-year-display {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #0D2D6C;
+    text-transform: capitalize;
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  width: 100%;
+  max-width: 320px; // Ancho típico para un calendario compacto
+
+  .day-label {
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #555;
+    padding-bottom: 5px;
+  }
+
+  .day-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 35px; // Altura fija para las celdas
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover:not(.other-month) {
+      background-color: #e9efff; // Un azul claro al pasar el mouse
+    }
+
+    &.other-month {
+      color: #ccc;
+      cursor: default;
+      background-color: #f9f9f9;
+    }
+
+    &.today {
+      font-weight: bold;
+      border-color: #ff9800; // Naranja para el día de hoy
+      color: #ff9800;
+    }
+
+    &.selected-day {
+      background-color: #0D2D6C; // Azul oscuro para el día seleccionado
+      color: white;
+      border-color: #0D2D6C;
+    }
+  }
+}
+
+.btn-save-reminder {
+  background-color: #0D2D6C; // Azul oscuro
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: 15px;
+  width: 100%;
+  max-width: 250px;
+
+  &:hover {
+    background-color: #0a2250; // Un azul un poco más oscuro
+  }
+
+  &:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+}

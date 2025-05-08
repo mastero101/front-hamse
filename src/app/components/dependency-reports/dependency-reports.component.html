@@ -1,0 +1,107 @@
+<div class="reports-container">
+  <div class="tabs">
+    <div class="tab" [class.active]="selectedTab === 'PCIVIL'" (click)="selectTab('PCIVIL')">P. Civil</div>
+    <div class="tab" [class.active]="selectedTab === 'ASEA'" (click)="selectTab('ASEA')">ASEA</div>
+    <div class="tab" [class.active]="selectedTab === 'STPS'" (click)="selectTab('STPS')">STPS</div>
+    <div class="tab" [class.active]="selectedTab === 'PROFECO'" (click)="selectTab('PROFECO')">PROFECO</div>
+    <div class="tab" [class.active]="selectedTab === 'CNE'" (click)="selectTab('CNE')">CNE</div>
+    <div class="tab" [class.active]="selectedTab === 'SENER'" (click)="selectTab('SENER')">SENER</div>
+    <div class="tab" [class.active]="selectedTab === 'PEMEX'" (click)="selectTab('PEMEX')">PEMEX</div>
+    <div class="tab" [class.active]="selectedTab === 'SIN-MUN'" (click)="selectTab('SIN-MUN')">SIN - MUN</div>
+    <div class="tab" [class.active]="selectedTab === 'SAT'" (click)="selectTab('SAT')">SAT</div>
+  </div>
+
+  <div class="content-area">
+    <div class="content-header">
+      <h2 class="dependency-title">{{ getDependencyFullName(selectedTab) }}</h2>
+    </div>
+
+    <div class="requirements-list">
+      <div *ngFor="let requirement of currentRequirements" class="requirement-card">
+        <div class="requirement-main-title">
+          <h3>{{requirement.title}}</h3>
+        </div>
+        <div class="requirement-description">
+          <p>{{requirement.description}}</p>
+        </div>
+        <div class="requirement-meta-column"> <!-- Nueva envoltura -->
+          <div class="requirement-info">
+            <div class="periodicity">
+              <span>Periodicidad:</span>
+              <strong>{{requirement.periodicity}}</strong>
+            </div>
+            <div class="period">
+              <span>Periodo:</span>
+              <strong>{{requirement.period}}</strong>
+            </div>
+          </div>
+          <div class="requirement-actions">
+            <div class="status-check">
+              <input type="checkbox" [id]="'req-' + requirement.title" [checked]="requirement.completed" (change)="requirement.completed = !requirement.completed"> <!-- Permitir cambio para demo -->
+              <label [for]="'req-' + requirement.title" [class.completed]="requirement.completed">
+                {{ requirement.completed ? 'Realizado' : 'Sin realizar' }}
+              </label>
+            </div>
+            <button class="btn-annotations" (click)="openVideoModal(requirement.videoUrl)" [disabled]="!requirement.videoUrl">Anotaciones</button>
+            <div class="action-buttons">
+              <button class="btn-action btn-reminder" (click)="openCalendarModal(requirement)">
+                <i class="fas fa-bell"></i> Indicar recordatorio
+              </button>
+              <button class="btn-action btn-period">
+                <i class="fas fa-calendar-alt"></i> Indicar periodo
+              </button>
+            </div>
+          </div>
+        </div> <!-- Fin de nueva envoltura -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Video Integrado -->
+  <div class="modal-overlay" *ngIf="isVideModalVisible" (click)="closeVideoModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo"> <!-- Asegúrate que esta imagen exista -->
+        <span>INFORMACIÓN - DETALLES</span>
+        <button class="close-button" (click)="closeVideoModal()" aria-label="Cerrar modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content" *ngIf="safeVideoUrl">
+        <iframe width="100%" height="100%" [src]="safeVideoUrl" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Calendario para Recordatorios -->
+  <div class="modal-overlay calendar-modal-overlay" *ngIf="isCalendarModalVisible" (click)="closeCalendarModal()">
+    <div class="modal-container calendar-modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header calendar-modal-header">
+        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo">
+        <span>Recordatorios</span>
+        <button class="close-button" (click)="closeCalendarModal()" aria-label="Cerrar modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="calendar-modal-content">
+        <div class="calendar-navigation">
+          <button (click)="previousMonth()" class="nav-button">&lt;</button>
+          <span class="month-year-display">{{ getMonthYearDisplay(calendarViewDate) }}</span>
+          <button (click)="nextMonth()" class="nav-button">&gt;</button>
+        </div>
+        <div class="calendar-grid">
+          <div *ngFor="let dayLabel of dayLabels" class="day-label">{{ dayLabel }}</div>
+          <div *ngFor="let dayObj of calendarDays"
+               class="day-cell"
+               [class.other-month]="!dayObj.isCurrentMonth"
+               [class.selected-day]="dayObj.isSelected"
+               [class.today]="dayObj.isToday && dayObj.isCurrentMonth"
+               (click)="selectDate(dayObj)">
+            {{ dayObj.day }}
+          </div>
+        </div>
+        <button class="btn-save-reminder" (click)="saveReminder()" [disabled]="!selectedReminderDate">Guardar Recordatorio</button>
+      </div>
+    </div>
+  </div>
+</div>
