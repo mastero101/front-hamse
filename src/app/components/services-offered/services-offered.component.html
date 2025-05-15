@@ -1,0 +1,44 @@
+<div class="services-container">
+    <div *ngFor="let service of services" class="service-item">
+        <div class="service-title-column">
+            <p>{{ service.title }}</p>
+        </div>
+        <div class="service-details-column">
+            <div class="info-icon" *ngIf="service.infoIcon" (click)="openInfoModal(service)">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="provider-tag" [style.background-color]="service.providerColor">
+                {{ service.provider }}
+            </div>
+            <div class="price">
+                {{ service.price | currency:'USD':'symbol':'1.2-2' }}
+            </div>
+            <button class="store-button" (click)="goToStore(service)">
+                <i class="fas fa-shopping-cart"></i> Ir a la tienda
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Video Integrado para Información del Servicio -->
+    <div class="modal-overlay" *ngIf="isInfoModalVisible" (click)="closeInfoModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo">
+                <span>INFORMACIÓN - DETALLES</span>
+                <button class="close-button" (click)="closeInfoModal()" aria-label="Cerrar modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content" *ngIf="safeVideoUrlForInfoModal">
+                <iframe width="100%" height="100%" [src]="safeVideoUrlForInfoModal" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+            </div>
+            <!-- Opcional: Mostrar un mensaje si no hay video -->
+            <div class="modal-content" *ngIf="!safeVideoUrlForInfoModal" style="text-align: center; padding: 20px;">
+                <p>No hay información adicional en video disponible para este servicio.</p>
+            </div>
+        </div>
+    </div>
+    
+</div>

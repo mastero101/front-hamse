@@ -15,8 +15,8 @@ export class NavigationComponent {
     { path: 'calendario-preventivo', label: 'Calendario Preventivo', icon: 'calendar', active: true },
     { path: 'programa-mantenimiento', label: 'Programa de mantenimiento', icon: 'wrench' },
     { path: 'reportes-dependencias', label: 'Reportes e dependencias', icon: 'file-text' },
-    { path: 'fichas', label: 'Fichas de requerimientos', icon: 'clipboard' },
-    { path: 'grupo', label: 'Grupo de estaciones', icon: 'users' },
+    { path: 'servicios', label: 'Servicios', icon: 'clipboard' },
+    { path: 'mantenimiento-preventivo', label: 'Matenimiento Preventivo', icon: 'book' },
     { path: 'configuracion', label: 'Configuración', icon: 'cog' }
   ];
 

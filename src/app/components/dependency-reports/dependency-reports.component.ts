@@ -24,7 +24,7 @@ export class DependencyReportsComponent implements OnInit {
   calendarDays: { day: number, month: number, year: number, isCurrentMonth: boolean, isSelected: boolean, isToday: boolean }[] = [];
   dayLabels = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 
-  constructor(private sanitizer: DomSanitizer) {} // Inyectar DomSanitizer
+  constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
     this.loadRequirements(this.selectedTab);

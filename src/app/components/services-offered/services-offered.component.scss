@@ -1,0 +1,235 @@
+:host {
+    display: block;
+    background-color: #e1e1e1; 
+    padding: 20px;
+    font-family: 'Arial', sans-serif; // O la fuente que estés usando
+}
+
+.services-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; // Espacio entre cada item de servicio
+}
+
+.service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff; // Fondo blanco para cada item
+    padding: 12px 20px; // Ajuste de padding
+    border-radius: 8px;
+    color: #333333; // Color de texto oscuro por defecto para el item
+    // border: 1px solid #2c2c54; // Borde sutil, opcional si se ve bien sin él
+
+    .service-title-column {
+        flex-grow: 1;
+        margin-right: 20px;
+
+        p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #000000; // Texto del título en negro
+        }
+    }
+
+    .service-details-column {
+        display: flex;
+        align-items: center;
+        gap: 12px; // Espacio entre elementos de detalle
+
+        .info-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #E6A23C; // Amarillo/dorado del ícono de info
+            color: #ffffff; // Ícono "i" en blanco
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-size: 1rem; // Ajustar tamaño del ícono "i"
+            font-weight: bold;
+            cursor: pointer;
+
+            i {
+                line-height: 0;
+            }
+        }
+
+        .provider-tag {
+            padding: 6px 12px;
+            border-radius: 6px; // Bordes un poco menos redondeados para el tag
+            color: white; // Texto del proveedor en blanco
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .price {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000000; // Precio en negro
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .store-button {
+            background-color: #1A2954; // Azul oscuro/púrpura del botón
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px; // Bordes bien redondeados para el botón
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+
+            i {
+                font-size: 1rem;
+            }
+
+            &:hover {
+                background-color: #2C3E7A; // Un poco más claro al pasar el mouse
+            }
+        }
+    }
+}
+
+// Media queries para responsividad si es necesario
+@media (max-width: 992px) {
+    .service-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+
+        .service-details-column {
+            width: 100%;
+            justify-content: space-between; // Para que los elementos se distribuyan
+            flex-wrap: wrap; // Permitir que los elementos pasen a la siguiente línea si no caben
+            gap: 10px; // Ajustar gap para modo columna
+        }
+
+        .service-title-column {
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .service-details-column {
+        .price {
+            min-width: auto; // Quitar ancho mínimo en móviles
+            text-align: left;
+        }
+
+        .provider-tag {
+            min-width: auto;
+        }
+
+        .store-button {
+            width: 100%; // Botón ocupa todo el ancho
+            justify-content: center;
+            margin-top: 10px;
+        }
+    }
+}
+
+// Estilos para el modal de información del servicio
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75); // Fondo semitransparente
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; // Asegura que esté por encima de otro contenido
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 800px; // Ajusta según sea necesario para el contenido del video
+  max-height: 90vh; // Altura máxima para evitar desbordamiento en pantallas pequeñas
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; // Importante para bordes redondeados y control de contenido
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #0D2D6C; // Color de fondo del encabezado (ejemplo)
+  color: white;
+  border-top-left-radius: 8px; // Coincide con el border-radius del contenedor
+  border-top-right-radius: 8px; // Coincide con el border-radius del contenedor
+
+  .header-logo {
+    height: 28px; // Ajusta según sea necesario
+    margin-right: 15px;
+  }
+
+  span { // Texto del título
+    flex-grow: 1;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left; // O 'center', según el diseño
+  }
+
+  .close-button {
+    background: #D9D9D9; // Estilo del botón de cerrar (ejemplo)
+    border: none;
+    color: #0D2D6C;
+    font-size: 1.2rem; // Tamaño del ícono (ajusta si es necesario)
+    cursor: pointer;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+
+    &:hover {
+      background: #c0c0c0;
+    }
+
+    i { // Asumiendo FontAwesome o similar para el ícono 'x'
+      line-height: 1; // Ayuda a centrar el ícono
+      font-size: 0.9rem; // Ajusta el tamaño del ícono fas fa-times
+    }
+  }
+}
+
+.modal-content {
+  padding: 0; // Quita el padding si el iframe ocupa todo el espacio
+  flex-grow: 1; // Permite que el contenido llene el espacio disponible
+  display: flex;
+  background-color: #000; // Fondo para el área del video
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    min-height: 315px; // Altura mínima para el reproductor de video
+  }
+}
+
+// Estilos para el mensaje cuando no hay video (usa la clase .modal-content también)
+.modal-content[style*="text-align: center"] { // Selector más específico para el mensaje de "no video"
+    background-color: #ffffff; // Fondo blanco para el mensaje
+    color: #333333; // Color de texto para el mensaje
+    // El padding y text-align ya están definidos inline en el HTML
+}
