@@ -1,4 +1,9 @@
 <div class="maintenance-program-container">
+    <div *ngIf="isLoading" class="loading-indicator-overlay">
+        <div class="spinner"></div>
+        <p>Cargando actividades...</p>
+    </div>
+
     <div class="program-header">
         <h1>Cuadro de mantenimiento 2025</h1>
         <div class="action-buttons">

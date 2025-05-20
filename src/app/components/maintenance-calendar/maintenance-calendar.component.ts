@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivityService, Activity } from '../../services/activity.service';
+import { ActivityService, Activity, PaginatedActivitiesResponse } from '../../services/activity.service';
 import { ScheduleService, Schedule } from '../../services/schedule.service'; // Asumiendo que Schedule tiene la estructura necesaria
 
 // Define el tipo para los estados locales
@@ -66,6 +66,9 @@ export class MaintenanceCalendarComponent implements OnInit {
   isLoadingSchedule = false;
   private currentScheduleHasActivities: boolean = false; 
 
+  completedActivities: number = 5;
+  pendingActivities: number = 8;
+
   constructor(
     private activityService: ActivityService,
     private scheduleService: ScheduleService
@@ -89,12 +92,11 @@ export class MaintenanceCalendarComponent implements OnInit {
   async loadBaseActivities(): Promise<void> {
     this.isLoadingActivities = true;
     return new Promise((resolve, reject) => {
-      this.activityService.getActivities().subscribe({
-        next: (baseActivities) => {
-          // Inicializa el array local con estado por defecto
-          this.activities = baseActivities.map(activity => ({
+      this.activityService.getActivities(1, 100, 'calendar').subscribe({ 
+        next: (response: PaginatedActivitiesResponse) => {
+          this.activities = response.data.map((activity: Activity) => ({
             ...activity,
-            status: 'sin_revision' as ActivityStatus, // Estado inicial por defecto
+            status: 'sin_revision' as ActivityStatus, 
           }));
           this.isLoadingActivities = false;
           console.log('Actividades base cargadas:', this.activities.length);
