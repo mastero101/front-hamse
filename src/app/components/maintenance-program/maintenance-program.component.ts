@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivityService, PaginatedActivitiesResponse, Activity as ServiceActivity } from '../../services/activity.service'; // Renombramos Activity importada
+import { ActivityService, PaginatedActivitiesResponse, Activity as ServiceActivity } from '../../services/activity.service';
+import { ScheduleService, Schedule } from '../../services/schedule.service';
 
 interface Month {
   name: string;
@@ -30,6 +31,8 @@ interface ProgramActivity {
   styleUrl: './maintenance-program.component.scss'
 })
 export class MaintenanceProgramComponent implements OnInit {
+  @Input() scheduleId: string | null = null;
+
   months: Month[] = [
     { name: 'Enero', weeks: [1, 2, 3, 4] },
     { name: 'Febrero', weeks: [1, 2, 3, 4] },
@@ -48,50 +51,156 @@ export class MaintenanceProgramComponent implements OnInit {
   activities: ProgramActivity[] = [];
   isLoading: boolean = false;
 
-  constructor(private activityService: ActivityService) { }
+  constructor(
+    private activityService: ActivityService,
+    private scheduleService: ScheduleService
+  ) { }
 
   ngOnInit(): void {
-    this.loadProgramActivities();
+    if (this.scheduleId) {
+      this.loadScheduleData(this.scheduleId);
+    } else {
+      // Si no hay scheduleId, cargar actividades genéricas sin estado persistido
+      this.loadGenericProgramActivities();
+      console.warn('No se proporcionó scheduleId. Se cargaron actividades genéricas sin estado.');
+    }
   }
 
-  loadProgramActivities(): void {
+  // Método para cargar actividades genéricas (sin estado de schedule)
+  loadGenericProgramActivities(): void {
     this.isLoading = true;
-    // El servicio ahora debería recibir actividades filtradas por 'program' desde el backend
     this.activityService.getActivities(1, 100, 'program').subscribe({
       next: (response: PaginatedActivitiesResponse) => {
-        const allFetchedActivities = response.data.map((serviceActivity: ServiceActivity) => {
-          return {
-            id: serviceActivity.id,
-            name: serviceActivity.name,
-            checkedWeeks: [], // Inicializa checkedWeeks vacío
-            frequency: serviceActivity.frequency,
-            expectedDuration: serviceActivity.expectedDuration,
-            category: serviceActivity.category
-          };
-        });
-
-        // Ya no debería ser necesario el filtro en el cliente si el backend funciona como se espera.
-        // Si aún se necesita por alguna razón, se puede descomentar, pero idealmente el backend maneja esto.
-        // this.activities = allFetchedActivities.filter(activity => activity.category === 'program');
-        this.activities = allFetchedActivities; // Asumimos que el backend ya filtró
-
-        // Este log es útil para confirmar cuántas actividades de 'program' se cargaron.
-        console.log('Actividades de PROGRAMA cargadas:', this.activities.length);
-        
-        // Opcional: Advertencia si, a pesar de todo, llegan actividades de otra categoría
-        // Esto solo sería relevante si el backend NO estuviera filtrando correctamente.
-        const nonProgramActivities = this.activities.filter(act => act.category !== 'program').length;
-        if (nonProgramActivities > 0) {
-          console.warn(`ADVERTENCIA: Se encontraron ${nonProgramActivities} actividades que no son de categoría 'program' después de la carga inicial. Esto podría indicar un problema en el filtro del backend.`);
-        }
-
+        this.activities = response.data.map((serviceActivity: ServiceActivity) => ({
+          id: serviceActivity.id,
+          name: serviceActivity.name,
+          checkedWeeks: [], // Inicializa checkedWeeks vacío
+          frequency: serviceActivity.frequency,
+          expectedDuration: serviceActivity.expectedDuration,
+          category: serviceActivity.category
+        }));
+        console.log('Actividades de PROGRAMA genéricas cargadas:', this.activities.length);
+        console.log('Datos de las actividades:', this.activities);
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error al cargar actividades de PROGRAMA:', error);
+        console.error('Error al cargar actividades de PROGRAMA genéricas:', error);
         this.isLoading = false;
       }
     });
+  }
+
+  // Nuevo método para cargar datos del schedule, incluyendo estados de actividad
+  loadScheduleData(scheduleId: string): void {
+    this.isLoading = true;
+    this.scheduleService.getSchedule(scheduleId).subscribe({
+      next: (schedule: Schedule) => {
+        if (schedule && schedule.Activities) {
+          this.activities = schedule.Activities.map((backendActivity: any) => {
+            return {
+              id: backendActivity.id,
+              name: backendActivity.name,
+              checkedWeeks: backendActivity.checkedWeeks || backendActivity.programStates || [],
+              frequency: backendActivity.frequency,
+              expectedDuration: backendActivity.expectedDuration,
+              category: backendActivity.category || 'program',
+            };
+          });
+          console.log(`Actividades cargadas para el schedule ${scheduleId}:`, this.activities.length);
+        } else {
+          console.warn(`Schedule ${scheduleId} cargado pero no contiene actividades o la estructura no es la esperada. Cargando actividades genéricas.`);
+          this.loadGenericProgramActivities();
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error(`Error al cargar el schedule ${scheduleId}:`, error);
+        this.isLoading = false;
+        this.loadGenericProgramActivities();
+      }
+    });
+  }
+
+
+  // Método para guardar el estado actual del programa (checkedWeeks de todas las actividades)
+  saveProgramState(): void {
+    console.log('[MaintenanceProgramComponent] saveProgramState called.');
+    console.log('[MaintenanceProgramComponent] Current scheduleId:', this.scheduleId);
+    console.log('[MaintenanceProgramComponent] Current isLoading:', this.isLoading);
+
+    if (!this.activities || this.activities.length === 0) {
+      console.warn('No hay actividades para guardar.');
+      alert('No hay cambios en las actividades para guardar.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    const activitiesToSave = this.activities.map(activity => ({
+      id: activity.id,
+      name: activity.name,
+      checkedWeeks: activity.checkedWeeks,
+      frequency: activity.frequency,
+      expectedDuration: activity.expectedDuration,
+      category: activity.category
+    }));
+
+    if (!this.scheduleId) {
+      // --- CREAR NUEVO SCHEDULE ---
+      console.log('No scheduleId found, attempting to create a new schedule.');
+      const newScheduleData: Omit<Schedule, 'id' | 'progress'> = {
+        startDate: new Date().toISOString().split('T')[0], // Formato YYYY-MM-DD
+        endDate: new Date(new Date().getFullYear(), 11, 31).toISOString().split('T')[0], // Fin del año actual
+        type: 'weekly', // Asumiendo 'weekly' para el programa de mantenimiento
+        status: 'in_progress',
+        assignedTo: 'placeholder_user_id', // Reemplazar con el ID del usuario real
+        Activities: activitiesToSave as any[] // Enviamos las actividades con sus estados
+      };
+
+      console.log('Payload for creating schedule:', JSON.stringify(newScheduleData, null, 2));
+
+      this.scheduleService.createSchedule(newScheduleData).subscribe({
+        next: (createdSchedule) => {
+          console.log('New schedule created successfully:', createdSchedule);
+          if (createdSchedule && createdSchedule.id) {
+            this.scheduleId = createdSchedule.id; // Actualizamos el scheduleId en el componente
+            alert('Nuevo programa guardado exitosamente con ID: ' + this.scheduleId);
+          } else {
+            console.error('Schedule created but ID is missing in the response.');
+            alert('Programa creado, pero hubo un problema al obtener su ID. Por favor, recargue la página o intente de nuevo.');
+          }
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error creating new schedule:', error);
+          const errorMessage = error.response?.data?.message || error.message || 'Error desconocido al crear el programa.';
+          alert(`Error al crear el nuevo programa: ${errorMessage}`);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // --- ACTUALIZAR SCHEDULE EXISTENTE ---
+      console.log(`Updating existing schedule with ID: ${this.scheduleId}`);
+      const scheduleUpdatePayload: Partial<Schedule> = {
+        Activities: activitiesToSave as any[]
+      };
+
+      console.log('Payload for updating schedule (scheduleUpdatePayload):', JSON.stringify(scheduleUpdatePayload, null, 2));
+
+      this.scheduleService.updateSchedule(this.scheduleId, scheduleUpdatePayload).subscribe({
+        next: (updatedSchedule) => {
+          console.log('Estado del programa guardado exitosamente. Respuesta del backend:', updatedSchedule);
+          alert('Cambios guardados exitosamente.');
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error al guardar el estado del programa:', error);
+          const errorMessage = error.response?.data?.message || error.message || 'Error desconocido al guardar cambios.';
+          alert(`Error al guardar los cambios: ${errorMessage}`);
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   isWeekChecked(activity: ProgramActivity, month: Month, week: number): boolean {

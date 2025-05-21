@@ -7,9 +7,9 @@
     <div class="program-header">
         <h1>Cuadro de mantenimiento 2025</h1>
         <div class="action-buttons">
-            <button class="btn-action">
+            <button class="btn-action" (click)="saveProgramState()" [disabled]="isLoading">
                 <i class="fas fa-save"></i>
-                Guardar
+                Guardar Cambios
             </button>
             <button class="btn-action">
                 <i class="fas fa-calendar"></i>
