@@ -188,3 +188,131 @@
     //   color: #333;
     // }
 }
+
+
+@media print {
+    /* Ocultar elementos no necesarios */
+    nav,
+    .navbar,
+    .nav-menu,
+    .action-buttons,
+    .btn-action {
+        display: none !important;
+    }
+
+    /* Mostrar solo la tabla */
+    .maintenance-program-container {
+        padding: 0;
+        height: auto;
+        background-color: white;
+        min-height: auto;
+    }
+
+    /* Ajustes para la tabla */
+    .maintenance-table {
+        background: none;
+        box-shadow: none;
+        overflow: visible;
+        margin-top: 20px; /* Espacio superior para la fecha */
+        position: relative;
+
+        /* Añadir la fecha antes de la tabla */
+        &::before {
+            content: attr(data-date);
+            position: absolute;
+            top: -30px;
+            right: 0;
+            font-size: 12pt;
+            font-weight: normal;
+        }
+        
+        table {
+            font-size: 10pt;
+            width: 100%;
+            table-layout: fixed;
+            
+            th, td {
+                padding: 4px;
+                font-size: 8pt;
+            }
+
+            .activity-column {
+                width: 25%;
+                background-color: white !important;
+                color: black !important;
+                border: 1px solid #000;
+            }
+
+            .month-column {
+                width: 6.25%; /* (100% - 25%) / 12 meses */
+                
+                .month-header {
+                    font-weight: bold;
+                }
+                
+                .weeks-header {
+                    .week {
+                        font-size: 7pt;
+                    }
+                }
+            }
+
+            .month-cell {
+                padding: 2px;
+                
+                .week-group {
+                    gap: 1px;
+                }
+
+                .week-checkbox {
+                    width: 12px;
+                    height: 12px;
+                    border: 1px solid #000;
+                    margin: 1px;
+                    
+                    /* Asegurar que los colores se impriman */
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                    color-adjust: exact;
+
+                    &.verified {
+                        background-color: #4CAF50 !important;
+                        border-color: #4CAF50 !important;
+                    }
+
+                    &.not-applicable {
+                        background-color: #f44336 !important;
+                        border-color: #f44336 !important;
+                    }
+
+                    .check-icon,
+                    .times-icon {
+                        font-size: 8pt;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Mantener los ajustes generales de página */
+    @page {
+        size: landscape;
+        margin: 1cm;
+    }
+
+    /* Evitar saltos de página dentro de elementos */
+    tr, td, th {
+        page-break-inside: avoid;
+    }
+
+    /* Asegurar que los íconos se muestren */
+    .fas {
+        font-family: 'Font Awesome 5 Free' !important;
+        -webkit-font-smoothing: antialiased;
+        display: inline-block;
+        font-style: normal;
+        font-variant: normal;
+        text-rendering: auto;
+        line-height: 1;
+    }
+}
