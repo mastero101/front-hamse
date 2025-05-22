@@ -16,20 +16,16 @@ export interface Schedule {
     id: string;
     username: string;
   };
-  // Add Activities if it's part of the main Schedule type from backend
   Activities?: Activity[]; // Or use BackendActivity if defined globally/imported
 }
 
-// Define the interface for the status update payload
-// Define the type for a single status update (if not already defined)
-export interface ActivityStatusUpdate { // <-- Asegúrate que esta interfaz exista y sea exportada si es necesario
+export interface ActivityStatusUpdate {
   activityId: string;
   state: string;
-  notes?: string; // Optional notes
+  notes?: string;
 }
 
-// Define the type for the payload object the backend expects
-export interface ActivityStatusPayload { // <-- Define esta interfaz
+export interface ActivityStatusPayload {
   statuses: ActivityStatusUpdate[];
 }
 
@@ -107,15 +103,12 @@ export class ScheduleService {
     });
   }
 
-  // --- Added Method ---
-  // Cambia el tipo del segundo parámetro de ActivityStatusUpdate[] a ActivityStatusPayload
   updateActivityStatuses(scheduleId: string, payload: ActivityStatusPayload): Observable<any> { // <-- Firma corregida
     const token = localStorage.getItem('token');
     const url = `${this.endpoint}/${scheduleId}/statuses`;
     console.log(`Sending PUT request to ${url} with payload:`, payload); // Log opcional
     return new Observable(subscriber => {
-      // Ahora 'payload' ya tiene la estructura { statuses: [...] } que espera axios.put
-      axios.put(url, payload, { // <-- Pasa el objeto payload directamente
+      axios.put(url, payload, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -126,5 +119,4 @@ export class ScheduleService {
         .finally(() => subscriber.complete());
     });
   }
-  // --- End Method ---
 }

@@ -30,7 +30,6 @@ export class ActivityService {
   constructor() {}
 
   getActivities(page: number = 1, limit: number = 10, category?: string): Observable<PaginatedActivitiesResponse> {
-    // const token = localStorage.getItem('token'); // Eliminado: el interceptor de Axios maneja la autorización
     return new Observable(subscriber => {
       const params: any = { 
         page,
@@ -41,26 +40,20 @@ export class ActivityService {
       }
 
       axios.get(this.endpoint, {
-        // headers: { // Eliminado: el interceptor de Axios maneja la autorización, Content-Type no es necesario para GET
-        //   'Authorization': `Bearer ${token}`,
-        //   'Content-Type': 'application/json'
-        // },
         params: params
       })
         .then(response => {
-          // Ajuste para la estructura de respuesta del backend:
-          // { success: true, message: "...", data: { totalItems, items, totalPages, currentPage } }
           if (response.data && response.data.success === true && response.data.data && typeof response.data.data.totalItems !== 'undefined') {
             const backendData = response.data.data;
             const paginatedResponse: PaginatedActivitiesResponse = {
-              data: backendData.items, // Array de actividades
+              data: backendData.items,
               total: backendData.totalItems,
               page: backendData.currentPage,
-              limit: limit, // El 'limit' que se pasó a la función
+              limit: limit,
               totalPages: backendData.totalPages
             };
             subscriber.next(paginatedResponse);
-          } else if (response.data && response.data.data && response.data.pagination) { // Estructura alternativa
+          } else if (response.data && response.data.data && response.data.pagination) {
             const paginatedData: PaginatedActivitiesResponse = {
               data: response.data.data,
               total: response.data.pagination.totalItems,
