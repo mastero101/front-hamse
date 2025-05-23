@@ -37,8 +37,8 @@
           </div>
           <div class="requirement-actions">
             <div class="status-check">
-              <input type="checkbox" [id]="'req-' + requirement.title" [checked]="requirement.completed" (change)="requirement.completed = !requirement.completed"> <!-- Permitir cambio para demo -->
-              <label [for]="'req-' + requirement.title" [class.completed]="requirement.completed">
+              <input type="checkbox" [id]="'req-' + requirement.id" [checked]="requirement.completed" (change)="updateRequirementStatus(requirement, $event)">
+              <label [for]="'req-' + requirement.id" [class.completed]="requirement.completed">
                 {{ requirement.completed ? 'Realizado' : 'Sin realizar' }}
               </label>
             </div>
