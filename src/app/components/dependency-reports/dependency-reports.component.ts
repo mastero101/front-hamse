@@ -5,7 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; // Im
 @Component({
   selector: 'app-dependency-reports',
   standalone: true,
-  imports: [CommonModule], // Eliminar VideoModalComponent de aquí
+  imports: [CommonModule],
   templateUrl: './dependency-reports.component.html',
   styleUrl: './dependency-reports.component.scss'
 })
