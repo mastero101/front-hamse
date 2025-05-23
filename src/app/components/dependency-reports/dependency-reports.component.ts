@@ -101,7 +101,21 @@ export class DependencyReportsComponent implements OnInit {
   openCalendarModal(requirement: any) {
     this.currentRequirementForReminder = requirement;
     this.calendarViewDate = new Date(); // Siempre abrir en el mes actual
-    this.selectedReminderDate = null; // Limpiar selección previa
+
+    // Verificar si el requerimiento ya tiene una fecha de recordatorio
+    if (requirement.reminderDate) {
+      // Si existe, parsear la fecha y asignarla a selectedReminderDate
+      // Asegurarse de que la fecha se parsea correctamente (el backend devuelve YYYY-MM-DD)
+      const [year, month, day] = requirement.reminderDate.split('-').map(Number);
+      // El mes en JavaScript es 0-indexado, por eso restamos 1
+      this.selectedReminderDate = new Date(year, month - 1, day);
+      console.log('Recordatorio existente encontrado:', this.selectedReminderDate.toLocaleDateString());
+    } else {
+      // Si no existe, limpiar la selección previa
+      this.selectedReminderDate = null;
+      console.log('No hay recordatorio existente para este requerimiento.');
+    }
+
     this.generateCalendarDays(this.calendarViewDate);
     this.isCalendarModalVisible = true;
   }
@@ -188,9 +202,31 @@ export class DependencyReportsComponent implements OnInit {
 
   saveReminder() {
     if (this.selectedReminderDate && this.currentRequirementForReminder) {
-      console.log('Recordatorio guardado para:', this.currentRequirementForReminder.title);
+      console.log('Guardando recordatorio para:', this.currentRequirementForReminder.title);
       console.log('Fecha seleccionada:', this.selectedReminderDate.toLocaleDateString());
-      // Aquí iría la lógica para guardar el recordatorio (e.g., enviar a un backend)
+
+      // Formatear la fecha a un string ISO (YYYY-MM-DD) para enviar al backend
+      const reminderDateISO = this.selectedReminderDate.toISOString().split('T')[0];
+
+      // Llamar al servicio para actualizar el requerimiento con la fecha del recordatorio
+      this.requirementService.updateRequirement(this.currentRequirementForReminder.id, {
+        reminderDate: reminderDateISO
+      }).subscribe({
+        next: (updatedRequirement) => {
+          console.log('Requerimiento actualizado con recordatorio:', updatedRequirement);
+          // Opcional: Actualizar el requerimiento en la lista local si es necesario
+          const index = this.currentRequirements.findIndex(req => req.id === updatedRequirement.id);
+          if (index !== -1) {
+            this.currentRequirements[index].reminderDate = updatedRequirement.reminderDate;
+          }
+          alert('Recordatorio guardado con éxito.');
+        },
+        error: (error) => {
+          console.error('Error al guardar el recordatorio:', error);
+          alert('Error al guardar el recordatorio.');
+        }
+      });
+
     } else {
       console.warn('No se ha seleccionado una fecha o requerimiento.');
     }

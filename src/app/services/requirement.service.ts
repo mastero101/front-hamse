@@ -13,6 +13,7 @@ export interface Requirement {
   hasProvidersButton?: boolean;
   subTitle?: string;
   dependency: string;
+  reminderDate?: string | null;
 }
 
 @Injectable({
