@@ -11,10 +11,53 @@
                 <i class="fas fa-save"></i>
                 Guardar Cambios
             </button>
-            <button class="btn-action">
+            <button class="btn-action" (click)="togglePeriodSelector()">
                 <i class="fas fa-calendar"></i>
-                Indicar periodo
+                {{ selectedPeriod ? 'Cambiar periodo' : 'Indicar periodo' }}
             </button>
+            <!-- Agregar el modal de selección de periodo -->
+            <div class="period-selector-modal" *ngIf="showPeriodSelector">
+                <div class="modal-content">
+                    <h2>Seleccionar Periodo</h2>
+                    <div class="period-form">
+                        <div class="period-start">
+                            <label>Desde:</label>
+                            <select #startMonth>
+                                @for (month of months; track month) {
+                                    <option [value]="month.name">{{month.name}}</option>
+                                }
+                            </select>
+                            <select #startWeek>
+                                @for (week of months[0].weeks; track week) {
+                                    <option [value]="week">Semana {{week}}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="period-end">
+                            <label>Hasta:</label>
+                            <select #endMonth>
+                                @for (month of months; track month) {
+                                    <option [value]="month.name">{{month.name}}</option>
+                                }
+                            </select>
+                            <select #endWeek>
+                                @for (week of months[0].weeks; track week) {
+                                    <option [value]="week">Semana {{week}}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="modal-actions">
+                            <button (click)="applyPeriodFilter({
+                                startMonth: startMonth.value,
+                                startWeek: +startWeek.value,
+                                endMonth: endMonth.value,
+                                endWeek: +endWeek.value
+                            })">Aplicar</button>
+                            <button (click)="togglePeriodSelector()">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <button class="btn-action" (click)="printProgram()">
                 <i class="fas fa-print"></i>
                 Imprimir
@@ -40,7 +83,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for (activity of activities; track activity.id) {
+                @for (activity of (selectedPeriod ? filteredActivities : activities); track activity.id) {
                     <tr>
                         <td class="activity-name">{{activity.name}}</td>
                         @for (month of months; track month) {

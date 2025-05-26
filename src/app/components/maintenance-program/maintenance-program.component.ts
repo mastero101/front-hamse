@@ -289,4 +289,45 @@ export class MaintenanceProgramComponent implements OnInit {
     console.log('Activando impresión...');
     window.print();
   }
+
+  showPeriodSelector: boolean = false;
+  selectedPeriod: { startMonth: string; startWeek: number; endMonth: string; endWeek: number } | null = null;
+  filteredActivities: ProgramActivity[] = [];
+
+  togglePeriodSelector(): void {
+    this.showPeriodSelector = !this.showPeriodSelector;
+    if (!this.showPeriodSelector) {
+      this.selectedPeriod = null;
+      this.filteredActivities = [...this.activities];
+    }
+  }
+
+  applyPeriodFilter(period: { startMonth: string; startWeek: number; endMonth: string; endWeek: number }): void {
+    this.selectedPeriod = period;
+    
+    const startMonthIndex = this.months.findIndex(m => m.name === period.startMonth);
+    const endMonthIndex = this.months.findIndex(m => m.name === period.endMonth);
+
+    if (startMonthIndex === -1 || endMonthIndex === -1) return;
+
+    this.filteredActivities = this.activities.filter(activity => {
+      return activity.checkedWeeks.some(check => {
+        const monthIndex = this.months.findIndex(m => m.name === check.month);
+        if (monthIndex === -1) return false;
+
+        if (monthIndex < startMonthIndex || monthIndex > endMonthIndex) return false;
+        if (monthIndex === startMonthIndex && check.week < period.startWeek) return false;
+        if (monthIndex === endMonthIndex && check.week > period.endWeek) return false;
+
+        return true;
+      });
+    });
+
+    this.showPeriodSelector = false;
+  }
+
+  clearPeriodFilter(): void {
+    this.selectedPeriod = null;
+    this.filteredActivities = [...this.activities];
+  }
 }
