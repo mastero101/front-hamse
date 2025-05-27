@@ -7,7 +7,7 @@ export interface Schedule {
   id: string;
   startDate: string;
   endDate: string;
-  type: 'weekly' | 'monthly';
+  type: 'daily' | 'weekly' | 'monthly' | 'yearly';
   status: 'pending' | 'in_progress' | 'completed';
   progress: number;
   assignedTo: string;

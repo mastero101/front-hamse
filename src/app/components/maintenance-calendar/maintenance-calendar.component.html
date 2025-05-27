@@ -45,12 +45,9 @@
                         </div>
                         <div class="week-days">
                             @for (day of weekDays; track day) {
-                                <div class="week-day" [class.today]="isToday(day)" [class.completed]="isDayCompleted(day)">
+                                <div class="week-day" [class.today]="isToday(day)" >
                                     <span class="day-name">{{ day | date:'EEE' }}</span>
                                     <span class="day-number">{{ day | date:'d' }}</span>
-                                    @if (isDayCompleted(day)) {
-                                        <i class="fas fa-check check-icon"></i>
-                                    }
                                 </div>
                             }
                         </div>
@@ -58,18 +55,19 @@
                 } @else if (currentView === 'monthly') {
                     <div class="month-view">
                         <div class="year-header">
-                            <span class="year-label">2025</span>
+                            <span class="year-label">{{ currentYear }}</span>
+                        </div>
+                        <div class="selected-month-label" style="text-align: center; margin-bottom: 18px;">
+                            <strong>Mes seleccionado:</strong> {{ currentMonthName | titlecase }} de {{ currentYear }}
                         </div>
                         <div class="months-grid">
                             @for (month of months; track month.name) {
-                                <div class="month-cell" 
-                                     [class.active]="month.name === currentMonth"
+                                <div class="month-cell"
+                                     [class.active]="month.name === currentMonthName"
                                      [class.completed]="month.completed"
                                      (click)="selectMonth(month.name)">
                                     <span class="month-name">{{month.name}}</span>
-                                    @if (month.completed) {
-                                        <i class="fas fa-check"></i>
-                                    }
+                                    <i *ngIf="month.completed" class="fas fa-check"></i>
                                 </div>
                             }
                         </div>
@@ -81,7 +79,7 @@
                             <button class="btn-nav" (click)="previousMonth()">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            <!-- Asegúrate que currentMonthName y currentYear se actualizan correctamente -->
+                            <!-- Asegúrate que currentMonthName and currentYear se actualizan correctamente -->
                             <span class="month-year-label">{{ currentMonthName | titlecase }} {{ currentYear }}</span>
                             <button class="btn-nav" (click)="nextMonth()">
                                 <i class="fas fa-chevron-right"></i>

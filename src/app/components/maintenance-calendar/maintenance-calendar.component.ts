@@ -1,41 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { ActivityService, Activity, PaginatedActivitiesResponse } from '../../services/activity.service';
-import { ScheduleService, Schedule } from '../../services/schedule.service'; // Asumiendo que Schedule tiene la estructura necesaria
+import { ScheduleService, Schedule, ActivityStatusPayload } from '../../services/schedule.service';
 
-// Define el tipo para los estados locales
 type ActivityStatus = 'sin_revision' | 'verificado' | 'no_aplica';
-
-// Define una interfaz local que extiende la Activity base y añade el status local
-interface CalendarActivity extends Activity {
-  status: ActivityStatus;
-}
-
-interface BackendActivityStatus {
-  
-  Statuses?: { 
-    state: string;
-  }[]; 
-  ActivitySchedule?: {
-
-  };
-}
-
-// Extiende la interfaz Activity base con la información de estado del backend
-interface BackendActivity extends Activity, BackendActivityStatus {}
-
-// Interfaz para el Schedule detallado como viene del backend
-interface DetailedSchedule extends Schedule {
-  Activities: BackendActivity[]; 
-}
-
-
+interface CalendarActivity extends Activity { status: ActivityStatus; }
+interface BackendActivity extends Activity { Statuses?: { state: string }[]; }
+interface DetailedSchedule extends Schedule { Activities: BackendActivity[]; }
 interface CalendarDay {
-  date: Date; // Usaremos el objeto Date completo
-  dayOfMonth: number; // El número del día a mostrar
-  isCurrentMonth: boolean; // Para saber si pertenece al mes actual
+  date: Date;
+  dayOfMonth: number;
+  isCurrentMonth: boolean;
   isToday: boolean;
-  isSelected: boolean; // Para resaltar el día seleccionado
+  isSelected: boolean;
 }
 
 @Component({
@@ -47,267 +25,324 @@ interface CalendarDay {
 })
 export class MaintenanceCalendarComponent implements OnInit {
   completionPercentage = 0;
-  currentMonth = 'Febrero'; // Considera hacerlo dinámico
-  weekDayNames = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+  currentView: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly';
+  selectedDate = new Date();
+  currentMonth = this.selectedDate.toLocaleDateString('es-ES', { month: 'long' });
+  currentYear = this.selectedDate.getFullYear();
+  currentWeekStart = new Date();
+  currentWeekEnd = new Date();
+  currentMonthName = this.currentMonth;
+
+  calendarDays: CalendarDay[] = [];
   weekDays: Date[] = [];
-  currentView: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly'; 
-  currentWeekStart: Date = new Date();
-  currentWeekEnd: Date = new Date();
-  selectedDate: Date = new Date(); 
+  activities: CalendarActivity[] = [];
+  allActivities: CalendarActivity[] = [];
+  months = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ].map(name => ({ name, completed: false }));
 
-  // *** Monthly View Properties ***
-  currentYear: number = new Date().getFullYear(); // Añadir año actual
-  currentMonthName: string = new Date().toLocaleDateString('es-ES', { month: 'long' }); // Nombre del mes actual
-  calendarDays: CalendarDay[] = []; // Usaremos esta para la cuadrícula mensual
-
-  activities: CalendarActivity[] = []; 
   currentScheduleId: string | null = null;
   isLoadingActivities = false;
   isLoadingSchedule = false;
-  private currentScheduleHasActivities: boolean = false; 
+  private currentScheduleHasActivities = false;
 
-  completedActivities: number = 5;
-  pendingActivities: number = 8;
-
-  constructor(
-    private activityService: ActivityService,
-    private scheduleService: ScheduleService
-  ) {}
+  constructor(private activityService: ActivityService, private scheduleService: ScheduleService) {}
 
   ngOnInit() {
-    if (this.checkAuthentication()) {
-      this.setCurrentWeek(this.selectedDate);
-      this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth()); // Generar calendario inicial
-      // 1. Carga la lista base de actividades (sin estados específicos)
-      this.loadBaseActivities().then(() => {
-        // 2. Una vez cargadas las actividades base, busca y carga el schedule para la fecha actual
-        this.loadScheduleForDate(this.selectedDate);
-      }).catch(error => {
-        console.error("Error en la inicialización:", error);
-      });
+    if (!this.isAuthenticated()) return;
+    this.initCalendar();
+  }
+
+  private initCalendar() {
+    this.setCurrentWeek(this.selectedDate);
+    this.generateCalendarDays(this.currentYear, this.selectedDate.getMonth());
+    this.loadBaseActivities()
+      .then(() => this.loadScheduleForDate(this.selectedDate))
+      .catch(console.error);
+  }
+
+  private isAuthenticated(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  private getCurrentUserId(): string {
+    try {
+      const data = localStorage.getItem('currentUser');
+      return data ? JSON.parse(data).id || '' : '';
+    } catch {
+      return '';
     }
   }
 
-  // Carga la lista de todas las actividades disponibles (sin estado específico del schedule)
-  async loadBaseActivities(): Promise<void> {
-    this.isLoadingActivities = true;
-    return new Promise((resolve, reject) => {
-      this.activityService.getActivities(1, 100, 'calendar').subscribe({ 
-        next: (response: PaginatedActivitiesResponse) => {
-          this.activities = response.data.map((activity: Activity) => ({
-            ...activity,
-            status: 'sin_revision' as ActivityStatus, 
-          }));
-          this.isLoadingActivities = false;
-          console.log('Actividades base cargadas:', this.activities.length);
-          resolve();
-        },
-        error: (error) => {
-          console.error('Error al cargar actividades base:', error);
-          this.isLoadingActivities = false;
-          reject(error);
-        }
-      });
+  private setCurrentWeek(refDate: Date) {
+    const offset = (refDate.getDay() || 7) - 1;
+    this.currentWeekStart = new Date(refDate);
+    this.currentWeekStart.setDate(refDate.getDate() - offset);
+    this.currentWeekStart.setHours(0, 0, 0, 0);
+
+    this.currentWeekEnd = new Date(this.currentWeekStart);
+    this.currentWeekEnd.setDate(this.currentWeekStart.getDate() + 6);
+    this.setWeekDays();
+  }
+
+  private setWeekDays() {
+    this.weekDays = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(this.currentWeekStart);
+      date.setDate(this.currentWeekStart.getDate() + i);
+      return date;
     });
   }
 
-  // Busca el Schedule que corresponde a una fecha dada y carga sus detalles
+  previousWeek() {
+    this.selectedDate = new Date(this.currentWeekStart);
+    this.selectedDate.setDate(this.selectedDate.getDate() - 7);
+    this.setCurrentWeek(this.selectedDate);
+    this.loadScheduleForDate(this.currentWeekStart);
+  }
+
+  nextWeek() {
+    this.selectedDate = new Date(this.currentWeekStart);
+    this.selectedDate.setDate(this.selectedDate.getDate() + 7);
+    this.setCurrentWeek(this.selectedDate);
+    this.loadScheduleForDate(this.currentWeekStart);
+  }
+
+  changeView(view: typeof this.currentView) {
+    this.currentView = view;
+    if (view === 'weekly') this.setCurrentWeek(this.selectedDate);
+    if (view === 'monthly') this.generateCalendarDays(this.currentYear, this.selectedDate.getMonth());
+    this.filterActivitiesByFrequency(view);
+  }
+
+  private filterActivitiesByFrequency(frequency: typeof this.currentView) {
+    this.activities = this.allActivities.filter(activity => {
+      if (frequency === 'daily') return activity.frequency === 'daily';
+      if (frequency === 'weekly') return activity.frequency === 'weekly';
+      if (frequency === 'monthly') return activity.frequency === 'monthly';
+      if (frequency === 'yearly') return activity.frequency === 'yearly';
+      return true;
+    });
+    console.log('Actividades después del filtro:', this.activities);
+  }
+
+  async loadBaseActivities(): Promise<void> {
+    this.isLoadingActivities = true;
+    try {
+      let allActivities: any[] = [];
+      let currentPage = 1;
+      let hasMorePages = true;
+
+      while (hasMorePages) {
+        const response = await firstValueFrom(this.activityService.getActivities(currentPage, 20, 'calendar'));
+        console.log(`Cargando página ${currentPage}:`, response);
+        
+        if (response?.data) {
+          allActivities = [...allActivities, ...response.data];
+        }
+        
+        hasMorePages = currentPage < response.totalPages;
+        currentPage++;
+      }
+
+      console.log('Total de actividades cargadas:', allActivities.length);
+      this.allActivities = allActivities.map(a => ({ ...a, status: 'sin_revision' }));
+      this.filterActivitiesByFrequency(this.currentView);
+    } catch (error) {
+      console.error('Error al cargar actividades:', error);
+    } finally {
+      this.isLoadingActivities = false;
+    }
+  }
+
   loadScheduleForDate(date: Date) {
     this.isLoadingSchedule = true;
-    this.selectedDate = date; // Actualiza la fecha seleccionada
-    console.log(`Buscando schedule para la fecha: ${date.toDateString()}`);
-
+    this.selectedDate = date;
     this.scheduleService.getSchedules().subscribe({
-      next: (schedules) => {
-        const targetSchedule = schedules.find(schedule => {
-          const startDate = new Date(schedule.startDate);
-          const endDate = new Date(schedule.endDate);
-          startDate.setHours(0, 0, 0, 0); // Normalizar inicio del día
-          endDate.setHours(23, 59, 59, 999); // Normalizar fin del día
-          const checkDate = new Date(date);
-          checkDate.setHours(12, 0, 0, 0);
-
-          return startDate <= checkDate && endDate >= checkDate;
-        });
-
-        if (targetSchedule) {
-          console.log(`Schedule encontrado: ${targetSchedule.id}`);
-          this.currentScheduleId = targetSchedule.id;
-          this.fetchAndUpdateScheduleDetails(targetSchedule.id);
+      next: schedules => {
+        const match = schedules.find(s => 
+          s.type === this.currentView &&
+          new Date(s.startDate) <= date && new Date(s.endDate) >= date
+        );
+        if (match) {
+          this.loadSchedule(match.id);
         } else {
-          console.warn(`No se encontró un schedule para la fecha: ${date.toDateString()}`);
-          this.createNewSchedule(date);
+          this.createSchedule(date);
         }
       },
-      error: (error) => {
-        console.error('Error al buscar schedules:', error);
-        this.currentScheduleId = null;
-        this.resetActivityStatuses();
-        this.isLoadingSchedule = false;
+      error: err => {
+        console.error('Error al obtener schedules:', err);
+        this.resetState();
       }
     });
   }
 
-  private createNewSchedule(date: Date) {
-    this.isLoadingSchedule = true;
-    const startDate = new Date(date);
-    // Ajusta la lógica para definir startDate y endDate según tu vista (semanal en este caso)
-    const dayOfWeek = startDate.getDay();
-    const firstDayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    startDate.setDate(startDate.getDate() + firstDayOffset);
-    startDate.setHours(0, 0, 0, 0);
+  private createSchedule(date: Date) {
+    let startDate = new Date(date);
+    let endDate = new Date(date);
+    let type: 'daily' | 'weekly' | 'monthly' | 'yearly' = this.currentView as any;
 
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-    endDate.setHours(23, 59, 59, 999);
+    if (this.currentView === 'weekly') {
+      const dayOfWeek = startDate.getDay();
+      startDate.setDate(startDate.getDate() - (dayOfWeek ? dayOfWeek - 1 : 6));
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+    } else if (this.currentView === 'monthly') {
+      startDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+    } else if (this.currentView === 'yearly') {
+      startDate = new Date(startDate.getFullYear(), 0, 1);
+      endDate = new Date(startDate.getFullYear(), 11, 31);
+    }
+    // Para daily, startDate y endDate ya son el mismo día
 
-    const newScheduleData = {
+    const filteredActivities = this.allActivities.filter(activity => {
+      if (type === 'weekly') return activity.frequency === 'weekly';
+      if (type === 'monthly') return activity.frequency === 'monthly';
+      if (type === 'daily') return activity.frequency === 'daily';
+      if (type === 'yearly') return activity.frequency === 'yearly';
+      return true;
+    });
+
+    console.log('Creando schedule con actividades filtradas:', {
+      type,
+      totalActivities: this.allActivities.length,
+      filteredActivities: filteredActivities.length,
+      activities: filteredActivities.map(a => ({ id: a.id, name: a.name, frequency: a.frequency }))
+    });
+
+    const payload = {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
-      type: this.mapViewTypeToScheduleType(this.currentView),
-      status: 'in_progress' as 'in_progress' | 'pending' | 'completed',
+      type,
+      status: 'in_progress' as const,
       assignedTo: this.getCurrentUserId(),
-      activities: this.activities.map(activity => ({
-        ...activity,
+      activities: filteredActivities.map(a => ({
+        id: a.id,
+        name: a.name,
+        description: a.description,
+        category: a.category,
+        area: a.area,
+        frequency: a.frequency,
+        expectedDuration: a.expectedDuration,
+        priority: a.priority,
         Statuses: [{ state: 'pending' }]
       }))
     };
 
-    console.log('Intentando crear nuevo schedule con datos:', newScheduleData);
-
-    this.scheduleService.createSchedule(newScheduleData).subscribe({
-      next: (createdSchedule) => {
-        console.log('Nuevo schedule creado:', createdSchedule);
-        this.currentScheduleId = createdSchedule.id;
-        // Una vez creado, carga sus detalles (que incluirán las actividades base con estado inicial)
-        this.fetchAndUpdateScheduleDetails(createdSchedule.id);
-        // isLoadingSchedule se pondrá en false dentro de fetchAndUpdateScheduleDetails
+    this.scheduleService.createSchedule(payload).subscribe({
+      next: s => {
+        console.log('Schedule creado exitosamente:', s);
+        this.loadSchedule(s.id);
       },
-      error: (error) => {
-        console.error('Error al crear nuevo schedule:', error);
-        alert('No se pudo crear un nuevo horario para esta semana. Por favor, inténtelo de nuevo más tarde.');
-        this.resetActivityStatuses(); // Resetea si falla la creación
-        this.currentScheduleId = null;
-        this.isLoadingSchedule = false; // Finaliza la carga en caso de error
+      error: (err) => {
+        console.error('Error al crear schedule:', err);
+        this.resetState();
       }
     });
   }
 
-  private mapViewTypeToScheduleType(viewType: 'daily' | 'weekly' | 'monthly' | 'yearly'): 'weekly' | 'monthly' {
-    switch (viewType) {
-      case 'daily':
-      case 'weekly':
-        return 'weekly';
-      case 'monthly':
-      case 'yearly':
-        return 'monthly';
-      default:
-        return 'weekly';
-    }
-  }
-
-  // Obtiene los detalles de un Schedule específico por ID
-  fetchAndUpdateScheduleDetails(scheduleId: string) {
-    console.log(`Obteniendo detalles para schedule: ${scheduleId}`);
-    this.currentScheduleHasActivities = false; // <-- Resetear la bandera al iniciar la carga
-    // Use 'as any' to bypass the type check as a workaround
-    (this.scheduleService.getSchedule(scheduleId) as any).subscribe({
-      next: (detailedSchedule: DetailedSchedule) => { // Keep the explicit type here for clarity within the handler
-        console.log('Detalles del schedule recibidos:', detailedSchedule);
-        // Basic check to see if the received data looks like DetailedSchedule at runtime
-        if (detailedSchedule && detailedSchedule.Activities) {
-            this.completionPercentage = detailedSchedule.progress || 0; // Usa el progreso del schedule
-            if (detailedSchedule.Activities.length > 0) {
-              // Actualiza los estados de las actividades locales con los del schedule
-              this.updateActivitiesFromSchedule(detailedSchedule.Activities);
-              this.currentScheduleHasActivities = true; // <-- Marcar que sí tiene actividades
-            } else {
-              console.warn('El schedule detallado no contiene actividades.');
-              this.resetActivityStatuses(); // Resetea estados locales si no hay actividades
-              // this.currentScheduleHasActivities sigue siendo false
-            }
-        } else {
-            // Handle cases where the data might not be DetailedSchedule despite the cast
-            console.error('Error: La data recibida de getSchedule no tiene la estructura esperada (DetailedSchedule).', detailedSchedule);
-            this.currentScheduleId = null;
-            this.resetActivityStatuses();
-            // this.currentScheduleHasActivities sigue siendo false
+  private loadSchedule(id: string) {
+    this.currentScheduleId = id;
+    this.scheduleService.getSchedule(id).subscribe({
+      next: (d: any) => {
+        console.log('Schedule cargado:', d);
+        if ('Activities' in d) {
+          const detailed = d as DetailedSchedule;
+          this.completionPercentage = detailed.progress || 0;
+          this.currentScheduleHasActivities = (detailed.Activities?.length ?? 0) > 0;
+          
+          // Mostrar solo las actividades asociadas al schedule y de la frecuencia seleccionada
+          this.activities = (detailed.Activities || [])
+            .filter(a => a.frequency === this.currentView)
+            .map(a => ({
+              ...a,
+              status: this.mapBackendStatusToLocal(
+                a.Statuses && a.Statuses.length > 0
+                  ? a.Statuses[a.Statuses.length - 1].state
+                  : undefined
+              )
+            }));
         }
         this.isLoadingSchedule = false;
       },
-      error: (error: any) => { // It's good practice to type the error parameter too
-        console.error(`Error al obtener detalles del schedule ${scheduleId}:`, error);
-        this.currentScheduleId = null; // Resetea ID si falla la carga
-        this.resetActivityStatuses(); // Resetea estados locales
-        this.currentScheduleHasActivities = false; // <-- Asegurar que es false en caso de error
-        this.isLoadingSchedule = false;
+      error: (err) => {
+        console.error('Error al cargar schedule:', err);
+        this.resetState();
       }
     });
   }
 
-  // Actualiza el estado de las actividades locales basado en la data del backend
-  updateActivitiesFromSchedule(backendActivities: BackendActivity[]) {
-    console.log('Actualizando estados desde backendActivities:', backendActivities);
-    this.activities = this.activities.map(localActivity => {
-      const backendActivity = backendActivities.find(ba => ba.id === localActivity.id);
-      let newStatus: ActivityStatus = 'sin_revision'; // Por defecto
+  private resetState() {
+    this.currentScheduleId = null;
+    this.resetActivityStatuses();
+    this.isLoadingSchedule = false;
+  }
 
-      if (backendActivity) {
-        const backendState = backendActivity.Statuses?.[0]?.state;
-
-        if (backendState) {
-          newStatus = this.mapBackendStatusToLocal(backendState);
-        } else {
-          // Ajusta la lógica de advertencia si es necesario
-          const hasStatusesArray = backendActivity.hasOwnProperty('Statuses') && Array.isArray(backendActivity.Statuses);
-          const hasStateInFirstStatus = hasStatusesArray && backendActivity.Statuses!.length > 0 && backendActivity.Statuses![0].hasOwnProperty('state');
-
-          if (!hasStateInFirstStatus) {
-             console.warn(`No se encontró 'state' en el primer elemento de 'Statuses' para la actividad ${localActivity.id} en la respuesta del backend. Se mantendrá 'sin_revision'. Backend data:`, backendActivity);
-          }
-           newStatus = 'sin_revision';
-        }
-      } else {
-         console.warn(`La actividad local ${localActivity.id} (${localActivity.name}) no se encontró en las actividades del schedule ${this.currentScheduleId}. Se mantendrá 'sin_revision'.`);
-         newStatus = 'sin_revision';
-      }
-
-      return {
-        ...localActivity,
-        status: newStatus
-      };
+  private updateActivityStatuses(data: BackendActivity[]) {
+    this.activities = this.activities.map(local => {
+      const backend = data.find(b => b.id === local.id);
+      const backendState = backend?.Statuses?.[0]?.state;
+      return { ...local, status: this.mapBackendStatusToLocal(backendState) };
     });
-    console.log('Estados de actividad locales actualizados:', this.activities);
   }
 
-  // Resetea todos los estados locales a 'sin_revision'
-  resetActivityStatuses() {
-    console.log('Reseteando estados de actividad locales a sin_revision.');
-    this.activities = this.activities.map(activity => ({
-      ...activity,
-      status: 'sin_revision'
-    }));
-    this.completionPercentage = 0; // Resetea porcentaje también
+  private resetActivityStatuses() {
+    this.activities = this.activities.map(a => ({ ...a, status: 'sin_revision' }));
+    this.completionPercentage = 0;
   }
 
-  // Mapea el estado string del backend al tipo local ActivityStatus
-  mapBackendStatusToLocal(backendStatus: string): ActivityStatus {
-    switch (backendStatus?.toLowerCase()) {
-      case 'completed':
-      case 'verified':
-        return 'verificado';
-      case 'not_applicable':
-        return 'no_aplica';
-      case 'pending':
-      case 'in_progress':
-      default:
-        return 'sin_revision';
+  toggleActivityStatus(activity: CalendarActivity) {
+    const order: ActivityStatus[] = ['sin_revision', 'verificado', 'no_aplica'];
+    const next = order[(order.indexOf(activity.status) + 1) % order.length];
+    activity.status = next;
+  }
+
+  saveActivities() {
+    if (!this.isAuthenticated() || !this.currentScheduleId || !this.currentScheduleHasActivities) {
+      console.warn('No se pueden guardar actividades: ', {
+        isAuthenticated: this.isAuthenticated(),
+        currentScheduleId: this.currentScheduleId,
+        hasActivities: this.currentScheduleHasActivities
+      });
+      return;
     }
+
+    // Ahora las actividades visibles ya son las del schedule, así que puedes usar directamente:
+    const activitiesToUpdate = this.activities;
+
+    const payload: ActivityStatusPayload = {
+      statuses: activitiesToUpdate.map(a => ({ 
+        activityId: a.id, 
+        state: this.mapLocalStatusToApi(a.status),
+        notes: a.status === 'no_aplica' ? 'Marcado como no aplica' : undefined
+      }))
+    };
+
+    console.log('Enviando actualización de estados:', payload);
+
+    this.scheduleService.updateActivityStatuses(this.currentScheduleId, payload).subscribe({
+      next: res => {
+        console.log('Estados actualizados exitosamente:', res);
+        this.completionPercentage = res.data?.progress ?? this.completionPercentage;
+        if (res.data?.Activities) {
+          this.updateActivityStatuses(res.data.Activities);
+          // Actualizar el estado de las actividades en allActivities también
+          this.allActivities = this.allActivities.map(activity => {
+            const updatedActivity = res.data.Activities.find((a: BackendActivity) => a.id === activity.id);
+            return updatedActivity ? { ...activity, status: this.mapBackendStatusToLocal(updatedActivity.Statuses?.[0]?.state) } : activity;
+          });
+        }
+      },
+      error: err => {
+        console.error('Error al guardar actividades:', err);
+        // Aquí podrías mostrar un mensaje de error al usuario
+      }
+    });
   }
 
-  // Mapea el estado local ActivityStatus al string esperado por el backend para guardar
-  mapLocalStatusToApi(localStatus: ActivityStatus): string {
-    switch (localStatus) {
+  private mapLocalStatusToApi(status: ActivityStatus): string {
+    switch (status) {
       case 'verificado':
         return 'completed';
       case 'no_aplica':
@@ -318,280 +353,95 @@ export class MaintenanceCalendarComponent implements OnInit {
     }
   }
 
-  private checkAuthentication(): boolean {
-    const token = localStorage.getItem('token');
-    return !!token;
-  }
-
-  private getCurrentUserId(): string {
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      try {
-        const userData = JSON.parse(currentUser);
-        return userData.id || '';
-      } catch (e) {
-        console.error("Error parsing currentUser from localStorage", e);
-        return '';
-      }
-    }
-    return '';
-  }
-
-  // Modificado para aceptar una fecha y cargar el schedule correspondiente
-  setCurrentWeek(refDate: Date) {
-    const today = new Date(refDate); // Usa la fecha de referencia
-    const dayOfWeek = today.getDay(); // 0 = Domingo, 1 = Lunes, ...
-    const firstDayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-    this.currentWeekStart = new Date(today.setDate(today.getDate() + firstDayOffset));
-    this.currentWeekStart.setHours(0, 0, 0, 0);
-
-    this.currentWeekEnd = new Date(this.currentWeekStart);
-    this.currentWeekEnd.setDate(this.currentWeekStart.getDate() + 6);
-    this.currentWeekEnd.setHours(23, 59, 59, 999);
-
-    this.setWeekDays();
-  }
-
-  setWeekDays() {
-    this.weekDays = [];
-    const startDate = new Date(this.currentWeekStart);
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startDate);
-      day.setDate(startDate.getDate() + i);
-      this.weekDays.push(day);
+  private mapBackendStatusToLocal(status: string = ''): ActivityStatus {
+    switch (status) {
+      case 'completed':
+        return 'verificado';
+      case 'not_applicable':
+        return 'no_aplica';
+      case 'pending':
+      default:
+        return 'sin_revision';
     }
   }
 
-  // Lógica para cambiar de semana
-  previousWeek() {
-    const newDate = new Date(this.currentWeekStart);
-    newDate.setDate(this.currentWeekStart.getDate() - 7);
-    this.setCurrentWeek(newDate); // Recalcula la semana
-    this.loadScheduleForDate(this.currentWeekStart); // Carga el schedule para el inicio de la nueva semana
-  }
-
-  nextWeek() {
-    const newDate = new Date(this.currentWeekStart);
-    newDate.setDate(this.currentWeekStart.getDate() + 7);
-    this.setCurrentWeek(newDate); // Recalcula la semana
-    this.loadScheduleForDate(this.currentWeekStart); // Carga el schedule para el inicio de la nueva semana
-  }
-
-  // Lógica para seleccionar un día (si implementas vista diaria o selección en calendario)
-  selectDate(date: Date) {
-      this.selectedDate = date;
-      // Si la vista mensual está activa, regenerar para resaltar
-      if (this.currentView === 'monthly') {
-        this.generateCalendarDays(date.getFullYear(), date.getMonth());
-      }
-      this.loadScheduleForDate(date);
-  }
-
-  saveActivities() {
-    if (!this.checkAuthentication()) return;
-    if (!this.currentScheduleId) {
-      console.error('No hay un horario actual seleccionado para guardar.');
-      // Podrías intentar crear uno o mostrar un error más claro al usuario
-      alert('Error: No hay un horario cargado para guardar los cambios.'); // Mensaje más claro
-      return;
-    }
-
-    if (!this.currentScheduleHasActivities) {
-        console.log(`[DEBUG] saveActivities: currentScheduleHasActivities es false. Cancelando guardado para schedule ${this.currentScheduleId}.`);
-        console.warn(`Intento de guardar cancelado: El schedule actual (${this.currentScheduleId}) no tiene actividades asociadas en el backend.`);
-        alert('No se pueden guardar los cambios porque este horario no tiene actividades asignadas.');
-        return; 
-    }
-    
-    console.log(`Guardando estados para Schedule ID: ${this.currentScheduleId}`);
-
-    const activityUpdates = this.activities.map(activity => ({
-      activityId: activity.id,
-      state: this.mapLocalStatusToApi(activity.status),
-    }));
-
-    console.log('Payload de actualización de estados:', activityUpdates);
-
-    const payload = { statuses: activityUpdates };
-
-    this.scheduleService.updateActivityStatuses(this.currentScheduleId!, payload).subscribe({
-        next: (response) => {
-            console.log('Estados de actividad actualizados con éxito:', response);
-            // Update local data based on the response (e.g., progress, specific activity statuses)
-            if (response.data && response.data.progress !== undefined) {
-                this.completionPercentage = response.data.progress;
-            }
-            // Optionally re-sync local activity statuses from response.data.Activities
-            if (response.data && response.data.Activities) {
-               this.updateActivitiesFromSchedule(response.data.Activities);
-            }
-        },
-        error: (error) => {
-            console.error('Error al actualizar estados de actividad:', error);
-        }
-    });
-  }
-
-  toggleActivityStatus(activity: CalendarActivity) {
-    if (!this.currentScheduleId) {
-        console.warn("No se puede cambiar el estado: no hay un schedule cargado.");
-        alert("Carga o selecciona una fecha con horario antes de cambiar estados."); 
-        return; 
-    }
-
-    const oldStatus = activity.status;
-    switch (activity.status) {
-      case 'sin_revision':
-        activity.status = 'verificado';
-        break;
-      case 'verificado':
-        activity.status = 'no_aplica';
-        break;
-      case 'no_aplica':
-        activity.status = 'sin_revision';
-        break;
-    }
-    console.log(`Actividad ${activity.id} cambió estado de ${oldStatus} a ${activity.status}`);
-  }
-
-  // *** NUEVO MÉTODO: Generar días para la vista mensual ***
   generateCalendarDays(year: number, month: number) {
-    this.calendarDays = [];
-    this.currentYear = year;
-    this.currentMonthName = new Date(year, month).toLocaleDateString('es-ES', { month: 'long' });
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
-    const daysInMonth = lastDayOfMonth.getDate();
+    const today = new Date();
+    const start = new Date(year, month, 1);
+    const end = new Date(year, month + 1, 0);
+    const startOffset = (start.getDay() || 7) - 1;
+    const fillStart = Array.from({ length: startOffset }, (_, i) => new Date(year, month - 1, start.getDate() - startOffset + i));
+    const current = Array.from({ length: end.getDate() }, (_, i) => new Date(year, month, i + 1));
+    const fillEnd = Array.from({ length: 42 - (fillStart.length + current.length) }, (_, i) => new Date(year, month + 1, i + 1));
+    const allDays = [...fillStart, ...current, ...fillEnd];
 
-    // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
-    let startDayOfWeek = firstDayOfMonth.getDay();
-    startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Ajustar para que Lunes sea 0
-
-    // Días del mes anterior para rellenar
-    const daysInPrevMonth = new Date(year, month, 0).getDate();
-    for (let i = startDayOfWeek - 1; i >= 0; i--) {
-      const date = new Date(year, month - 1, daysInPrevMonth - i);
-      this.calendarDays.push({
-        date: date,
-        dayOfMonth: date.getDate(),
-        isCurrentMonth: false,
-        isToday: this.isSameDate(date, new Date()),
-        isSelected: this.isSameDate(date, this.selectedDate)
-      });
-    }
-
-    // Días del mes actual
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      this.calendarDays.push({
-        date: date,
-        dayOfMonth: day,
-        isCurrentMonth: true,
-        isToday: this.isSameDate(date, new Date()),
-        isSelected: this.isSameDate(date, this.selectedDate)
-      });
-    }
-
-    // Días del mes siguiente para rellenar (hasta completar 6 semanas = 42 días)
-    const daysRendered = this.calendarDays.length;
-    const daysToAdd = daysRendered > 35 ? 42 - daysRendered : 35 - daysRendered; // Apuntar a 5 o 6 filas
-    for (let i = 1; i <= daysToAdd; i++) {
-      const date = new Date(year, month + 1, i);
-      this.calendarDays.push({
-        date: date,
-        dayOfMonth: date.getDate(),
-        isCurrentMonth: false,
-        isToday: this.isSameDate(date, new Date()),
-        isSelected: this.isSameDate(date, this.selectedDate)
-      });
-    }
+    this.calendarDays = allDays.map(date => ({
+      date,
+      dayOfMonth: date.getDate(),
+      isCurrentMonth: date.getMonth() === month,
+      isToday: this.isSameDate(date, today),
+      isSelected: this.isSameDate(date, this.selectedDate)
+    }));
   }
 
-  // *** NUEVO MÉTODO: Helper para comparar fechas (ignora la hora) ***
-  isSameDate(date1: Date, date2: Date): boolean {
-    return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
+  isSameDate(a: Date, b: Date) {
+    return a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
   }
 
-  // *** NUEVO MÉTODO: Cambiar al mes anterior/siguiente ***
-  previousMonth() {
-    const newDate = new Date(this.selectedDate);
-    newDate.setMonth(newDate.getMonth() - 1);
-    this.selectedDate = newDate; // Actualiza la fecha seleccionada también
-    this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
-    // Opcional: Cargar schedule para el primer día del nuevo mes o mantener la selección
-    this.loadScheduleForDate(this.selectedDate);
-  }
-
-  nextMonth() {
-    const newDate = new Date(this.selectedDate);
-    newDate.setMonth(newDate.getMonth() + 1);
-    this.selectedDate = newDate;
-    this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
-    this.loadScheduleForDate(this.selectedDate);
-  }
-
-  // *** NUEVO MÉTODO: Seleccionar un día desde la vista mensual ***
-  selectDayFromMonthView(day: CalendarDay) {
-    this.selectedDate = day.date;
-    // Regenerar calendario para actualizar la clase 'isSelected'
-    this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
-    // Cargar el schedule para el día seleccionado
-    this.loadScheduleForDate(this.selectedDate);
-    // Opcional: Cambiar a vista semanal o diaria automáticamente
-    // this.changeView('weekly');
-  }
-
-  // --- Métodos de vista y UI ---
   isToday(date: Date): boolean {
     return this.isSameDate(date, new Date());
   }
 
-  isDayCompleted(date: Date): boolean {
-    return false;
+  selectDayFromMonthView(day: CalendarDay) {
+    this.selectedDate = day.date;
+    this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
+    this.loadScheduleForDate(this.selectedDate);
   }
 
-  changeView(view: 'daily' | 'weekly' | 'monthly' | 'yearly') {
-      this.currentView = view;
-      if (view === 'weekly') {
-          this.setCurrentWeek(this.selectedDate);
-      } else if (view === 'monthly') {
-          // Asegurarse de que los días del calendario estén generados para el mes actual
-          this.generateCalendarDays(this.selectedDate.getFullYear(), this.selectedDate.getMonth());
-      }
-      // Añadir lógica para yearly si es necesario
+  selectMonth(monthName: string) {
+    const monthIndex = this.months.findIndex(m => m.name === monthName);
+    if (monthIndex !== -1) {
+      this.selectedDate = new Date(this.currentYear, monthIndex, 1);
+      this.generateCalendarDays(this.currentYear, monthIndex);
+      this.currentMonthName = monthName;
+      this.currentMonth = this.selectedDate.toLocaleDateString('es-ES', { month: 'long' });
+      this.loadScheduleForDate(this.selectedDate);
+    }
+  }
+
+  previousMonth(): void {
+    this.selectedDate = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth() - 1, 1);
+    this.currentYear = this.selectedDate.getFullYear();
+    this.currentMonthName = this.selectedDate.toLocaleDateString('es-ES', { month: 'long' });
+    this.currentMonth = this.currentMonthName;
+    this.generateCalendarDays(this.currentYear, this.selectedDate.getMonth());
+    this.loadScheduleForDate(this.selectedDate);
+  }
+
+  nextMonth(): void {
+    this.selectedDate = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth() + 1, 1);
+    this.currentYear = this.selectedDate.getFullYear();
+    this.currentMonthName = this.selectedDate.toLocaleDateString('es-ES', { month: 'long' });
+    this.currentMonth = this.currentMonthName;
+    this.generateCalendarDays(this.currentYear, this.selectedDate.getMonth());
+    this.loadScheduleForDate(this.selectedDate);
   }
 
   getViewTitle(): string {
-    switch(this.currentView) {
-        // Añadir el formato correcto para la fecha seleccionada
-        case 'daily': return `Actividades para ${this.selectedDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
-        case 'weekly': return `Actividades Semanales (${this.currentWeekStart.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} - ${this.currentWeekEnd.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })})`;
-        // Actualizar título mensual si es necesario (puede ser dinámico más adelante)
-        case 'monthly': return `Actividades Mensuales (${this.selectedDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })})`;
-        case 'yearly': return 'Resumen Anual';
-        default: return 'Actividades';
-      }
-  }
-
-  months = [
-      { name: 'Enero', completed: true },
-      { name: 'Febrero', completed: false },
-      { name: 'Marzo', completed: false },
-      { name: 'Abril', completed: false },
-      { name: 'Mayo', completed: false },
-      { name: 'Junio', completed: false },
-      { name: 'Julio', completed: false },
-      { name: 'Agosto', completed: false },
-      { name: 'Septiembre', completed: false },
-      { name: 'Octubre', completed: false },
-      { name: 'Noviembre', completed: false },
-      { name: 'Diciembre', completed: false }
-  ];
-  
-  selectMonth(monthName: string) {
-      this.currentMonth = monthName;
+    const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' } as const;
+    switch (this.currentView) {
+      case 'daily':
+        return `Actividades para ${this.selectedDate.toLocaleDateString('es-ES', opts)}`;
+      case 'weekly':
+        return `Actividades Semanales (${this.currentWeekStart.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} - ${this.currentWeekEnd.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })})`;
+      case 'monthly':
+        return `Actividades Mensuales (${this.selectedDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })})`;
+      case 'yearly':
+        return 'Resumen Anual';
+      default:
+        return 'Actividades';
+    }
   }
 }
