@@ -130,10 +130,18 @@
                 </div>
                 <div class="list-header">
                     <h3>{{ getViewTitle() }}</h3>
-                    <button class="btn-save" (click)="saveActivities()" [disabled]="!currentScheduleId"> <!-- Añadido [disabled] -->
-                        <i class="fas fa-save"></i>
-                        Guardar
-                    </button>
+                    <div class="button-actions">
+                        @if (currentView === 'yearly') {
+                            <button class="btn-orange" (click)="printCalendar()">
+                                <i class="fas fa-print"></i>
+                                <span>Imprimir</span>
+                            </button>
+                        }
+                        <button class="btn-save" (click)="saveActivities()" [disabled]="!currentScheduleId">
+                            <i class="fas fa-save"></i>
+                            Guardar
+                        </button>
+                    </div>
                 </div>
                 <div class="activities-list" [ngClass]="currentView">
                     @if (activities.length === 0) {

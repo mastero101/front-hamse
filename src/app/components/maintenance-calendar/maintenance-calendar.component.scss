@@ -574,6 +574,13 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 24px;
+        padding: 0 24px;
+  
+        .button-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
   
         h3 {
           color: #1a237e;
@@ -591,6 +598,16 @@
           align-items: center;
           gap: 8px;
           cursor: pointer;
+          font-size: 14px;
+          
+          &:hover {
+              background: #f4c180;
+          }
+
+          &:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+          }
         }
       }
   
@@ -692,6 +709,26 @@
 
                     .list-header {
                         padding: 0 24px;
+                        .btn-orange {
+                            background: #ffa000;
+                            color: white;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            cursor: pointer;
+                            font-size: 14px;
+
+                            i {
+                              font-size: 16px;
+                            }
+
+                            &:hover {
+                              background: #f4c180;
+                            }
+                        }
                     }
 
                     .activities-list.yearly {
