@@ -167,6 +167,7 @@ export class MaintenanceCalendarComponent implements OnInit {
         if (match) {
           this.loadSchedule(match.id);
         } else {
+          this.resetAllActivitiesStatus();
           this.createSchedule(date);
         }
       },
@@ -183,8 +184,8 @@ export class MaintenanceCalendarComponent implements OnInit {
     let type: 'daily' | 'weekly' | 'monthly' | 'yearly' = this.currentView as any;
 
     if (this.currentView === 'weekly') {
-      const dayOfWeek = startDate.getDay();
-      startDate.setDate(startDate.getDate() - (dayOfWeek ? dayOfWeek - 1 : 6));
+      const dayOfWeek = startDate.getDay() === 0 ? 6 : startDate.getDay() - 1;
+      startDate.setDate(startDate.getDate() - dayOfWeek);
       endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 6);
     } else if (this.currentView === 'monthly') {
@@ -233,7 +234,7 @@ export class MaintenanceCalendarComponent implements OnInit {
     this.scheduleService.createSchedule(payload).subscribe({
       next: s => {
         console.log('Schedule creado exitosamente:', s);
-        this.loadSchedule(s.id);
+        this.loadSchedule(s.id, true);
       },
       error: (err) => {
         console.error('Error al crear schedule:', err);
@@ -242,7 +243,7 @@ export class MaintenanceCalendarComponent implements OnInit {
     });
   }
 
-  private loadSchedule(id: string) {
+  private loadSchedule(id: string, forceReset: boolean = false) {
     this.currentScheduleId = id;
     this.scheduleService.getSchedule(id).subscribe({
       next: (d: any) => {
@@ -251,18 +252,28 @@ export class MaintenanceCalendarComponent implements OnInit {
           const detailed = d as DetailedSchedule;
           this.completionPercentage = detailed.progress || 0;
           this.currentScheduleHasActivities = (detailed.Activities?.length ?? 0) > 0;
-          
-          // Mostrar solo las actividades asociadas al schedule y de la frecuencia seleccionada
+
+          // LOG: Ver qué llega en cada actividad
+          (detailed.Activities || []).forEach((a, idx) => {
+            console.log(`Actividad[${idx}]:`, a.name, 'Statuses:', a.Statuses, 'ProgramStates:');
+          });
+
+          // Detectar si todas las actividades llegan sin Statuses o con Statuses vacíos
+          const allBlank = (detailed.Activities || []).every(a => !a.Statuses || a.Statuses.length === 0);
+
           this.activities = (detailed.Activities || [])
             .filter(a => a.frequency === this.currentView)
             .map(a => ({
               ...a,
-              status: this.mapBackendStatusToLocal(
-                a.Statuses && a.Statuses.length > 0
-                  ? a.Statuses[a.Statuses.length - 1].state
-                  : undefined
-              )
+              status: (forceReset || allBlank)
+                ? 'sin_revision'
+                : (a.Statuses && a.Statuses.length > 0
+                  ? this.mapBackendStatusToLocal(a.Statuses[a.Statuses.length - 1].state)
+                  : 'sin_revision')
             }));
+          if (!this.activities || this.activities.length === 0) {
+            this.resetAllActivitiesStatus();
+          }
         }
         this.isLoadingSchedule = false;
       },
@@ -288,8 +299,11 @@ export class MaintenanceCalendarComponent implements OnInit {
   }
 
   private resetActivityStatuses() {
-    this.activities = this.activities.map(a => ({ ...a, status: 'sin_revision' }));
+    // Reiniciar todas las actividades
+    this.allActivities = this.allActivities.map(a => ({ ...a, status: 'sin_revision' }));
     this.completionPercentage = 0;
+    this.currentScheduleId = null;
+    this.currentScheduleHasActivities = false;
   }
 
   toggleActivityStatus(activity: CalendarActivity) {
@@ -443,5 +457,28 @@ export class MaintenanceCalendarComponent implements OnInit {
       default:
         return 'Actividades';
     }
+  }
+
+  private resetAllActivitiesStatus() {
+    // Limpiar allActivities
+    this.allActivities = this.allActivities.map(a => ({ ...a, status: 'sin_revision' }));
+    // Crear una nueva lista de activities LIMPIA
+    this.activities = this.allActivities
+      .filter(activity => {
+        if (this.currentView === 'daily') return activity.frequency === 'daily';
+        if (this.currentView === 'weekly') return activity.frequency === 'weekly';
+        if (this.currentView === 'monthly') return activity.frequency === 'monthly';
+        if (this.currentView === 'yearly') return activity.frequency === 'yearly';
+        return true;
+      })
+      .map(a => ({ ...a, status: 'sin_revision' })); // <-- Esto es clave
+    this.completionPercentage = 0;
+    this.currentScheduleId = null;
+    this.currentScheduleHasActivities = false;
+  }
+
+  printCalendar(): void {
+    console.log('Activando impresión del calendario...');
+    window.print();
   }
 }

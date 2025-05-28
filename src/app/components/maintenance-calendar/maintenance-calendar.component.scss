@@ -884,3 +884,237 @@
     }
   }
 }
+
+/* Estilos para impresión */
+@media print {
+  /* Ocultar elementos no necesarios */
+  .btn-orange,
+  .btn-nav,
+  .btn-save,
+  .tab-group,
+  .notification-box,
+  .reminder-section,
+  nav,
+  header,
+  footer,
+  .navbar,
+  .nav-menu {
+    display: none !important;
+  }
+
+  /* Ajustes generales de página */
+  @page {
+    size: A4 landscape;
+    margin: 1cm; /* Reducir margen */
+  }
+
+  /* Estilos para el contenedor principal */
+  .calendar-container {
+    width: 100%;
+    margin: 0;
+    padding: 0.5cm; /* Reducir padding */
+    background: white !important;
+  }
+
+  /* Asegurar que los colores se impriman */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    font-size: 10pt; /* Reducir tamaño de fuente general */
+  }
+
+  /* Estilos para las tarjetas */
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 15px !important; /* Reducir margen inferior */
+    background: white !important;
+    padding: 15px !important; /* Reducir padding */
+  }
+
+  /* Estilos para el círculo de progreso */
+  .progress-circle {
+    border: 2px solid #000 !important; /* Reducir borde */
+    width: 80px !important; /* Reducir tamaño */
+    height: 80px !important;
+    .percentage {
+      color: #000 !important;
+      font-size: 18px !important; /* Reducir tamaño de fuente */
+    }
+  }
+
+  /* Estilos para la lista de actividades */
+  .activities-list {
+    .activity-row {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      border-bottom: 1px solid #000 !important;
+      padding: 8px 0 !important; /* Reducir padding */
+      margin-bottom: 5px !important; /* Reducir margen inferior */
+
+      .activity-text {
+        font-size: 12px !important; /* Reducir tamaño de fuente */
+        color: #000 !important;
+        font-weight: normal !important; /* Ajustar peso */
+      }
+
+      .status-group {
+        gap: 8px !important; /* Reducir espacio */
+
+        .status-text {
+          color: #000 !important;
+          font-weight: normal !important; /* Ajustar peso */
+          font-size: 12px !important; /* Reducir tamaño de fuente */
+          min-width: 60px !important; /* Ajustar ancho mínimo */
+        }
+        .checkbox {
+          border: 1px solid #000 !important; /* Reducir borde */
+          width: 16px !important;
+          height: 16px !important; /* Reducir tamaño */
+          
+          &.verificado {
+            background-color: #4CAF50 !important;
+            border-color: #4CAF50 !important;
+          }
+
+          &.no_aplica {
+            background-color: #f44336 !important;
+            border-color: #f44336 !important;
+          }
+        }
+      }
+    }
+  }
+
+  /* Estilos para el calendario */
+  .calendar-card {
+    .week-view, .month-view, .month-view-calendar {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .week-day, .day-cell {
+      border: 1px solid #000 !important;
+      font-size: 12px !important; /* Reducir tamaño de fuente */
+      padding: 5px !important; /* Reducir padding */
+      
+      &.today {
+        border: 2px solid #000 !important;
+        font-weight: bold !important;
+      }
+
+      .day-name {
+        font-size: 10px !important; /* Reducir tamaño de fuente */
+        font-weight: bold !important;
+      }
+
+      .day-number {
+        font-size: 14px !important; /* Reducir tamaño de fuente */
+      }
+    }
+  }
+
+  /* Estilos para la cabecera */
+  .title-section {
+    margin-bottom: 10px !important; /* Reducir margen inferior */
+    h2 {
+      font-size: 20px !important; /* Reducir tamaño de fuente */
+      color: #000 !important;
+      font-weight: bold !important;
+      margin-bottom: 4px !important; /* Reducir margen inferior */
+    }
+
+    p {
+      font-size: 14px !important; /* Reducir tamaño de fuente */
+      color: #000 !important;
+    }
+  }
+
+  /* Estilos para la vista mensual */
+  .month-view {
+    .year-header {
+      margin-bottom: 15px !important; /* Reducir margen inferior */
+      .year-label {
+        font-size: 18px !important; /* Reducir tamaño de fuente */
+        color: #000 !important;
+        border: 2px solid #000 !important;
+        padding: 5px 15px !important; /* Reducir padding */
+      }
+    }
+
+    .selected-month-label {
+      font-size: 14px !important; /* Reducir tamaño de fuente */
+      margin-bottom: 10px !important; /* Reducir margen inferior */
+    }
+
+    .months-grid {
+      gap: 10px !important; /* Reducir espacio */
+
+      .month-cell {
+        border: 1px solid #000 !important; /* Reducir borde */
+        color: #000 !important;
+        font-size: 14px !important; /* Reducir tamaño de fuente */
+        font-weight: 500 !important;
+        padding: 8px 0 !important; /* Reducir padding */
+      }
+    }
+  }
+
+  /* Estilos para la vista semanal */
+  .week-view {
+    .week-header {
+      gap: 10px !important; /* Reducir espacio */
+      margin-bottom: 15px !important; /* Reducir margen inferior */
+
+      .week-label {
+        font-size: 16px !important; /* Reducir tamaño de fuente */
+        color: #000 !important;
+        font-weight: bold !important;
+      }
+    }
+    .week-days {
+      gap: 8px !important; /* Reducir espacio */
+    }
+  }
+
+  /* Estilos para la lista de actividades */
+  .activities-list-card {
+    .list-header {
+      margin-bottom: 15px !important; /* Reducir margen inferior */
+      h3 {
+        font-size: 18px !important; /* Reducir tamaño de fuente */
+        color: #000 !important;
+        font-weight: bold !important;
+      }
+    }
+  }
+
+  /* Asegurar que los íconos se muestren */
+  .fas {
+    font-family: 'Font Awesome 5 Free' !important;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+  }
+
+  /* Ajustes para la vista anual */
+  .yearly-view {
+    .activities-list.yearly {
+      gap: 15px !important; /* Reducir espacio */
+      .activity-row {
+        border: 1px solid #000 !important;
+        padding: 12px !important; /* Reducir padding */
+        margin-bottom: 8px !important; /* Reducir margen inferior */
+        .activity-text {
+           font-size: 14px !important; /* Reducir tamaño de fuente */
+        }
+      }
+    }
+  }
+}
