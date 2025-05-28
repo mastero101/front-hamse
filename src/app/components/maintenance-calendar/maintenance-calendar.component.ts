@@ -113,6 +113,7 @@ export class MaintenanceCalendarComponent implements OnInit {
     if (view === 'weekly') this.setCurrentWeek(this.selectedDate);
     if (view === 'monthly') this.generateCalendarDays(this.currentYear, this.selectedDate.getMonth());
     this.filterActivitiesByFrequency(view);
+    this.loadScheduleForDate(this.selectedDate);
   }
 
   private filterActivitiesByFrequency(frequency: typeof this.currentView) {
@@ -160,7 +161,7 @@ export class MaintenanceCalendarComponent implements OnInit {
     this.selectedDate = date;
     this.scheduleService.getSchedules().subscribe({
       next: schedules => {
-        const match = schedules.find(s => 
+        const match = schedules.find(s =>
           s.type === this.currentView &&
           new Date(s.startDate) <= date && new Date(s.endDate) >= date
         );
