@@ -1155,3 +1155,163 @@
     }
   }
 }
+
+/* Estilos para el Modal de Selección de Periodo */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+}
+
+.modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Centra el modal */
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001; /* Asegura que esté por encima del overlay */
+    max-width: 400px; /* Ancho máximo del modal */
+    width: 90%; /* Ancho adaptable */
+
+    h3 {
+        margin-top: 0;
+        color: #1a237e;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+
+        .btn-secondary {
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #bbb;
+            }
+        }
+
+        .btn-primary {
+            background-color: #ffa000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: #ff8f00;
+            }
+        }
+    }
+}
+
+/* Reminder Section */
+.reminder-section {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f5f5f5; /* Fondo semi-transparente suave */
+    border-left: 5px solid #ffa000; /* Borde naranja a la izquierda como indicador */
+    border-radius: 0 8px 8px 0; /* Solo redondear las esquinas derechas */
+    font-size: 14px;
+    color: #666;
+    // text-align: center; /* Eliminar centrado global */
+    display: flex; /* Usar flexbox para alinear contenido */
+    align-items: center; /* Centrar verticalmente el contenido */
+    gap: 16px; /* Espacio entre los elementos principales */
+
+    .reminder-content {
+        display: flex; /* Usar flexbox para alinear los detalles y la imagen */
+        align-items: center; /* Centrar verticalmente */
+        width: 100%; /* Asegurar que ocupe el ancho disponible */
+        justify-content: space-between; /* Espacio entre el texto y la imagen */
+    }
+
+    .reminder-header {
+        display: flex; /* Alinear ícono y texto del encabezado */
+        align-items: center;
+        gap: 8px; /* Espacio entre ícono y texto */
+        margin-bottom: 8px; /* Espacio debajo del encabezado */
+
+        i {
+            font-size: 20px; /* Tamaño del ícono */
+            color: #1a237e; /* Color del ícono (azul oscuro) */
+        }
+
+        h4 {
+            margin: 0;
+            color: #1a237e; /* Color del título */
+            font-size: 16px; /* Tamaño del título */
+            font-weight: 600;
+        }
+    }
+
+    .reminder-text p {
+        margin: 0;
+        color: #333; /* Color del texto del recordatorio */
+        font-size: 14px;
+    }
+
+    .reminder-logo {
+        max-width: 550px; /* Tamaño máximo de la imagen (aumentado) */
+        height: auto;
+        border-radius: 4px; /* Bordes redondeados para la imagen */
+    }
+}
+
+/* Ajustes para impresión para la sección de recordatorio */
+@media print {
+    .reminder-section {
+        border: 1px solid #000 !important; /* Borde negro para impresión */
+        border-left: 5px solid #000 !important; /* Mantener borde izquierdo */
+        background: white !important;
+        color: #000 !important;
+
+        .reminder-header {
+            i, h4 {
+                color: #000 !important;
+            }
+        }
+
+        .reminder-text p {
+            color: #000 !important;
+        }
+
+        .reminder-logo {
+            border: 1px solid #000 !important;
+        }
+    }
+}

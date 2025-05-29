@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ActivityService, Activity, PaginatedActivitiesResponse } from '../../services/activity.service';
@@ -46,6 +46,12 @@ export class MaintenanceCalendarComponent implements OnInit {
   isLoadingActivities = false;
   isLoadingSchedule = false;
   private currentScheduleHasActivities = false;
+
+  // Propiedad para controlar la visibilidad del modal de selección de periodo
+  showPeriodModal = false;
+
+  // Referencia al input de fecha en el modal
+  @ViewChild('selectedDateInput') selectedDateInput!: ElementRef;
 
   constructor(private activityService: ActivityService, private scheduleService: ScheduleService) {}
 
@@ -481,5 +487,47 @@ export class MaintenanceCalendarComponent implements OnInit {
   printCalendar(): void {
     console.log('Activando impresión del calendario...');
     window.print();
+  }
+
+  // Método para manejar el botón 'Indicar periodo'
+  openPeriodSelector(): void {
+    console.log('Botón "Indicar periodo" clickeado.');
+    // Mostrar el modal
+    this.showPeriodModal = true;
+  }
+
+  // Método para cerrar el modal de selección de periodo
+  closePeriodModal(): void {
+    this.showPeriodModal = false;
+  }
+
+  // Método para procesar la fecha/periodo seleccionado del modal
+  processPeriodSelection(): void {
+    const selectedDateString = this.selectedDateInput.nativeElement.value;
+
+    if (!selectedDateString) {
+        console.warn('No se ha seleccionado ninguna fecha.');
+        return;
+    }
+
+    const selectedPeriodDate = new Date(selectedDateString);
+
+    console.log('Fecha seleccionada (procesando):', selectedPeriodDate);
+
+    switch (this.currentView) {
+      case 'daily':
+        this.loadScheduleForDate(selectedPeriodDate);
+        break;
+      case 'weekly':
+        this.setCurrentWeek(selectedPeriodDate);
+        this.loadScheduleForDate(this.currentWeekStart);
+        break;
+      case 'monthly':
+        const dateForMonth = new Date(selectedPeriodDate.getFullYear(), selectedPeriodDate.getMonth(), 1);
+        this.selectMonth(dateForMonth.toLocaleDateString('es-ES', { month: 'long' }));
+        break;
+    }
+
+    this.closePeriodModal();
   }
 }

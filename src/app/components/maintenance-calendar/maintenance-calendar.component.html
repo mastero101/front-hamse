@@ -17,7 +17,7 @@
                                 '24 de Febrero 2025' }}</p>
                         </div>
                         <div class="button-group">
-                            <button class="btn-orange">
+                            <button class="btn-orange" (click)="openPeriodSelector()">
                                 <i class="fas fa-calendar"></i>
                                 <span>Indicar periodo</span>
                             </button>
@@ -188,3 +188,21 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para seleccionar periodo -->
+@if (showPeriodModal) {
+    <div class="modal-overlay" (click)="closePeriodModal()"></div>
+    <div class="modal-content">
+        <h3>Seleccionar Periodo</h3>
+        <!-- Aquí iría el selector de fechas, por ahora usamos campos de entrada -->
+        <div class="form-group">
+            <label for="selectedDateInput">Fecha:</label>
+            <input type="date" id="selectedDateInput" #selectedDateInput>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn-secondary" (click)="closePeriodModal()">Cancelar</button>
+            <button class="btn-primary" (click)="processPeriodSelection()">Seleccionar</button>
+        </div>
+    </div>
+}
