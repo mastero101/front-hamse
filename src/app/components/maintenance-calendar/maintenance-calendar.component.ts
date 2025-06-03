@@ -260,27 +260,33 @@ export class MaintenanceCalendarComponent implements OnInit {
           this.completionPercentage = detailed.progress || 0;
           this.currentScheduleHasActivities = (detailed.Activities?.length ?? 0) > 0;
 
-          // LOG: Ver qué llega en cada actividad
-          (detailed.Activities || []).forEach((a, idx) => {
-            console.log(`Actividad[${idx}]:`, a.name, 'Statuses:', a.Statuses, 'ProgramStates:');
-          });
-
-          // Detectar si todas las actividades llegan sin Statuses o con Statuses vacíos
-          const allBlank = (detailed.Activities || []).every(a => !a.Statuses || a.Statuses.length === 0);
+          // No necesitamos una comprobación general de hasValidStates aquí para decidir cómo mapear.
+          // Cada actividad se mapea basada en sus propios estados.
 
           this.activities = (detailed.Activities || [])
             .filter(a => a.frequency === this.currentView)
             .map(a => ({
               ...a,
-              status: (forceReset || allBlank)
-                ? 'sin_revision'
-                : (a.Statuses && a.Statuses.length > 0
-                  ? this.mapBackendStatusToLocal(a.Statuses[a.Statuses.length - 1].state)
-                  : 'sin_revision')
+              // Para cada actividad, usa el último estado si existe, de lo contrario, usa 'sin_revision'.
+              status: (a.Statuses && a.Statuses.length > 0)
+                ? this.mapBackendStatusToLocal(a.Statuses[a.Statuses.length - 1].state)
+                : 'sin_revision'
             }));
+
+          // Si después de filtrar y mapear no hay actividades, resetea.
           if (!this.activities || this.activities.length === 0) {
-            this.resetAllActivitiesStatus();
+             console.log('No hay actividades relevantes para la vista en el schedule cargado. Reseteando.');
+             this.resetAllActivitiesStatus(); // Esto limpiará y reseteará this.activities a base vacía o sin revision
+          } else {
+             console.log('Actividades cargadas y mapeadas:', this.activities);
+             // Opcional: si quieres que allActivities refleje los estados del schedule cargado
+             // this.updateActivityStatuses(detailed.Activities || []);
+             // Sin embargo, si allActivities se usa como base limpia, mejor no actualizarla aquí.
           }
+
+        } else {
+           console.log('Schedule cargado no tiene el formato esperado (falta Activities). Reseteando estados.');
+           this.resetState();
         }
         this.isLoadingSchedule = false;
       },
