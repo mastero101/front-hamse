@@ -208,6 +208,17 @@
     &:hover {
       background-color: #ffb300;
     }
+
+    &:disabled {
+      background-color: #e0e0e0; // Gris claro cuando está deshabilitado
+      color: #999; // Texto gris
+      cursor: not-allowed; // Cursor que indica que no se puede hacer clic
+      opacity: 0.6; // Reducir opacidad para indicar estado deshabilitado
+      
+      &:hover {
+        background-color: #e0e0e0; // Mantener el mismo color al hacer hover
+      }
+    }
   }
 
   .action-buttons {

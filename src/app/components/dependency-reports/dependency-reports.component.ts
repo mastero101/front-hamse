@@ -84,11 +84,11 @@ export class DependencyReportsComponent implements OnInit {
   }
 
   openVideoModal(videoUrl?: string) {
-    if (videoUrl) {
-      this.currentVideoUrl = videoUrl;
+    if (this.hasValidVideoUrl(videoUrl)) {
+      this.currentVideoUrl = videoUrl!;
       this.isVideModalVisible = true;
     } else {
-      console.warn('No video URL provided for annotations.');
+      console.warn('No se proporcionó una URL de video válida para las anotaciones.');
     }
   }
 
@@ -252,5 +252,9 @@ export class DependencyReportsComponent implements OnInit {
     return names[tabKey] || tabKey;
   }
 
+  // Método helper para verificar si un videoUrl es válido
+  hasValidVideoUrl(videoUrl: string | null | undefined): boolean {
+    return videoUrl !== null && videoUrl !== undefined && videoUrl.trim() !== '';
+  }
 
 }

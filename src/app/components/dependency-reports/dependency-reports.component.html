@@ -42,7 +42,7 @@
                 {{ requirement.completed ? 'Realizado' : 'Sin realizar' }}
               </label>
             </div>
-            <button class="btn-annotations" (click)="openVideoModal(requirement.videoUrl)" [disabled]="!requirement.videoUrl">Anotaciones</button>
+            <button class="btn-annotations" (click)="openVideoModal(requirement.videoUrl)" [disabled]="!hasValidVideoUrl(requirement.videoUrl)">Anotaciones</button>
             <div class="action-buttons">
               <button class="btn-action btn-reminder" (click)="openCalendarModal(requirement)">
                 <i class="fas fa-bell"></i> Indicar recordatorio
