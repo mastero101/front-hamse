@@ -61,7 +61,7 @@
   <div class="modal-overlay" *ngIf="isVideModalVisible" (click)="closeVideoModal()">
     <div class="modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo"> <!-- Asegúrate que esta imagen exista -->
+        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Logo.png')">
         <span>INFORMACIÓN - DETALLES</span>
         <button class="close-button" (click)="closeVideoModal()" aria-label="Cerrar modal">
           <i class="fas fa-times"></i>
@@ -77,7 +77,7 @@
   <div class="modal-overlay calendar-modal-overlay" *ngIf="isCalendarModalVisible" (click)="closeCalendarModal()">
     <div class="modal-container calendar-modal-container" (click)="$event.stopPropagation()">
       <div class="modal-header calendar-modal-header">
-        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo">
+        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Logo.png')">
         <span>Recordatorios</span>
         <button class="close-button" (click)="closeCalendarModal()" aria-label="Cerrar modal">
           <i class="fas fa-times"></i>

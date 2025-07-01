@@ -257,4 +257,11 @@ export class DependencyReportsComponent implements OnInit {
     return videoUrl !== null && videoUrl !== undefined && videoUrl.trim() !== '';
   }
 
+  setFallback(event: Event, fallbackUrl: string) {
+    const img = event.target as HTMLImageElement | null;
+    if (img) {
+      img.src = fallbackUrl;
+    }
+  }
+
 }
