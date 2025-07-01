@@ -2,7 +2,7 @@
     <div class="modal-container" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <div class="header-logo">
-                <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo">
+                <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Logo.png')">
             </div>
             <span class="header-title">Recordatorios</span>
             <button class="close-button" (click)="closeModal()" aria-label="Cerrar modal">
@@ -17,7 +17,7 @@
                 <h2>{{ reminderTitle }}</h2>
             </div>
             <div class="reminder-flyer">
-                <img src="../../../assets/images/HAMSE_Cedula_Operacion.png" alt="Hamse Logo">
+                <img src="../../../assets/images/HAMSE_Cedula_Operacion.png" alt="Hamse Logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Cedula_Operacion.png')">
             </div>
             <button class="action-button" (click)="onActionClick()">{{ reminderButtonText }}</button>
             <p class="deadline-text">{{ reminderDeadline }}</p>

@@ -36,4 +36,11 @@ export class NavigationComponent {
   logout() {
     this.authService.logout();
   }
+
+  setFallback(event: Event, fallbackUrl: string) {
+    const img = event.target as HTMLImageElement | null;
+    if (img) {
+      img.src = fallbackUrl;
+    }
+  }
 }

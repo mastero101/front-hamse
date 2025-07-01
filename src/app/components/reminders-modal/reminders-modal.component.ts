@@ -30,4 +30,11 @@ export class RemindersModalComponent {
     // Opcional: puedes decidir si cerrar el modal después de hacer clic en el botón de acción
     // this.closeModal();
   }
+
+  setFallback(event: Event, fallbackUrl: string) {
+    const img = event.target as HTMLImageElement | null;
+    if (img) {
+      img.src = fallbackUrl;
+    }
+  }
 }

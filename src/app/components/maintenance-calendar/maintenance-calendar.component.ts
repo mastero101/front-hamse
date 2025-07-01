@@ -536,4 +536,11 @@ export class MaintenanceCalendarComponent implements OnInit {
 
     this.closePeriodModal();
   }
+
+  setFallback(event: Event, fallbackUrl: string) {
+    const img = event.target as HTMLImageElement | null;
+    if (img) {
+      img.src = fallbackUrl;
+    }
+  }
 }
