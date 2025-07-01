@@ -1,0 +1,34 @@
+# Instrucciones para desplegar Angular en Apache
+
+1. Compilar el proyecto Angular con el base-href correcto:
+
+   ng build --base-href /calendario-preventivo/
+
+2. Eliminar todos los archivos de la carpeta de Apache excepto .htaccess:
+
+   sudo find /var/www/calendario-preventivo -mindepth 1 ! -name '.htaccess' -exec rm -rf {} +
+
+3. Copiar los archivos compilados a la carpeta de Apache:
+
+   sudo cp -r /home/hamsemx/front-hamse/dist/front-hamse/browser/* /var/www/calendario-preventivo/
+
+4. Para crearlo o editarlo, usa el siguiente comando:
+
+   sudo nano /var/www/calendario-preventivo/.htaccess
+
+   Luego, pega el siguiente contenido:
+
+   <IfModule mod_rewrite.c>
+     RewriteEngine On
+     RewriteBase /calendario-preventivo/
+     RewriteRule ^index\.html$ - [L]
+     RewriteCond %{REQUEST_FILENAME} !-f
+     RewriteCond %{REQUEST_FILENAME} !-d
+     RewriteRule . /calendario-preventivo/index.html [L]
+   </IfModule>
+
+   Este archivo permite que todas las rutas sean gestionadas por Angular y evita errores 404 al recargar o navegar directamente a rutas internas.
+
+---
+
+Este archivo contiene los comandos necesarios para desplegar correctamente la aplicación Angular en un servidor Apache, asegurando que no se elimine el archivo .htaccess. 
