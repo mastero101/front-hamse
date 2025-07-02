@@ -323,6 +323,17 @@ export class MaintenanceCalendarComponent implements OnInit {
     const order: ActivityStatus[] = ['sin_revision', 'verificado', 'no_aplica'];
     const next = order[(order.indexOf(activity.status) + 1) % order.length];
     activity.status = next;
+    this.updateCompletionPercentage();
+  }
+
+  private updateCompletionPercentage() {
+    if (!this.activities.length) {
+      this.completionPercentage = 0;
+      return;
+    }
+    const total = this.activities.length;
+    const completadas = this.activities.filter(a => a.status === 'verificado').length;
+    this.completionPercentage = Math.round((completadas / total) * 100);
   }
 
   saveActivities() {
@@ -542,5 +553,15 @@ export class MaintenanceCalendarComponent implements OnInit {
     if (img) {
       img.src = fallbackUrl;
     }
+  }
+
+  get progressDotCx(): number {
+    const angle = (this.completionPercentage / 100) * 2 * Math.PI - Math.PI / 2;
+    return 60 + 50 * Math.cos(angle);
+  }
+
+  get progressDotCy(): number {
+    const angle = (this.completionPercentage / 100) * 2 * Math.PI - Math.PI / 2;
+    return 60 + 50 * Math.sin(angle);
   }
 }

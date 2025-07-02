@@ -6,8 +6,39 @@
             <div class="card activities-card">
                 <div class="circle-container">
                     <div class="progress-circle">
-                        <span class="percentage">{{completionPercentage}}%</span>
-                        <div class="circle-dot"></div>
+                        <svg width="120" height="120" style="position: relative;">
+                            <!-- Círculo de fondo gris -->
+                            <circle
+                                cx="60" cy="60" r="54"
+                                stroke="#e0e0e0"
+                                stroke-width="12"
+                                fill="none"
+                            />
+                            <!-- Círculo de progreso amarillo -->
+                            <circle
+                                cx="60" cy="60" r="54"
+                                [attr.stroke-dasharray]="339.292"
+                                [attr.stroke-dashoffset]="339.292 - (completionPercentage / 100) * 339.292"
+                                stroke="#ffa000"
+                                stroke-width="12"
+                                fill="none"
+                                stroke-linecap="round"
+                                style="transition: stroke-dashoffset 0.5s;"
+                                transform="rotate(-90 60 60)"
+                            />
+                            <!-- Bolita amarilla dinámica -->
+                            <circle
+                                [attr.cx]="progressDotCx"
+                                [attr.cy]="progressDotCy"
+                                r="10"
+                                fill="#ffa000"
+                                stroke="#fff"
+                                stroke-width="3"
+                                style="transition: cx 0.5s, cy 0.5s;"
+                            />
+                            <!-- Porcentaje centrado -->
+                            <text x="60" y="68" text-anchor="middle" font-size="32" fill="#1a237e" font-weight="500">{{completionPercentage}}%</text>
+                        </svg>
                     </div>
                     <div class="info-container">
                         <div class="title-section">

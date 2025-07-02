@@ -13,8 +13,14 @@
   
   .progress-circle {
     display: flex;
-    gap: 20px;
-    
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 120px;
+    height: 120px;
+    background: none;
+    border: none;
+
     .circle {
       width: 120px;
       height: 120px;
@@ -29,6 +35,10 @@
         color: #1a237e;
         font-weight: bold;
       }
+    }
+
+    .circle-dot {
+      display: none !important;
     }
   }
   
