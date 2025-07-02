@@ -31,6 +31,9 @@ export class DependencyReportsComponent implements OnInit {
   respaldoNota: string = '';
   respaldoArchivo: File | null = null;
   currentRequirementForRespaldo: any = null;
+  isRespaldoSaving = false;
+  respaldoErrorMsg: string = '';
+  respaldoSuccessMsg: string = '';
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -328,13 +331,41 @@ export class DependencyReportsComponent implements OnInit {
 
   guardarRespaldo() {
     if (!this.currentRequirementForRespaldo) return;
-    // Aquí puedes enviar la nota y el archivo al backend
-    console.log('Guardando respaldo para:', this.currentRequirementForRespaldo.title);
-    console.log('Nota:', this.respaldoNota);
-    console.log('Archivo:', this.respaldoArchivo);
-    // Simulación de guardado
-    alert('Respaldo guardado (simulado).');
-    this.closeRespaldoModal();
+    this.respaldoErrorMsg = '';
+    this.respaldoSuccessMsg = '';
+    if (!this.respaldoArchivo) {
+      this.respaldoErrorMsg = 'Por favor selecciona un archivo para el respaldo.';
+      return;
+    }
+    this.isRespaldoSaving = true;
+    this.requirementService.uploadRespaldo(
+      this.currentRequirementForRespaldo.id,
+      this.respaldoArchivo,
+      this.respaldoNota
+    ).subscribe({
+      next: (response) => {
+        this.respaldoSuccessMsg = 'Respaldo guardado con éxito.';
+        // Actualizar el requerimiento en la lista local si es necesario
+        const index = this.currentRequirements.findIndex(req => req.id === this.currentRequirementForRespaldo.id);
+        if (index !== -1) {
+          this.currentRequirements[index].respaldo = response.respaldo;
+        }
+        // Limpiar campos
+        this.respaldoNota = '';
+        this.respaldoArchivo = null;
+        setTimeout(() => {
+          this.respaldoSuccessMsg = '';
+          this.closeRespaldoModal();
+        }, 1200);
+      },
+      error: (error) => {
+        console.error('Error al guardar el respaldo:', error);
+        this.respaldoErrorMsg = 'Error al guardar el respaldo. Intenta de nuevo.';
+      },
+      complete: () => {
+        this.isRespaldoSaving = false;
+      }
+    });
   }
 
 }

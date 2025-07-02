@@ -50,4 +50,18 @@ export class RequirementService {
         .finally(() => subscriber.complete());
     });
   }
+
+  uploadRespaldo(id: string, file: File, nota: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('nota', nota);
+    return new Observable(subscriber => {
+      axios.post(`${this.endpoint}/${id}/respaldo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+        .then(response => subscriber.next(response.data))
+        .catch(error => subscriber.error(error))
+        .finally(() => subscriber.complete());
+    });
+  }
 }

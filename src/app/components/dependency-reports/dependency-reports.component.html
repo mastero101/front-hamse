@@ -138,7 +138,12 @@
         <textarea id="respaldoNota" [(ngModel)]="respaldoNota" rows="3" placeholder="Escribe una nota sencilla..."></textarea>
         <label for="respaldoArchivo">Archivo (PDF, JPG, PNG, etc.):</label>
         <input id="respaldoArchivo" type="file" (change)="onRespaldoFileChange($event)" accept=".pdf,.jpg,.jpeg,.png">
-        <button class="btn-action" (click)="guardarRespaldo()">Guardar Respaldo</button>
+        <div *ngIf="respaldoErrorMsg" class="error-msg">{{ respaldoErrorMsg }}</div>
+        <div *ngIf="respaldoSuccessMsg" class="success-msg">{{ respaldoSuccessMsg }}</div>
+        <button class="btn-action" (click)="guardarRespaldo()" [disabled]="isRespaldoSaving">
+          <span *ngIf="isRespaldoSaving">Guardando...</span>
+          <span *ngIf="!isRespaldoSaving">Guardar Respaldo</span>
+        </button>
       </div>
     </div>
   </div>
