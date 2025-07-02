@@ -65,36 +65,6 @@
             text-align: center;
             min-width: 80px;
         }
-
-        .price {
-            font-size: 1rem;
-            font-weight: bold;
-            color: #000000; // Precio en negro
-            min-width: 100px;
-            text-align: right;
-        }
-
-        .store-button {
-            background-color: #1A2954; // Azul oscuro/púrpura del botón
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 20px; // Bordes bien redondeados para el botón
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s ease;
-
-            i {
-                font-size: 1rem;
-            }
-
-            &:hover {
-                background-color: #2C3E7A; // Un poco más claro al pasar el mouse
-            }
-        }
     }
 }
 
@@ -121,19 +91,8 @@
 
 @media (max-width: 600px) {
     .service-details-column {
-        .price {
-            min-width: auto; // Quitar ancho mínimo en móviles
-            text-align: left;
-        }
-
         .provider-tag {
             min-width: auto;
-        }
-
-        .store-button {
-            width: 100%; // Botón ocupa todo el ancho
-            justify-content: center;
-            margin-top: 10px;
         }
     }
 }

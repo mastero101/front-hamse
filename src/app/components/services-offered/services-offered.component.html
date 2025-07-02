@@ -10,12 +10,6 @@
             <div class="provider-tag" [style.background-color]="service.providerColor">
                 {{ service.provider }}
             </div>
-            <div class="price">
-                {{ service.price | currency:'USD':'symbol':'1.2-2' }}
-            </div>
-            <button class="store-button" (click)="goToStore(service)">
-                <i class="fas fa-shopping-cart"></i> Ir a la tienda
-            </button>
         </div>
     </div>
 
