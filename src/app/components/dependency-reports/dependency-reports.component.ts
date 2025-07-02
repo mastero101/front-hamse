@@ -52,7 +52,26 @@ export class DependencyReportsComponent implements OnInit {
     // Modificar para usar el servicio que interactúa con el backend
     this.requirementService.getRequirements(dependency).subscribe({
       next: (response: any) => { // Change type to any to access data property
-        this.currentRequirements = response.data; // Assign the data array
+        this.currentRequirements = response.data;
+        // MOCK: Agregar proveedores de prueba si no existen
+        if (this.currentRequirements && this.currentRequirements.length > 0 && !this.currentRequirements[0].providers) {
+          const mockProviders = [
+            [
+              { name: 'NAES', color: '#4CAF50' },
+              { name: 'ORKAL', color: '#FF9800' }
+            ],
+            [
+              { name: 'JLR', color: '#F44336' }
+            ],
+            [
+              { name: 'NAES', color: '#4CAF50' },
+              { name: 'JLR', color: '#F44336' }
+            ]
+          ];
+          this.currentRequirements.forEach((req, i) => {
+            req.providers = mockProviders[i % mockProviders.length];
+          });
+        }
         console.log(`Requerimientos cargados para ${dependency}:`, this.currentRequirements); // Log the array
       },
       error: (error) => {
@@ -262,6 +281,23 @@ export class DependencyReportsComponent implements OnInit {
     if (img) {
       img.src = fallbackUrl;
     }
+  }
+
+  get providersForCurrentDependency(): { name: string, color: string }[] {
+    // Extrae proveedores únicos de los requerimientos actuales
+    const map = new Map<string, string>();
+    for (const req of this.currentRequirements) {
+      if (req.provider && req.providerColor) {
+        map.set(req.provider, req.providerColor);
+      }
+    }
+    return Array.from(map.entries()).map(([name, color]) => ({ name, color }));
+  }
+
+  filterByProvider(providerName: string) {
+    // Aquí podrías filtrar los requerimientos por proveedor si lo deseas
+    console.log('Filtrar por proveedor:', providerName);
+    // Si quieres implementar el filtrado real, házmelo saber
   }
 
 }

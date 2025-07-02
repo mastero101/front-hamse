@@ -192,3 +192,24 @@
     color: #333333; // Color de texto para el mensaje
     // El padding y text-align ya están definidos inline en el HTML
 }
+
+.service-providers-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.provider-btn {
+  border: none;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: filter 0.2s;
+}
+
+.provider-btn:hover {
+  filter: brightness(1.1);
+}

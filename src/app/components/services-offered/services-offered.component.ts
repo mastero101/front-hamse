@@ -11,6 +11,7 @@ interface IService {
   infoIcon?: boolean;
   videoUrl?: string;
   storeUrl?: string; 
+  providers?: { name: string; color: string }[];
 }
 
 @Component({
@@ -71,6 +72,19 @@ export class ServicesOfferedComponent implements OnInit{
   constructor(private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
+    // MOCK: Agregar array de proveedores a cada servicio si no existe
+    this.services.forEach((service, i) => {
+      if (!service.providers) {
+        service.providers = [
+          { name: 'NAES', color: '#4CAF50' },
+          { name: 'ORKAL', color: '#FF9800' }
+        ];
+        // Para variar, algunos servicios solo tendrán uno
+        if (i % 2 === 0) {
+          service.providers = [service.providers[0]];
+        }
+      }
+    });
   }
 
   openInfoModal(service: IService): void {

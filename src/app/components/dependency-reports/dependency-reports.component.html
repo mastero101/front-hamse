@@ -16,6 +16,17 @@
       <h2 class="dependency-title">{{ getDependencyFullName(selectedTab) }}</h2>
     </div>
 
+    <div class="providers-row">
+      <ng-container *ngIf="providersForCurrentDependency.length > 0">
+        <button *ngFor="let provider of providersForCurrentDependency"
+                class="provider-btn"
+                [style.backgroundColor]="provider.color"
+                (click)="filterByProvider(provider.name)">
+          {{ provider.name }}
+        </button>
+      </ng-container>
+    </div>
+
     <div class="requirements-list">
       <div *ngFor="let requirement of currentRequirements" class="requirement-card">
         <div class="requirement-main-title">
@@ -24,7 +35,7 @@
         <div class="requirement-description">
           <p>{{requirement.description}}</p>
         </div>
-        <div class="requirement-meta-column"> <!-- Nueva envoltura -->
+        <div class="requirement-meta-column">
           <div class="requirement-info">
             <div class="periodicity">
               <span>Periodicidad:</span>
@@ -52,7 +63,14 @@
               </button>
             </div>
           </div>
-        </div> <!-- Fin de nueva envoltura -->
+        </div>
+        <div class="requirement-providers-row" *ngIf="requirement.providers && requirement.providers.length">
+          <button *ngFor="let provider of requirement.providers"
+                  class="provider-btn"
+                  [style.backgroundColor]="provider.color">
+            {{ provider.name }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

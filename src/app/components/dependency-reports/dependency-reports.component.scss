@@ -88,15 +88,41 @@
 }
 
 .requirement-card {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 20px;
+  align-items: start;
   background: white;
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  display: grid;
-  grid-template-columns: 1fr 1.5fr 1.2fr; // Ajusta las proporciones según sea necesario
-  gap: 20px;
-  align-items: start; // Alinea los items al inicio de la celda del grid
-  // border-left: 5px solid #1a237e; // Eliminado para que coincida con la imagen
+  position: relative;
+  min-height: 220px; // Asegura altura mínima para que los botones bajen
+
+  .requirement-main-title {
+    grid-column: 1 / 2;
+    grid-row: 1;
+  }
+  .requirement-description {
+    grid-column: 1 / 2;
+    grid-row: 2;
+  }
+  .requirement-meta-column {
+    grid-column: 2 / 3;
+    grid-row: 1 / 4;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .requirement-providers-row {
+    grid-column: 1 / 2;
+    grid-row: 3;
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    align-self: end;
+  }
 }
 
 .requirement-main-title {
@@ -250,6 +276,14 @@
       background-color: #121858;
     }
   }
+}
+
+.requirement-providers-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+  margin-left: 0;
+  margin-top: 0;
 }
 
 // Media queries para responsividad (opcional, pero recomendado)
@@ -511,4 +545,40 @@
     background-color: #ccc;
     cursor: not-allowed;
   }
+}
+
+.providers-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.provider-btn {
+  border: none;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: filter 0.2s;
+}
+
+.provider-btn:hover {
+  filter: brightness(1.1);
+}
+
+.provider-btn {
+  border: none;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: filter 0.2s;
+}
+
+.provider-btn:hover {
+  filter: brightness(1.1);
 }
