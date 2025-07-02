@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RequirementService, Requirement } from '../../services/requirement.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dependency-reports',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dependency-reports.component.html',
   styleUrl: './dependency-reports.component.scss'
 })
@@ -24,6 +25,12 @@ export class DependencyReportsComponent implements OnInit {
   selectedReminderDate: Date | null = null;
   calendarDays: { day: number, month: number, year: number, isCurrentMonth: boolean, isSelected: boolean, isToday: boolean }[] = [];
   dayLabels = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+
+  // Variables para el modal de respaldo
+  isRespaldoModalVisible = false;
+  respaldoNota: string = '';
+  respaldoArchivo: File | null = null;
+  currentRequirementForRespaldo: any = null;
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -298,6 +305,36 @@ export class DependencyReportsComponent implements OnInit {
     // Aquí podrías filtrar los requerimientos por proveedor si lo deseas
     console.log('Filtrar por proveedor:', providerName);
     // Si quieres implementar el filtrado real, házmelo saber
+  }
+
+  openRespaldoModal(requirement: any) {
+    this.currentRequirementForRespaldo = requirement;
+    this.respaldoNota = '';
+    this.respaldoArchivo = null;
+    this.isRespaldoModalVisible = true;
+  }
+
+  closeRespaldoModal() {
+    this.isRespaldoModalVisible = false;
+    this.currentRequirementForRespaldo = null;
+    this.respaldoNota = '';
+    this.respaldoArchivo = null;
+  }
+
+  onRespaldoFileChange(event: any) {
+    const file = event.target.files && event.target.files[0];
+    this.respaldoArchivo = file || null;
+  }
+
+  guardarRespaldo() {
+    if (!this.currentRequirementForRespaldo) return;
+    // Aquí puedes enviar la nota y el archivo al backend
+    console.log('Guardando respaldo para:', this.currentRequirementForRespaldo.title);
+    console.log('Nota:', this.respaldoNota);
+    console.log('Archivo:', this.respaldoArchivo);
+    // Simulación de guardado
+    alert('Respaldo guardado (simulado).');
+    this.closeRespaldoModal();
   }
 
 }

@@ -58,8 +58,8 @@
               <button class="btn-action btn-reminder" (click)="openCalendarModal(requirement)">
                 <i class="fas fa-bell"></i> Indicar recordatorio
               </button>
-              <button class="btn-action btn-period">
-                <i class="fas fa-calendar-alt"></i> Indicar periodo
+              <button class="btn-action btn-respaldo" (click)="openRespaldoModal(requirement)">
+                <i class="fas fa-upload"></i> Respaldo
               </button>
             </div>
           </div>
@@ -119,6 +119,26 @@
           </div>
         </div>
         <button class="btn-save-reminder" (click)="saveReminder()" [disabled]="!selectedReminderDate">Guardar Recordatorio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Respaldo -->
+  <div class="modal-overlay" *ngIf="isRespaldoModalVisible" (click)="closeRespaldoModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Logo.png')">
+        <span>Respaldo</span>
+        <button class="close-button" (click)="closeRespaldoModal()" aria-label="Cerrar modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content" style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+        <label for="respaldoNota">Nota:</label>
+        <textarea id="respaldoNota" [(ngModel)]="respaldoNota" rows="3" placeholder="Escribe una nota sencilla..."></textarea>
+        <label for="respaldoArchivo">Archivo (PDF, JPG, PNG, etc.):</label>
+        <input id="respaldoArchivo" type="file" (change)="onRespaldoFileChange($event)" accept=".pdf,.jpg,.jpeg,.png">
+        <button class="btn-action" (click)="guardarRespaldo()">Guardar Respaldo</button>
       </div>
     </div>
   </div>

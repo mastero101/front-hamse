@@ -17,7 +17,7 @@ export class NavigationComponent {
     { path: 'reportes-dependencias', label: 'Reportes e dependencias', icon: 'file-text' },
     { path: 'servicios', label: 'Servicios', icon: 'clipboard' },
     { path: 'mantenimiento-preventivo', label: 'Matenimiento Preventivo', icon: 'book' },
-    //{ path: 'configuracion', label: 'Configuración', icon: 'cog' }
+    { path: 'configuracion', label: 'Configuración', icon: 'cog' }
   ];
 
   showAuthModal = false;
