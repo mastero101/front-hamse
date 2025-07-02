@@ -610,3 +610,29 @@
 .provider-btn:hover {
   filter: brightness(1.1);
 }
+
+.btn-action.ver-respaldo-btn {
+  background-color: #2196f3; /* Azul claro */
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  margin-top: 8px;
+}
+
+.btn-action.ver-respaldo-btn i {
+  font-size: 1.2rem;
+}
+
+.btn-action.ver-respaldo-btn:hover {
+  background-color: #1565c0;
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.18);
+  transform: translateY(-2px) scale(1.04);
+}

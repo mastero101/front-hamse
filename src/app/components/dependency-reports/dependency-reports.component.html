@@ -61,6 +61,12 @@
               <button class="btn-action btn-respaldo" (click)="openRespaldoModal(requirement)">
                 <i class="fas fa-upload"></i> Respaldo
               </button>
+              <button
+                *ngIf="hasRespaldoContent(requirement.respaldo)"
+                class="btn-action ver-respaldo-btn"
+                (click)="openRespaldoViewModal(requirement)">
+                <i class="fas fa-eye"></i> Ver respaldo
+              </button>
             </div>
           </div>
         </div>
@@ -144,6 +150,36 @@
           <span *ngIf="isRespaldoSaving">Guardando...</span>
           <span *ngIf="!isRespaldoSaving">Guardar Respaldo</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de visualización de respaldo -->
+  <div class="modal-overlay" *ngIf="isRespaldoViewModalVisible" (click)="closeRespaldoViewModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Logo.png')">
+        <span>Visualización de Respaldo</span>
+        <button class="close-button" (click)="closeRespaldoViewModal()" aria-label="Cerrar modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-content" style="padding: 24px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start;">
+        <ng-container *ngIf="respaldoViewData">
+          <label>Nota:</label>
+          <div style="margin-bottom: 12px;">{{ respaldoViewData.nota || 'Sin nota' }}</div>
+          <label *ngIf="respaldoViewData.url && respaldoViewData.url.trim() !== ''">Archivo:</label>
+          <a *ngIf="respaldoViewData.url && respaldoViewData.url.trim() !== ''"
+             [href]="respaldoViewData.url"
+             target="_blank"
+             rel="noopener"
+             style="color: #1a237e; font-weight: bold;">
+            <i class="fas fa-file-download"></i> Descargar / Ver archivo
+          </a>
+        </ng-container>
+        <ng-container *ngIf="!respaldoViewData">
+          <div>No hay respaldo disponible.</div>
+        </ng-container>
       </div>
     </div>
   </div>

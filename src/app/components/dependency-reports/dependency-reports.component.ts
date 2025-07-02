@@ -35,6 +35,9 @@ export class DependencyReportsComponent implements OnInit {
   respaldoErrorMsg: string = '';
   respaldoSuccessMsg: string = '';
 
+  isRespaldoViewModalVisible = false;
+  respaldoViewData: { url: string, nota: string } | null = null;
+
   constructor(
     private sanitizer: DomSanitizer,
     private requirementService: RequirementService // Asegurarse de que RequirementService está inyectado
@@ -333,8 +336,9 @@ export class DependencyReportsComponent implements OnInit {
     if (!this.currentRequirementForRespaldo) return;
     this.respaldoErrorMsg = '';
     this.respaldoSuccessMsg = '';
-    if (!this.respaldoArchivo) {
-      this.respaldoErrorMsg = 'Por favor selecciona un archivo para el respaldo.';
+    // Permitir nota sola, archivo solo, o ambos
+    if (!this.respaldoArchivo && !this.respaldoNota.trim()) {
+      this.respaldoErrorMsg = 'Debes ingresar una nota, seleccionar un archivo, o ambos.';
       return;
     }
     this.isRespaldoSaving = true;
@@ -366,6 +370,50 @@ export class DependencyReportsComponent implements OnInit {
         this.isRespaldoSaving = false;
       }
     });
+  }
+
+  openRespaldoViewModal(requirement: any) {
+    // Asegurarse de que respaldo esté parseado
+    let respaldo = requirement.respaldo;
+    if (typeof respaldo === 'string') {
+      try {
+        respaldo = JSON.parse(respaldo);
+      } catch {
+        respaldo = null;
+      }
+    }
+    // Cambia la condición: abre el modal si hay nota o url
+    if ((respaldo && typeof respaldo === 'object') && (respaldo.url || respaldo.nota)) {
+      this.respaldoViewData = respaldo;
+      this.isRespaldoViewModalVisible = true;
+    } else {
+      this.respaldoViewData = null;
+      this.isRespaldoViewModalVisible = false;
+    }
+  }
+
+  closeRespaldoViewModal() {
+    this.isRespaldoViewModalVisible = false;
+    this.respaldoViewData = null;
+  }
+
+  getRespaldoObj(respaldo: any): { url?: string, nota?: string } {
+    if (!respaldo) return {};
+    if (typeof respaldo === 'string') {
+      try {
+        return JSON.parse(respaldo);
+      } catch {
+        return {};
+      }
+    }
+    return respaldo;
+  }
+
+  hasRespaldoContent(respaldo: any): boolean {
+    const obj = this.getRespaldoObj(respaldo);
+    const url = obj.url && typeof obj.url === 'string' ? obj.url.trim() : '';
+    const nota = obj.nota && typeof obj.nota === 'string' ? obj.nota.trim() : '';
+    return !!(url || nota);
   }
 
 }

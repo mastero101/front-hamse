@@ -51,9 +51,11 @@ export class RequirementService {
     });
   }
 
-  uploadRespaldo(id: string, file: File, nota: string): Observable<any> {
+  uploadRespaldo(id: string, file: File | null, nota: string): Observable<any> {
     const formData = new FormData();
-    formData.append('file', file);
+    if (file) {
+      formData.append('file', file);
+    }
     formData.append('nota', nota);
     return new Observable(subscriber => {
       axios.post(`${this.endpoint}/${id}/respaldo`, formData, {
