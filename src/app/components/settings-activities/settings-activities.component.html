@@ -1,0 +1,25 @@
+<div class="settings-activities-container">
+  <h2>Configuración de Actividades</h2>
+  <div *ngIf="isLoading" class="loading">Cargando actividades...</div>
+  <div *ngIf="!isLoading && activities.length === 0" class="no-activities">No hay actividades registradas.</div>
+  <table *ngIf="!isLoading && activities.length > 0" class="activities-table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let activity of activities">
+        <td>{{ activity.name }}</td>
+        <td>
+          <label class="switch">
+            <input type="checkbox" [checked]="activity.active" (change)="toggleActive(activity)">
+            <span class="slider round"></span>
+          </label>
+          <span class="status-label">{{ activity.active ? 'Activa' : 'Inactiva' }}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div> 

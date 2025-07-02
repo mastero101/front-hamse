@@ -4,6 +4,7 @@ import { MaintenanceProgramComponent } from './components/maintenance-program/ma
 import { DependencyReportsComponent } from './components/dependency-reports/dependency-reports.component';
 import { ServicesOfferedComponent } from './components/services-offered/services-offered.component';
 import { PreventiveMaintenanceComponent } from './components/preventive-maintenance/preventive-maintenance.component';
+import { SettingsActivitiesComponent } from './components/settings-activities/settings-activities.component';
 
 export const routes: Routes = [
     {
@@ -25,6 +26,10 @@ export const routes: Routes = [
     {
         path:'mantenimiento-preventivo',
         component: PreventiveMaintenanceComponent
+    },
+    {
+        path: 'configuracion-actividades',
+        component: SettingsActivitiesComponent
     },
     {
         path: '',

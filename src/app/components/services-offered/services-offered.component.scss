@@ -13,16 +13,17 @@
 
 .service-item {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
     align-items: center;
-    background-color: #ffffff; // Fondo blanco para cada item
-    padding: 12px 20px; // Ajuste de padding
+    background-color: #ffffff;
+    padding: 12px 20px;
     border-radius: 8px;
-    color: #333333; // Color de texto oscuro por defecto para el item
-    // border: 1px solid #2c2c54; // Borde sutil, opcional si se ve bien sin él
+    color: #333333;
+    margin-bottom: 16px;
+    justify-content: space-between;
 
     .service-title-column {
-        flex-grow: 1;
+        flex: 1;
         margin-right: 20px;
 
         p {
@@ -35,8 +36,10 @@
 
     .service-details-column {
         display: flex;
+        flex-direction: row;
         align-items: center;
-        gap: 12px; // Espacio entre elementos de detalle
+        gap: 12px;
+        justify-content: flex-end;
 
         .info-icon {
             display: flex;
@@ -194,9 +197,10 @@
 }
 
 .service-providers-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    align-items: center;
 }
 
 .provider-btn {
