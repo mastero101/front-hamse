@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; 
 import { ProductService, IProduct } from '../../services/product.service';
+import { FormsModule } from '@angular/forms';
 
 interface IService {
   id: string;
@@ -18,66 +19,141 @@ interface IService {
 @Component({
   selector: 'app-services-offered',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './services-offered.component.html',
   styleUrl: './services-offered.component.scss'
 })
 export class ServicesOfferedComponent implements OnInit{
-  
-  services: IService[] = [
-    { id: 's1', title: 'Justificación técnica de los Límites de Responsabilidad RA y RC', provider: 'NAES', providerColor: '#4CAF50', price: 9310.35, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's2', title: 'Análisis de Riesgos', provider: 'NAES', providerColor: '#4CAF50', price: 6206.90, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's3', title: 'Protocolo de Respuesta a Emergencias (PRE)', provider: 'NAES', providerColor: '#4CAF50', price: 6206.90, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's4', title: 'Cédula de Operación Anual (Incluye su presentación al portal de SERMANAT)', provider: 'NAES', providerColor: '#4CAF50', price: 4800.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's5', title: 'Elaboración de SASISOPA (Incluye curso de capacitación para su implementación)', provider: 'NAES', providerColor: '#4CAF50', price: 18620.70, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's6', title: 'Dictámen SASISOPA (Incluye su ingreso en ASEA, seguimiento hasta su autorización)', provider: 'NAES', providerColor: '#4CAF50', price: 18620.70, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's7', title: 'Elaboración del sistema de gestión de medición SGM (CARPETA RAÍZ)', provider: 'NAES', providerColor: '#4CAF50', price: 6000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's8', title: 'INSPECCIÓN COMPLETA A LA ESTACIÓN (incluye verificación y comprobación de las condiciones de operación, seguridad y documental; así como la entrega de reporte fotográfico y de hallazgos)', provider: 'NAES', providerColor: '#4CAF50', price: 18620.70, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's9', title: 'CURSO DE CAPACITACIÓN EN LÍNEA ASEA/STPS/CRE (incluye constancias DC-3 y diploma)', provider: 'NAES', providerColor: '#4CAF50', price: 1800.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's10', title: 'DICTAMEN NOM-005-ASEA-2016 OPERACIÓN Y MANTENIMIENTO', provider: 'ORKAL', providerColor: '#FF9800', price: 5000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's11', title: 'DICTAMEN NOM-016-CRE-2016 ES', provider: 'ORKAL', providerColor: '#FF9800', price: 3000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's12', title: 'Lavado de tanque (No incluye viáticos) y máximo recolección 2 tambos', provider: 'JLR', providerColor: '#F44336', price: 15800.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's13', title: 'Recolección de tambo de residuos de lavado (No incluye viáticos)', provider: 'JLR', providerColor: '#F44336', price: 1650.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's14', title: 'Lavado de Tanque sin recolección de residuos peligrosos (No incluye Viáticos)', provider: 'JLR', providerColor: '#F44336', price: 12500.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's15', title: 'Cubicación a tanque de almacenamiento', provider: 'IPROMER', providerColor: '#00BCD4', price: 7000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's16', title: 'Recalibración y configuración de consola', provider: 'IPROMER', providerColor: '#00BCD4', price: 2500.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's17', title: 'Calibración de Sondas Nivel y Temperatura', provider: 'IPROMER', providerColor: '#00BCD4', price: 4500.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's18', title: 'Medición de espesores en tanque de almacenamiento subterráneo', provider: 'IPROMER', providerColor: '#00BCD4', price: 15950.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's19', title: 'Dictamen NOM-016-CRE-2016 para la Dictaminación de Análisis de Petrolíferos', provider: 'SIACORP', providerColor: '#9C27B0', price: 3000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's20', title: 'ANÁLISIS DE RIESGO', provider: 'SIACORP', providerColor: '#9C27B0', price: 10500.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's21', title: 'CÉDULA DE OPERACIÓN ANUAL', provider: 'SIACORP', providerColor: '#9C27B0', price: 3570.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's22', title: 'PROTOCOLO DE RESPUESTA A EMERGENCIAS (PRE)', provider: 'SIACORP', providerColor: '#9C27B0', price: 10500.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's23', title: 'DICTAMEN NOM-005-ASEA-2016', provider: 'SIACORP', providerColor: '#9C27B0', price: 6090.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's24', title: 'AUDITORÍA EXTERNA SASISOPA', provider: 'SIACORP', providerColor: '#9C27B0', price: 9450.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's25', title: 'SISTEMA DE GESTIÓN DE MEDICIONES', provider: 'SIACORP', providerColor: '#9C27B0', price: 15225.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's26', title: 'CONFORMACIÓN Y REGISTRO DE SASISOPA ON LINE', provider: 'SIACORP', providerColor: '#9C27B0', price: 22550.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's27', title: 'SERVICIO A 1 RECIPIENTE SUJETOS A PRESIÓN USADO NOM-020-STPS-2011 INCLUYE VÁLVULA DE SEGURIDAD Y CURSO A 2 PERSONAS', provider: 'ARSADI', providerColor: '#3F51B5', price: 8190.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's28', title: 'ESTUDIO TIERRAS FÍSICAS NOM-022-STPS-2015', provider: 'ARSADI', providerColor: '#3F51B5', price: 4725.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's29', title: 'ESTUDIO ILUMINACIÓN NOM-025-STPS-2008', provider: 'ARSADI', providerColor: '#3F51B5', price: 4725.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's30', title: 'VERIFICACION ELECTRICA NOM-001-SEDE-2012', provider: 'ARSADI', providerColor: '#3F51B5', price: 18000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's31', title: 'VALVULA DE SEGURIDAD 1/4" Y CALIBRADA', provider: 'ARSADI', providerColor: '#3F51B5', price: 1600.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's32', title: 'ESTUDIO DE VULNERABILIDAD DE SEGURIDAD PRIMERA VEZ', provider: 'GDS', providerColor: '#009688', price: 13000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's33', title: 'ESTUDIO DE VULNERABILIDAD DE SEGURIDAD SUBSECUENTE', provider: 'GDS', providerColor: '#009688', price: 6500.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's34', title: 'FORTINET F60 (INCLUYE SOPORTE ANUAL) PRECIO EN DÓLARES', provider: 'ASIAMI', providerColor: '#795548', price: 1140.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's35', title: 'ANTIVIRUS SENTINEL 1 LICENCIA (PRECIO EN DÓLARES)', provider: 'ASIAMI', providerColor: '#795548', price: 39.38, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's36', title: 'PRUEBAS DE HERMETICIDAD ANUALES POR TANQUE (no incluye viáticos)', provider: 'ZESA', providerColor: '#8BC34A', price: 1320.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's37', title: 'PRUEBAS DE HERMETICIDAD INICIALES POR TANQUE (no incluye viáticos)', provider: 'ZESA', providerColor: '#8BC34A', price: 2750.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-    { id: 's38', title: 'DICTAMEN ANEXO 30 Y 31 AÑO 2025', provider: 'VERIFIGAS', providerColor: '#E6A23C', price: 40000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' }, // Color naranja/dorado para VERIFIGAS
-    { id: 's39', title: 'DICTAMEN ANEXO 30 Y 31 AÑO 2024', provider: 'VERIFIGAS', providerColor: '#E6A23C', price: 32000.00, infoIcon: true, videoUrl: 'https://youtu.be/LV6M1GK4Fsw', storeUrl: 'https://www.hamse.mx/public/' },
-  ];
-
   isInfoModalVisible = false;
   selectedServiceForModal: IService | null = null;
   safeVideoUrlForInfoModal: SafeResourceUrl | null = null;
   products: IProduct[] = [];
+  filteredProducts: IProduct[] = [];
+
+  // Búsqueda y filtros
+  searchTerm: string = '';
+  selectedProvider: string = '';
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
+  minStock: number | null = null;
+  maxStock: number | null = null;
+  providers: string[] = [];
+
+  // Paginación
+  currentPage: number = 1;
+  itemsPerPage: number = 25;
+  totalPages: number = 1;
+
+  // Ordenamiento
+  sortField: string = 'name';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  // Umbral de pocos disponibles
+  lowStockThreshold: number = 3;
+
+  private providerColors: { [key: string]: string } = {};
+  private colorPalette: string[] = [
+    '#4CAF50', // Verde
+    '#FF9800', // Naranja
+    '#2196F3', // Azul
+    '#9C27B0', // Morado
+    '#E91E63', // Rosa
+    '#00BCD4', // Cyan
+    '#795548', // Café
+    '#8BC34A', // Verde claro
+    '#E6A23C', // Dorado
+    '#3F51B5', // Azul oscuro
+    '#009688', // Verde azulado
+    '#F44336', // Rojo
+  ];
 
   constructor(private sanitizer: DomSanitizer, private productService: ProductService) { }
 
   async ngOnInit(): Promise<void> {
     try {
       this.products = await this.productService.getProducts();
+      this.providers = Array.from(new Set(this.products.map(p => p.supplier).filter((s): s is string => !!s)));
+      this.applyFilters();
+      console.log('[ServicesOfferedComponent] Productos obtenidos:', this.products);
     } catch (err) {
       console.error('Error al obtener productos:', err);
+    }
+  }
+
+  resetFilters(): void {
+    this.searchTerm = '';
+    this.selectedProvider = '';
+    this.minPrice = null;
+    this.maxPrice = null;
+    this.minStock = null;
+    this.maxStock = null;
+    this.sortField = 'name';
+    this.sortDirection = 'asc';
+    this.applyFilters();
+  }
+
+  setSort(field: string, direction: 'asc' | 'desc') {
+    this.sortField = field;
+    this.sortDirection = direction;
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    let filtered = this.products;
+    // Búsqueda por nombre o proveedor
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.trim().toLowerCase();
+      filtered = filtered.filter(p =>
+        (p.name && p.name.toLowerCase().includes(term)) ||
+        (p.supplier && p.supplier.toLowerCase().includes(term))
+      );
+    }
+    // Filtro por proveedor
+    if (this.selectedProvider) {
+      filtered = filtered.filter(p => p.supplier === this.selectedProvider);
+    }
+    // Filtro por rango de precio
+    if (this.minPrice !== null) {
+      filtered = filtered.filter(p => p.price >= this.minPrice!);
+    }
+    if (this.maxPrice !== null) {
+      filtered = filtered.filter(p => p.price <= this.maxPrice!);
+    }
+    // Filtro por stock
+    if (this.minStock !== null) {
+      filtered = filtered.filter(p => p.stock >= this.minStock!);
+    }
+    if (this.maxStock !== null) {
+      filtered = filtered.filter(p => p.stock <= this.maxStock!);
+    }
+    // Ordenamiento
+    filtered = filtered.slice().sort((a, b) => {
+      let valA = a[this.sortField as keyof IProduct];
+      let valB = b[this.sortField as keyof IProduct];
+      if (typeof valA === 'string' && typeof valB === 'string') {
+        return this.sortDirection === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      } else if (typeof valA === 'number' && typeof valB === 'number') {
+        return this.sortDirection === 'asc'
+          ? valA - valB
+          : valB - valA;
+      }
+      return 0;
+    });
+    this.filteredProducts = filtered;
+    this.totalPages = Math.ceil(this.filteredProducts.length / this.itemsPerPage) || 1;
+    this.currentPage = 1;
+  }
+
+  get paginatedProducts(): IProduct[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredProducts.slice(start, start + this.itemsPerPage);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
     }
   }
 
@@ -113,5 +189,43 @@ export class ServicesOfferedComponent implements OnInit{
     
     console.log(`Navegando a la tienda para el servicio "${service.title}": ${urlToOpen}`);
     window.open(urlToOpen, '_blank');
+  }
+
+  goToProductUrl(url: string): void {
+    if (url) {
+      window.open(url, '_blank');
+    }
+  }
+
+  getProviderColor(provider: string): string {
+    if (!this.providerColors[provider]) {
+      const idx = Object.keys(this.providerColors).length % this.colorPalette.length;
+      this.providerColors[provider] = this.colorPalette[idx];
+    }
+    return this.providerColors[provider];
+  }
+
+  // Paginador avanzado con saltos y rango dinámico
+  get pageNumbers(): (number | string)[] {
+    const total = this.totalPages;
+    const current = this.currentPage;
+    const delta = 5;
+    const range: (number | string)[] = [];
+    let l: number;
+
+    for (let i = 1; i <= total; i++) {
+      if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
+        range.push(i);
+      } else if (range[range.length - 1] !== '...') {
+        range.push('...');
+      }
+    }
+    return range;
+  }
+
+  goToPageIfNumber(page: number | string) {
+    if (typeof page === 'number') {
+      this.goToPage(page);
+    }
   }
 }

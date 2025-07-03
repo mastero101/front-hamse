@@ -8,18 +8,18 @@ export interface IProduct {
   price: number;
   stock: number;
   url?: string;
+  supplier?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
-  private apiUrl = '/products'; // El baseURL ya está en axiosInstance
+  private apiUrl = '/products';
 
   async getProducts(): Promise<IProduct[]> {
     const response = await axiosInstance.get<IProduct[]>(this.apiUrl);
     return response.data;
   }
 
-  // Puedes agregar más métodos para crear, actualizar, eliminar, etc.
 } 

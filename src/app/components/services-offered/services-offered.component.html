@@ -1,7 +1,37 @@
+<!-- Filtros SIEMPRE arriba -->
+<div class="filters-container">
+  <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="Buscar por nombre o proveedor..." />
+  <select [(ngModel)]="selectedProvider" (change)="applyFilters()">
+    <option value="">Todos los proveedores</option>
+    <option *ngFor="let prov of providers" [value]="prov">{{ prov }}</option>
+  </select>
+  <input type="number" [(ngModel)]="minPrice" (input)="applyFilters()" placeholder="Precio mínimo" min="0" />
+  <input type="number" [(ngModel)]="maxPrice" (input)="applyFilters()" placeholder="Precio máximo" min="0" />
+  <input type="number" [(ngModel)]="minStock" (input)="applyFilters()" placeholder="Stock mínimo" min="0" />
+  <input type="number" [(ngModel)]="maxStock" (input)="applyFilters()" placeholder="Stock máximo" min="0" />
+  <button class="reset-btn" (click)="resetFilters()">Limpiar filtros</button>
+
+  <!-- Ordenamiento -->
+  <select [(ngModel)]="sortField" (change)="applyFilters()">
+    <option value="name">Nombre</option>
+    <option value="price">Precio</option>
+    <option value="stock">Stock</option>
+  </select>
+  <select [(ngModel)]="sortDirection" (change)="applyFilters()">
+    <option value="asc">Ascendente</option>
+    <option value="desc">Descendente</option>
+  </select>
+</div>
+
+<!-- Lista de productos paginada -->
 <div class="services-container">
-    <div *ngFor="let product of products" class="service-item">
+    <div *ngFor="let product of paginatedProducts" class="service-item">
         <div class="service-title-column">
             <p>{{ product.name }}</p>
+            <div *ngIf="product.supplier" class="supplier-tag"
+                 [ngStyle]="{'background-color': getProviderColor(product.supplier), 'color': '#fff'}">
+                Proveedor: {{ product.supplier }}
+            </div>
         </div>
         <div class="service-details-column">
             <div class="provider-tag" *ngIf="product.description">
@@ -12,7 +42,12 @@
             </div>
             <div>
                 <span>Stock: {{ product.stock }}</span>
+                <span *ngIf="product.stock <= lowStockThreshold && product.stock > 0" class="low-stock-warning">¡Pocos disponibles!</span>
+                <span *ngIf="product.stock === 0" class="out-stock-warning">Sin stock</span>
             </div>
+            <button *ngIf="product.url" class="cart-btn" (click)="goToProductUrl(product.url)" title="Comprar">
+                <i class="fas fa-shopping-cart"></i> Comprar
+            </button>
         </div>
     </div>
 
@@ -37,5 +72,14 @@
             </div>
         </div>
     </div>
-    
+</div>
+
+<!-- Paginador avanzado -->
+<div class="paginator" *ngIf="totalPages > 1">
+  <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Anterior</button>
+  <ng-container *ngFor="let page of pageNumbers">
+    <button *ngIf="page !== '...'" (click)="goToPageIfNumber(page)" [class.active]="page === currentPage">{{ page }}</button>
+    <span *ngIf="page === '...'" class="paginator-ellipsis">...</span>
+  </ng-container>
+  <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Siguiente</button>
 </div>
