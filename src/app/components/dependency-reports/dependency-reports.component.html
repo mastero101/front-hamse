@@ -124,7 +124,7 @@
             {{ dayObj.day }}
           </div>
         </div>
-        <button class="btn-save-reminder" (click)="saveReminder()" [disabled]="!selectedReminderDate">Guardar Recordatorio</button>
+        <button class="btn-save-reminder" (click)="saveReminder()" [disabled]="!selectedReminderDates.length">Guardar Recordatorio</button>
       </div>
     </div>
   </div>

@@ -14,6 +14,7 @@ export interface Requirement {
   subTitle?: string;
   dependency: string;
   reminderDate?: string | null;
+  reminderDates?: string[];
 }
 
 @Injectable({

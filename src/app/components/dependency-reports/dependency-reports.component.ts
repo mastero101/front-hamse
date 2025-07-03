@@ -22,7 +22,7 @@ export class DependencyReportsComponent implements OnInit {
   isCalendarModalVisible: boolean = false;
   currentRequirementForReminder: any = null;
   calendarViewDate: Date = new Date();
-  selectedReminderDate: Date | null = null;
+  selectedReminderDates: Date[] = [];
   calendarDays: { day: number, month: number, year: number, isCurrentMonth: boolean, isSelected: boolean, isToday: boolean }[] = [];
   dayLabels = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
 
@@ -132,20 +132,16 @@ export class DependencyReportsComponent implements OnInit {
   // Métodos para el modal de Calendario
   openCalendarModal(requirement: any) {
     this.currentRequirementForReminder = requirement;
-    this.calendarViewDate = new Date(); // Siempre abrir en el mes actual
+    this.calendarViewDate = new Date();
 
-    // Verificar si el requerimiento ya tiene una fecha de recordatorio
-    if (requirement.reminderDate) {
-      // Si existe, parsear la fecha y asignarla a selectedReminderDate
-      // Asegurarse de que la fecha se parsea correctamente (el backend devuelve YYYY-MM-DD)
-      const [year, month, day] = requirement.reminderDate.split('-').map(Number);
-      // El mes en JavaScript es 0-indexado, por eso restamos 1
-      this.selectedReminderDate = new Date(year, month - 1, day);
-      console.log('Recordatorio existente encontrado:', this.selectedReminderDate.toLocaleDateString());
+    // Cargar todas las fechas guardadas
+    if (Array.isArray(requirement.reminderDates)) {
+      this.selectedReminderDates = requirement.reminderDates.map((dateStr: string) => {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day);
+      });
     } else {
-      // Si no existe, limpiar la selección previa
-      this.selectedReminderDate = null;
-      console.log('No hay recordatorio existente para este requerimiento.');
+      this.selectedReminderDates = [];
     }
 
     this.generateCalendarDays(this.calendarViewDate);
@@ -155,7 +151,7 @@ export class DependencyReportsComponent implements OnInit {
   closeCalendarModal() {
     this.isCalendarModalVisible = false;
     this.currentRequirementForReminder = null;
-    this.selectedReminderDate = null;
+    this.selectedReminderDates = [];
   }
 
   generateCalendarDays(date: Date) {
@@ -189,10 +185,11 @@ export class DependencyReportsComponent implements OnInit {
     // Días del mes actual
     for (let day = 1; day <= lastDayOfMonth.getDate(); day++) {
       const currentDate = new Date(year, month, day);
-      const isSelected = this.selectedReminderDate ?
-        (this.selectedReminderDate.getFullYear() === year &&
-         this.selectedReminderDate.getMonth() === month &&
-         this.selectedReminderDate.getDate() === day) : false;
+      const isSelected = this.selectedReminderDates.some(
+        d => d.getFullYear() === year &&
+             d.getMonth() === month &&
+             d.getDate() === day
+      );
       const isTodayFlag = currentDate.getTime() === today.getTime();
 
       this.calendarDays.push({ day, month, year, isCurrentMonth: true, isSelected, isToday: isTodayFlag });
@@ -225,31 +222,36 @@ export class DependencyReportsComponent implements OnInit {
   }
 
   selectDate(dayObj: { day: number, month: number, year: number, isCurrentMonth: boolean }) {
-    if (!dayObj.isCurrentMonth) return; // No permitir seleccionar días de otros meses por ahora
+    if (!dayObj.isCurrentMonth) return;
 
-    this.selectedReminderDate = new Date(dayObj.year, dayObj.month, dayObj.day);
-    // Regenerar días para reflejar la selección
+    const date = new Date(dayObj.year, dayObj.month, dayObj.day);
+    const index = this.selectedReminderDates.findIndex(
+      d => d.getFullYear() === date.getFullYear() &&
+           d.getMonth() === date.getMonth() &&
+           d.getDate() === date.getDate()
+    );
+    if (index === -1) {
+      this.selectedReminderDates.push(date);
+    } else {
+      this.selectedReminderDates.splice(index, 1); // Quitar si ya estaba seleccionada
+    }
     this.generateCalendarDays(this.calendarViewDate);
   }
 
   saveReminder() {
-    if (this.selectedReminderDate && this.currentRequirementForReminder) {
-      console.log('Guardando recordatorio para:', this.currentRequirementForReminder.title);
-      console.log('Fecha seleccionada:', this.selectedReminderDate.toLocaleDateString());
-
-      // Formatear la fecha a un string ISO (YYYY-MM-DD) para enviar al backend
-      const reminderDateISO = this.selectedReminderDate.toISOString().split('T')[0];
-
-      // Llamar al servicio para actualizar el requerimiento con la fecha del recordatorio
+    if (this.selectedReminderDates.length && this.currentRequirementForReminder) {
+      const reminderDatesISO = this.selectedReminderDates.map(date =>
+        date.toISOString().split('T')[0]
+      );
       this.requirementService.updateRequirement(this.currentRequirementForReminder.id, {
-        reminderDate: reminderDateISO
+        reminderDates: reminderDatesISO
       }).subscribe({
         next: (updatedRequirement) => {
           console.log('Requerimiento actualizado con recordatorio:', updatedRequirement);
           // Opcional: Actualizar el requerimiento en la lista local si es necesario
           const index = this.currentRequirements.findIndex(req => req.id === updatedRequirement.id);
           if (index !== -1) {
-            this.currentRequirements[index].reminderDate = updatedRequirement.reminderDate;
+            this.currentRequirements[index].reminderDates = updatedRequirement.reminderDates;
           }
           alert('Recordatorio guardado con éxito.');
         },
@@ -258,7 +260,6 @@ export class DependencyReportsComponent implements OnInit {
           alert('Error al guardar el recordatorio.');
         }
       });
-
     } else {
       console.warn('No se ha seleccionado una fecha o requerimiento.');
     }
