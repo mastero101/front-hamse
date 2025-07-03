@@ -25,7 +25,7 @@ interface CalendarDay {
 })
 export class MaintenanceCalendarComponent implements OnInit {
   completionPercentage = 0;
-  currentView: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'weekly';
+  currentView: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'daily';
   selectedDate = new Date();
   currentMonth = this.selectedDate.toLocaleDateString('es-ES', { month: 'long' });
   currentYear = this.selectedDate.getFullYear();
