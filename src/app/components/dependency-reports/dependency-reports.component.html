@@ -73,7 +73,9 @@
         <div class="requirement-providers-row" *ngIf="requirement.providers && requirement.providers.length">
           <button *ngFor="let provider of requirement.providers"
                   class="provider-btn"
-                  [style.backgroundColor]="provider.color">
+                  [style.backgroundColor]="provider.color"
+                  [title]="provider.url || ''"
+                  (click)="provider.url ? openProviderUrl(provider.url) : null">
             {{ provider.name }}
           </button>
         </div>

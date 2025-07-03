@@ -66,25 +66,6 @@ export class DependencyReportsComponent implements OnInit {
     this.requirementService.getRequirements(dependency).subscribe({
       next: (response: any) => { // Change type to any to access data property
         this.currentRequirements = response.data;
-        // MOCK: Agregar proveedores de prueba si no existen
-        if (this.currentRequirements && this.currentRequirements.length > 0 && !this.currentRequirements[0].providers) {
-          const mockProviders = [
-            [
-              { name: 'NAES', color: '#4CAF50' },
-              { name: 'ORKAL', color: '#FF9800' }
-            ],
-            [
-              { name: 'JLR', color: '#F44336' }
-            ],
-            [
-              { name: 'NAES', color: '#4CAF50' },
-              { name: 'JLR', color: '#F44336' }
-            ]
-          ];
-          this.currentRequirements.forEach((req, i) => {
-            req.providers = mockProviders[i % mockProviders.length];
-          });
-        }
         console.log(`Requerimientos cargados para ${dependency}:`, this.currentRequirements); // Log the array
       },
       error: (error) => {
@@ -415,6 +396,10 @@ export class DependencyReportsComponent implements OnInit {
     const url = obj.url && typeof obj.url === 'string' ? obj.url.trim() : '';
     const nota = obj.nota && typeof obj.nota === 'string' ? obj.nota.trim() : '';
     return !!(url || nota);
+  }
+
+  openProviderUrl(url: string) {
+    window.open(url, '_blank');
   }
 
 }

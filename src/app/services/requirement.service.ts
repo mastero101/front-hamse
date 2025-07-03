@@ -15,6 +15,7 @@ export interface Requirement {
   dependency: string;
   reminderDate?: string | null;
   reminderDates?: string[];
+  providers?: { name: string; color: string; url?: string }[];
 }
 
 @Injectable({
