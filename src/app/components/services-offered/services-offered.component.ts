@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; 
+import { ProductService, IProduct } from '../../services/product.service';
 
 interface IService {
   id: string;
@@ -68,23 +69,16 @@ export class ServicesOfferedComponent implements OnInit{
   isInfoModalVisible = false;
   selectedServiceForModal: IService | null = null;
   safeVideoUrlForInfoModal: SafeResourceUrl | null = null;
+  products: IProduct[] = [];
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(private sanitizer: DomSanitizer, private productService: ProductService) { }
 
-  ngOnInit(): void {
-    // MOCK: Agregar array de proveedores a cada servicio si no existe
-    this.services.forEach((service, i) => {
-      if (!service.providers) {
-        service.providers = [
-          { name: 'NAES', color: '#4CAF50' },
-          { name: 'ORKAL', color: '#FF9800' }
-        ];
-        // Para variar, algunos servicios solo tendrán uno
-        if (i % 2 === 0) {
-          service.providers = [service.providers[0]];
-        }
-      }
-    });
+  async ngOnInit(): Promise<void> {
+    try {
+      this.products = await this.productService.getProducts();
+    } catch (err) {
+      console.error('Error al obtener productos:', err);
+    }
   }
 
   openInfoModal(service: IService): void {

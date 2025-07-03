@@ -1,21 +1,17 @@
 <div class="services-container">
-    <div *ngFor="let service of services" class="service-item">
+    <div *ngFor="let product of products" class="service-item">
         <div class="service-title-column">
-            <p>{{ service.title }}</p>
+            <p>{{ product.name }}</p>
         </div>
         <div class="service-details-column">
-            <div class="info-icon" *ngIf="service.infoIcon" (click)="openInfoModal(service)">
-                <i class="fas fa-info-circle"></i>
+            <div class="provider-tag" *ngIf="product.description">
+                {{ product.description }}
             </div>
-            <div class="service-providers-row" *ngIf="service.providers && service.providers.length">
-                <button *ngFor="let provider of service.providers"
-                        class="provider-btn"
-                        [style.backgroundColor]="provider.color">
-                    {{ provider.name }}
-                </button>
+            <div>
+                <span>Precio: {{ product.price | currency }}</span>
             </div>
-            <div class="provider-tag" [style.background-color]="service.providerColor">
-                {{ service.provider }}
+            <div>
+                <span>Stock: {{ product.stock }}</span>
             </div>
         </div>
     </div>
