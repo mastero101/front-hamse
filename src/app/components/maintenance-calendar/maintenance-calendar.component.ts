@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ActivityService, Activity, PaginatedActivitiesResponse } from '../../services/activity.service';
 import { ScheduleService, Schedule, ActivityStatusPayload } from '../../services/schedule.service';
+import { SettingsService } from '../../services/settings.service';
 
 type ActivityStatus = 'sin_revision' | 'verificado' | 'no_aplica';
 interface CalendarActivity extends Activity { status: ActivityStatus; }
@@ -53,10 +54,23 @@ export class MaintenanceCalendarComponent implements OnInit {
   // Referencia al input de fecha en el modal
   @ViewChild('selectedDateInput') selectedDateInput!: ElementRef;
 
-  constructor(private activityService: ActivityService, private scheduleService: ScheduleService) {}
+  // --- Imagen de recordatorio ---
+  reminderImageUrl: string = '../../../assets/images/ASEA1_Actividad.png';
+  isAdmin: boolean = false;
+  editingReminderImage: boolean = false;
+  loadingReminderImage: boolean = false;
+  reminderImageError: string = '';
+
+  constructor(
+    private activityService: ActivityService,
+    private scheduleService: ScheduleService,
+    private settingsService: SettingsService
+  ) {}
 
   ngOnInit() {
     if (!this.isAuthenticated()) return;
+    this.checkAdminStatus();
+    this.loadReminderImage();
     this.initCalendar();
   }
 
@@ -563,5 +577,74 @@ export class MaintenanceCalendarComponent implements OnInit {
   get progressDotCy(): number {
     const angle = (this.completionPercentage / 100) * 2 * Math.PI - Math.PI / 2;
     return 60 + 50 * Math.sin(angle);
+  }
+
+  checkAdminStatus() {
+    try {
+      const user = localStorage.getItem('currentUser');
+      this.isAdmin = user ? JSON.parse(user).role === 'admin' : false;
+    } catch {
+      this.isAdmin = false;
+    }
+  }
+
+  loadReminderImage() {
+    this.settingsService.getSettingByKey('calendarReminderImage').subscribe({
+      next: (res) => {
+        if (res && res.value) {
+          this.reminderImageUrl = res.value;
+        }
+      },
+      error: () => {
+        // Si no existe, se mantiene la imagen por defecto
+      }
+    });
+  }
+
+  onEditReminderImage() {
+    this.editingReminderImage = true;
+    this.reminderImageError = '';
+  }
+
+  onReminderImageFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.loadingReminderImage = true;
+      this.reminderImageError = '';
+      this.settingsService.uploadImage(file).subscribe({
+        next: (res) => {
+          if (res && res.url) {
+            this.saveReminderImageUrl(res.url);
+          } else {
+            this.reminderImageError = 'No se pudo obtener la URL de la imagen.';
+            this.loadingReminderImage = false;
+          }
+        },
+        error: () => {
+          this.reminderImageError = 'Error al subir la imagen.';
+          this.loadingReminderImage = false;
+        }
+      });
+    }
+  }
+
+  saveReminderImageUrl(url: string) {
+    this.settingsService.updateSettingByKey('calendarReminderImage', url).subscribe({
+      next: () => {
+        this.reminderImageUrl = url;
+        this.editingReminderImage = false;
+        this.loadingReminderImage = false;
+      },
+      error: () => {
+        this.reminderImageError = 'Error al guardar la URL de la imagen.';
+        this.loadingReminderImage = false;
+      }
+    });
+  }
+
+  cancelEditReminderImage() {
+    this.editingReminderImage = false;
+    this.reminderImageError = '';
   }
 }

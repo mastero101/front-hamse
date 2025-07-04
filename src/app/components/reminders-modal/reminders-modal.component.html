@@ -10,18 +10,45 @@
             </button>
         </div>
         <div class="modal-content">
+            <!-- Botón de edición para admin -->
+            <ng-container *ngIf="isAdmin && !editMode">
+                <button class="action-button" style="margin-bottom: 10px; background: #ffa000; color: #222;" (click)="startEditAnnouncement.emit()">
+                    Editar anuncio
+                </button>
+            </ng-container>
+            <!-- Campos en modo edición -->
+            <ng-container *ngIf="isAdmin && editMode">
+                <div class="edit-fields">
+                    <label>Título:<input [(ngModel)]="tempAnnouncement.title" /></label>
+                    <label>Imagen (URL):<input [(ngModel)]="tempAnnouncement.image" /></label>
+                    <label>Subir imagen:
+                        <input type="file" accept="image/*" (change)="onImageFileSelected($event)" />
+                    </label>
+                    <div *ngIf="loadingImage" style="color: #1a237e; font-weight: 600;">Subiendo imagen...</div>
+                    <div *ngIf="imageUploadError" style="color: #ef4444; font-weight: 600;">{{ imageUploadError }}</div>
+                    <label>Texto del botón:<input [(ngModel)]="tempAnnouncement.buttonText" /></label>
+                    <label>Vigencia:<input [(ngModel)]="tempAnnouncement.deadline" /></label>
+                    <label>Detalles:<textarea [(ngModel)]="tempAnnouncement.details"></textarea></label>
+                    <label>Enlace:<input [(ngModel)]="tempAnnouncement.link" /></label>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: center;">
+                    <button class="action-button" [disabled]="loadingSave" (click)="saveAnnouncement.emit()">Guardar</button>
+                    <button class="action-button" style="background: #ccc; color: #222;" [disabled]="loadingSave" (click)="cancelEditAnnouncement.emit()">Cancelar</button>
+                </div>
+            </ng-container>
+            <!-- Vista normal -->
             <div class="title-container">
                 <div class="reminder-icon">
                     <i class="fa-solid fa-bell"></i>
                 </div>
-                <h2>{{ reminderTitle }}</h2>
+                <h2>{{ editMode ? tempAnnouncement.title : reminderTitle }}</h2>
             </div>
             <div class="reminder-flyer">
-                <img src="../../../assets/images/HAMSE_Cedula_Operacion.png" alt="Hamse Logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Cedula_Operacion.png')">
+                <img [src]="editMode ? tempAnnouncement.image : reminderImage" alt="Anuncio" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Cedula_Operacion.png')">
             </div>
-            <button class="action-button" (click)="onActionClick()">{{ reminderButtonText }}</button>
-            <p class="deadline-text">{{ reminderDeadline }}</p>
-            <p class="details-text">{{ reminderDetails }}</p>
+            <button class="action-button" *ngIf="!editMode" (click)="onActionClick()">{{ reminderButtonText }}</button>
+            <p class="deadline-text">{{ editMode ? tempAnnouncement.deadline : reminderDeadline }}</p>
+            <p class="details-text">{{ editMode ? tempAnnouncement.details : reminderDetails }}</p>
         </div>
     </div>
 </div>

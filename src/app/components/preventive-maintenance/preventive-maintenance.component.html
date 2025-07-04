@@ -13,3 +13,25 @@
       <a href="https://www.hamse.mx/public/contacto/" target="_blank" class="info-button">Solicitar información</a>
     </div>
   </div>
+
+<!-- Modal de anuncio -->
+<app-reminders-modal
+  [isVisible]="showAnnouncementModal"
+  (close)="closeAnnouncementModal()"
+  [reminderTitle]="announcementTitle"
+  [reminderButtonText]="announcementButtonText"
+  [reminderDeadline]="announcementDeadline"
+  [reminderDetails]="announcementDetails"
+  [externalLink]="announcementLink"
+  [reminderImage]="announcementImage"
+  [isAdmin]="isAdmin"
+  [editMode]="editMode"
+  [tempAnnouncement]="tempAnnouncement"
+  [loadingSave]="loadingSave"
+  [loadingImage]="loadingImage"
+  [imageUploadError]="imageUploadError"
+  (startEditAnnouncement)="startEditAnnouncement()"
+  (saveAnnouncement)="saveAnnouncement()"
+  (cancelEditAnnouncement)="cancelEditAnnouncement()"
+  (imageFileSelected)="onAnnouncementImageSelected($event)"
+/>
