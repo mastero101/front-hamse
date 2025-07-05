@@ -154,7 +154,7 @@
   .calendar-container {
     padding: 24px;
     background: transparent;
-    min-height: calc(100vh - 65px);
+    min-height: unset;
   
     .cards-wrapper {
       display: grid;
@@ -162,14 +162,14 @@
       gap: 24px;
       max-width: 1800px;
       margin: 0 auto;
-      height: calc(100vh - 100px);
+      height: auto;
     }
   
     .right-column {
-      height: 100%;
+      height: auto;
       
       .activities-list-card {
-        height: 100%;
+        height: auto;
         display: flex;
         flex-direction: column;
         
@@ -285,6 +285,7 @@
       background: white;
       border-radius: 12px;
       padding: 20px;
+      margin-bottom: 18px;
     
       .circle-container {
         display: flex;
@@ -813,7 +814,7 @@
   padding: 8px;
   text-align: center;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, transform 0.1s ease, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Transiciones suaves */
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease, border-color 0.2s ease-in-out; /* Transiciones suaves */
   position: relative; /* Para posibles pseudo-elementos */
   min-height: 60px; /* Asegura una altura mínima (ajustado) */
   display: flex;
@@ -1129,13 +1130,53 @@
 
   /* Estilos para la lista de actividades */
   .activities-list-card {
-    .list-header {
-      margin-bottom: 15px !important; /* Reducir margen inferior */
-      h3 {
-        font-size: 18px !important; /* Reducir tamaño de fuente */
-        color: #000 !important;
-        font-weight: bold !important;
-      }
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    font-size: 9pt !important;
+  }
+  .activities-list {
+    .activity-row {
+      padding: 2px 4px !important;
+      margin-bottom: 0 !important;
+      border: 1px solid #222 !important;
+      font-size: 9pt !important;
+      min-height: unset !important;
+      align-items: center !important;
+    }
+    .activity-text {
+      font-size: 9pt !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      align-items: center !important;
+    }
+    .status-group {
+      font-size: 9pt !important;
+      gap: 4px !important;
+      align-items: center !important;
+    }
+    .status-text {
+      min-width: 60px !important;
+      font-size: 9pt !important;
+      padding: 0 !important;
+    }
+    .checkbox {
+      width: 16px !important;
+      height: 16px !important;
+      font-size: 10pt !important;
+      margin: 0 2px !important;
+    }
+    i {
+      font-size: 10pt !important;
+    }
+  }
+  .list-header {
+    padding: 4px 8px !important;
+    font-size: 10pt !important;
+    h3 {
+      font-size: 11pt !important;
+      margin: 0 !important;
     }
   }
 
@@ -1163,6 +1204,30 @@
         }
       }
     }
+  }
+
+  html, body {
+    font-size: 10pt !important;
+    zoom: 0.85;
+  }
+  .maintenance-container,
+  .calendar-container,
+  .cards-wrapper,
+  .card,
+  .activities-card,
+  .calendar-card {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  tr, td, th, .day-cell, .activity-row {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
 
