@@ -346,7 +346,7 @@ export class MaintenanceCalendarComponent implements OnInit {
       return;
     }
     const total = this.activities.length;
-    const completadas = this.activities.filter(a => a.status === 'verificado').length;
+    const completadas = this.activities.filter(a => a.status === 'verificado' || a.status === 'no_aplica').length;
     this.completionPercentage = Math.round((completadas / total) * 100);
   }
 
