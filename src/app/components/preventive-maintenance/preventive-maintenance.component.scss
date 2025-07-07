@@ -95,6 +95,10 @@
 
 // Modo visualización
 .view-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
   .maintenance-image-container {
     margin-bottom: 20px;
   }
@@ -127,18 +131,35 @@
     margin-bottom: 25px;
   }
 
+  .button-group {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 15px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .maintenance-action-button,
+  .edit-button {
+    min-width: 170px;
+    height: 48px;
+    padding: 0 32px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    border: none;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+
   .maintenance-action-button {
     background: linear-gradient(135deg, #007bff, #0056b3);
     color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 15px;
-
+    margin: 0;
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
@@ -148,13 +169,7 @@
   .edit-button {
     background: #28a745;
     color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
+    margin: 0;
     &:hover {
       background: #218838;
       transform: translateY(-1px);

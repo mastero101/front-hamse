@@ -23,15 +23,15 @@
       <!-- Detalles -->
       <p class="maintenance-details">{{ maintenanceDetails }}</p>
 
-      <!-- Botón de acción -->
-      <button class="maintenance-action-button" (click)="onExternalLinkClick()">
-        {{ maintenanceButtonText }}
-      </button>
-
-      <!-- Botón de edición para admin -->
-      <button *ngIf="isAdmin" class="edit-button" (click)="startEditMaintenance()">
-        Editar Contenido
-      </button>
+      <!-- Botones de acción alineados -->
+      <div class="button-group">
+        <button class="maintenance-action-button" (click)="onExternalLinkClick()">
+          {{ maintenanceButtonText }}
+        </button>
+        <button *ngIf="isAdmin" class="edit-button" (click)="startEditMaintenance()">
+          Editar Contenido
+        </button>
+      </div>
     </div>
 
     <!-- Modo edición -->
