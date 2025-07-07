@@ -1,20 +1,146 @@
 <div class="preventive-maintenance-container">
-    <div class="title-card">
-      <h2>Mantenimiento Preventivo</h2>
+  <div class="title-card">
+    <h2>Mantenimiento Preventivo</h2>
+  </div>
+
+  <!-- Contenido integrado del modal -->
+  <div class="maintenance-content" *ngIf="showMaintenanceContent">
+    
+    <!-- Modo visualización -->
+    <div *ngIf="!editMode" class="view-mode">
+      
+      <!-- Imagen -->
+      <div class="maintenance-image-container">
+        <img [src]="maintenanceImage" [alt]="maintenanceTitle" class="maintenance-image">
+      </div>
+
+      <!-- Título -->
+      <h3 class="maintenance-title">{{ maintenanceTitle }}</h3>
+
+      <!-- Fecha límite -->
+      <p class="maintenance-deadline">{{ maintenanceDeadline }}</p>
+
+      <!-- Detalles -->
+      <p class="maintenance-details">{{ maintenanceDetails }}</p>
+
+      <!-- Botón de acción -->
+      <button class="maintenance-action-button" (click)="onExternalLinkClick()">
+        {{ maintenanceButtonText }}
+      </button>
+
+      <!-- Botón de edición para admin -->
+      <button *ngIf="isAdmin" class="edit-button" (click)="startEditMaintenance()">
+        Editar Contenido
+      </button>
     </div>
-  
-    <div class="content-card">
-      <ul>
-        <li *ngFor="let item of maintenanceItems">{{ item }}</li>
-      </ul>
-    </div>
-  
-    <div class="actions-container">
-      <a href="https://www.hamse.mx/public/contacto/" target="_blank" class="info-button">Solicitar información</a>
+
+    <!-- Modo edición -->
+    <div *ngIf="editMode" class="edit-mode">
+      
+      <h3>Editar Contenido</h3>
+
+      <!-- Título -->
+      <div class="form-group">
+        <label for="title">Título:</label>
+        <input 
+          type="text" 
+          id="title" 
+          [(ngModel)]="tempMaintenance.title" 
+          class="form-input"
+          placeholder="Título del contenido">
+      </div>
+
+      <!-- Imagen -->
+      <div class="form-group">
+        <label for="image">Imagen:</label>
+        <div class="image-upload-container">
+          <img [src]="tempMaintenance.image" [alt]="tempMaintenance.title" class="preview-image" *ngIf="tempMaintenance.image">
+          <input 
+            type="file" 
+            id="image" 
+            accept="image/*" 
+            (change)="onMaintenanceImageSelected($event)"
+            class="file-input">
+          <label for="image" class="file-label">
+            {{ tempMaintenance.image ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+          </label>
+        </div>
+        <div *ngIf="loadingImage" class="loading">Subiendo imagen...</div>
+        <div *ngIf="imageUploadError" class="error">{{ imageUploadError }}</div>
+      </div>
+
+      <!-- Texto del botón -->
+      <div class="form-group">
+        <label for="buttonText">Texto del botón:</label>
+        <input 
+          type="text" 
+          id="buttonText" 
+          [(ngModel)]="tempMaintenance.buttonText" 
+          class="form-input"
+          placeholder="Texto del botón">
+      </div>
+
+      <!-- Fecha límite -->
+      <div class="form-group">
+        <label for="deadline">Fecha límite:</label>
+        <input 
+          type="text" 
+          id="deadline" 
+          [(ngModel)]="tempMaintenance.deadline" 
+          class="form-input"
+          placeholder="Fecha límite">
+      </div>
+
+      <!-- Detalles -->
+      <div class="form-group">
+        <label for="details">Detalles:</label>
+        <textarea 
+          id="details" 
+          [(ngModel)]="tempMaintenance.details" 
+          class="form-textarea"
+          placeholder="Detalles del contenido"
+          rows="3"></textarea>
+      </div>
+
+      <!-- Enlace -->
+      <div class="form-group">
+        <label for="link">Enlace:</label>
+        <input 
+          type="url" 
+          id="link" 
+          [(ngModel)]="tempMaintenance.link" 
+          class="form-input"
+          placeholder="URL del enlace">
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="edit-actions">
+        <button 
+          class="save-button" 
+          (click)="saveMaintenance()" 
+          [disabled]="loadingSave">
+          {{ loadingSave ? 'Guardando...' : 'Guardar' }}
+        </button>
+        <button class="cancel-button" (click)="cancelEditMaintenance()">
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
 
-<!-- Modal de anuncio -->
+  <div class="content-card">
+    <ul>
+      <li *ngFor="let item of maintenanceItems">{{ item }}</li>
+    </ul>
+  </div>
+
+  <div class="actions-container">
+    <a href="https://www.hamse.mx/public/contacto/" target="_blank" class="info-button">Solicitar información</a>
+  </div>
+</div>
+
+<!-- Modal de anuncio original (comentado por si se necesita implementar nuevamente) -->
+<!--
 <app-reminders-modal
   [isVisible]="showAnnouncementModal"
   (close)="closeAnnouncementModal()"
@@ -35,3 +161,4 @@
   (cancelEditAnnouncement)="cancelEditAnnouncement()"
   (imageFileSelected)="onAnnouncementImageSelected($event)"
 />
+-->

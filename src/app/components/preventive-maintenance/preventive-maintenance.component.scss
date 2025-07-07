@@ -81,6 +81,219 @@
 
 }
 
+// Estilos para el contenido integrado del modal
+.maintenance-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+// Modo visualización
+.view-mode {
+  .maintenance-image-container {
+    margin-bottom: 20px;
+  }
+
+  .maintenance-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .maintenance-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  .maintenance-deadline {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+    font-style: italic;
+  }
+
+  .maintenance-details {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 25px;
+  }
+
+  .maintenance-action-button {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 15px;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+    }
+  }
+
+  .edit-button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #218838;
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// Modo edición
+.edit-mode {
+  text-align: left;
+
+  h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .image-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .preview-image {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .file-input {
+    display: none;
+  }
+
+  .file-label {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    padding: 15px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    color: #6c757d;
+
+    &:hover {
+      border-color: #007bff;
+      background: #e3f2fd;
+      color: #007bff;
+    }
+  }
+
+  .loading {
+    color: #007bff;
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .error {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+  }
+
+  .save-button, .cancel-button {
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .save-button {
+    background: #28a745;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: #218838;
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+  }
+
+  .cancel-button {
+    background: #6c757d;
+    color: white;
+
+    &:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+  }
+}
+
 // Media query para pantallas más pequeñas
 @media (max-width: 600px) {
   .title-card h2 {
@@ -89,6 +302,22 @@
 
   .content-card ul li {
     font-size: 0.9rem;
+  }
+
+  .maintenance-content {
+    padding: 20px;
+  }
+
+  .view-mode .maintenance-title {
+    font-size: 20px;
+  }
+
+  .edit-mode .edit-actions {
+    flex-direction: column;
+  }
+
+  .edit-mode .save-button, .edit-mode .cancel-button {
+    width: 100%;
   }
 
   .actions-container {
