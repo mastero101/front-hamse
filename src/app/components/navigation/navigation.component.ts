@@ -16,7 +16,7 @@ export class NavigationComponent {
     { path: 'programa-mantenimiento', label: 'Programa de mantenimiento', icon: 'wrench' },
     { path: 'reportes-dependencias', label: 'Reportes e dependencias', icon: 'file-text' },
     { path: 'servicios', label: 'Servicios', icon: 'clipboard' },
-    { path: 'mantenimiento-preventivo', label: 'Matenimiento Preventivo', icon: 'book' },
+    { path: 'mantenimiento-preventivo', label: 'Mantenimiento Preventivo', icon: 'book' },
     { path: 'configuracion-actividades', label: 'Configuración', icon: 'cog' }
   ];
 
