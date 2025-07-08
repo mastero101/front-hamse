@@ -84,7 +84,7 @@
                         <div class="week-days">
                             @for (day of weekDays; track day) {
                                 <div class="week-day" [class.today]="isToday(day)" >
-                                    <span class="day-name">{{ day | date:'EEE' }}</span>
+                                    <span class="day-name">{{ day | date:'EEE':'':'es' | titlecase }}</span>
                                     <span class="day-number">{{ day | date:'d' }}</span>
                                 </div>
                             }

@@ -385,10 +385,11 @@ export class MaintenanceCalendarComponent implements OnInit {
             return updatedActivity ? { ...activity, status: this.mapBackendStatusToLocal(updatedActivity.Statuses?.[0]?.state) } : activity;
           });
         }
+        alert('¡Actividades guardadas correctamente!');
       },
       error: err => {
         console.error('Error al guardar actividades:', err);
-        // Aquí podrías mostrar un mensaje de error al usuario
+        alert('Error al guardar actividades. Intenta de nuevo.');
       }
     });
   }
