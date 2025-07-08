@@ -6,6 +6,8 @@ import { WhatsappChatBubbleComponent } from './components/whatsapp-chat-bubble/w
 import { RemindersModalComponent } from './components/reminders-modal/reminders-modal.component';
 import { AuthService } from './services/auth.service';
 import { Subscription } from 'rxjs';
+import { RequirementService } from './services/requirement.service';
+import { NotificationService } from './services/notification.service';
 
 @Component({
   selector: 'app-root',
@@ -25,7 +27,11 @@ export class AppComponent implements OnInit, OnDestroy {
   showRemindersModal = false;
   private currentUserSubscription: Subscription | undefined;
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private requirementService: RequirementService,
+    private notificationService: NotificationService
+  ) {
     sessionStorage.removeItem('remindersModalShownThisSession');
   }
 
@@ -43,6 +49,8 @@ export class AppComponent implements OnInit, OnDestroy {
         sessionStorage.removeItem('remindersModalShownThisSession');
       }
     });
+
+    this.checkReminders();
   }
 
   ngOnDestroy(): void {
@@ -53,5 +61,30 @@ export class AppComponent implements OnInit, OnDestroy {
 
   closeRemindersModal(): void {
     this.showRemindersModal = false;
+  }
+
+  checkReminders() {
+    this.requirementService.getRequirements('').subscribe(requirements => {
+      const hoy = new Date();
+      const proximos = requirements.filter(req => {
+        if (!req.reminderDates) return false;
+        // Suponiendo que reminderDates es un array de fechas
+        return req.reminderDates.some((fecha: string) => {
+          const reminderDate = new Date(fecha);
+          // Aquí puedes ajustar la lógica: hoy, próximos 3 días, etc.
+          return (
+            reminderDate.getDate() === hoy.getDate() &&
+            reminderDate.getMonth() === hoy.getMonth() &&
+            reminderDate.getFullYear() === hoy.getFullYear()
+          );
+        });
+      });
+
+      if (proximos.length > 0) {
+        this.notificationService.show(
+          `Tienes ${proximos.length} recordatorio(s) para hoy.`
+        );
+      }
+    });
   }
 }

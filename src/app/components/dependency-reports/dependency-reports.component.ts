@@ -64,7 +64,7 @@ export class DependencyReportsComponent implements OnInit {
   loadRequirements(dependency: string) {
     // Modificar para usar el servicio que interactúa con el backend
     this.requirementService.getRequirements(dependency).subscribe({
-      next: (response: any) => { // Change type to any to access data property
+      next: (response: any) => {
         this.currentRequirements = response.data;
         console.log(`Requerimientos cargados para ${dependency}:`, this.currentRequirements); // Log the array
       },

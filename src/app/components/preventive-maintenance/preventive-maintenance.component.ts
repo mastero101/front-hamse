@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 // import { RemindersModalComponent } from '../reminders-modal/reminders-modal.component'; // Comentado por si se necesita implementar nuevamente
 import { SettingsService } from '../../services/settings.service';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-preventive-maintenance',
@@ -68,7 +69,8 @@ export class PreventiveMaintenanceComponent implements OnInit {
 
   constructor(
     private settingsService: SettingsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -95,30 +97,23 @@ export class PreventiveMaintenanceComponent implements OnInit {
       });
     });
 
-    // --- Código del modal original (comentado por si se necesita implementar nuevamente) ---
-    // const announcementKeys = [
-    //   { key: 'announcementTitle', prop: 'announcementTitle' },
-    //   { key: 'announcementImage', prop: 'announcementImage' },
-    //   { key: 'announcementButtonText', prop: 'announcementButtonText' },
-    //   { key: 'announcementDeadline', prop: 'announcementDeadline' },
-    //   { key: 'announcementDetails', prop: 'announcementDetails' },
-    //   { key: 'announcementLink', prop: 'announcementLink' }
-    // ];
-    // announcementKeys.forEach(({ key, prop }) => {
-    //   this.settingsService.getSettingByKey(key).subscribe({
-    //     next: (res) => {
-    //       if (res && res.value) {
-    //         (this as any)[prop] = res.value;
-    //       }
-    //     },
-    //     error: () => {
-    //       // Si no existe, se mantiene el valor por defecto
-    //     }
-    //   });
-    // });
-    // setTimeout(() => {
-    //   this.showAnnouncementModal = true;
-    // }, 300); // Pequeño delay para evitar parpadeo
+    // --- Notificaciones de recordatorios (ejemplo con requirements) ---
+    // Aquí deberías llamar a tu servicio real de requirements
+    // Simulación:
+    /*
+    this.requirementService.getRequirements().subscribe(res => {
+      const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+      res.data.forEach(req => {
+        if (Array.isArray(req.reminderDates)) {
+          req.reminderDates.forEach(date => {
+            if (date === today) {
+              this.notificationService.show(`¡Tienes un recordatorio para: ${req.title}!`);
+            }
+          });
+        }
+      });
+    });
+    */
   }
 
   checkAdminStatus(): void {

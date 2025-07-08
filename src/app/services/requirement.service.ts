@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import axios from '../config/axios.config';
+import { NotificationService } from './notification.service';
 
 export interface Requirement {
   id: string;
@@ -13,7 +14,6 @@ export interface Requirement {
   hasProvidersButton?: boolean;
   subTitle?: string;
   dependency: string;
-  reminderDate?: string | null;
   reminderDates?: string[];
   providers?: { name: string; color: string; url?: string }[];
 }
@@ -24,7 +24,7 @@ export interface Requirement {
 export class RequirementService {
   private endpoint = '/requirements';
 
-  constructor() {}
+  constructor(private notificationService: NotificationService) {}
 
   getRequirements(dependency: string): Observable<Requirement[]> {
     return new Observable(subscriber => {
