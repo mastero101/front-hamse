@@ -117,10 +117,7 @@ export class DependencyReportsComponent implements OnInit {
 
     // Cargar todas las fechas guardadas
     if (Array.isArray(requirement.reminderDates)) {
-      this.selectedReminderDates = requirement.reminderDates.map((dateStr: string) => {
-        const [year, month, day] = dateStr.split('-').map(Number);
-        return new Date(year, month - 1, day);
-      });
+      this.selectedReminderDates = requirement.reminderDates.map((dateStr: string) => new Date(dateStr));
     } else {
       this.selectedReminderDates = [];
     }

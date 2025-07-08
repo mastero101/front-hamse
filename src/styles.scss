@@ -1,5 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
 body {
   min-height: 100%;
   height: auto;
@@ -7,4 +9,32 @@ body {
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+// Aumenta el z-index y personaliza colores y tamaño
+.mat-snack-bar-container {
+  z-index: 3000 !important; // Más alto que modales comunes
+  background: #1a237e !important; // Fondo azul oscuro
+  color: #fff !important;
+  font-size: 1.2rem !important;
+  font-weight: bold;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.4);
+  border-radius: 8px !important;
+  border: 2px solid #ffb300;
+  text-align: center;
+  letter-spacing: 0.5px;
+  padding: 18px 32px !important;
+  min-width: 350px;
+  max-width: 90vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: pre-line !important;
+}
+
+// Botón de cerrar
+.mat-simple-snackbar-action {
+  color: #ffb300 !important;
+  font-weight: bold;
+  font-size: 1.1rem;
 }
