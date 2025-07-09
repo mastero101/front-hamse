@@ -14,8 +14,8 @@ export class NavigationComponent {
   navItems = [
     { path: 'calendario-preventivo', label: 'Calendario Preventivo', icon: 'calendar', active: true },
     { path: 'programa-mantenimiento', label: 'Programa de mantenimiento', icon: 'wrench' },
-    { path: 'reportes-dependencias', label: 'Reportes e dependencias', icon: 'file-text' },
-    { path: 'servicios', label: 'Servicios', icon: 'clipboard' },
+    { path: 'reportes-dependencias', label: 'Reportes a dependencias', icon: 'file-text' },
+    { path: 'servicios', label: 'Productos y Servicios', icon: 'clipboard' },
     { path: 'mantenimiento-preventivo', label: 'Mantenimiento Preventivo', icon: 'book' },
     { path: 'configuracion-actividades', label: 'Configuración', icon: 'cog' }
   ];
