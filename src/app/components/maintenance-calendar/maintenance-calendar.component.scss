@@ -1319,7 +1319,7 @@
     margin-top: 24px;
     padding: 16px;
     background: #f5f5f5; /* Fondo semi-transparente suave */
-    border-left: 5px solid #ffa000; /* Borde naranja a la izquierda como indicador */
+    border-left: none !important; /* Borde naranja a la izquierda como indicador */
     border-radius: 0 8px 8px 0; /* Solo redondear las esquinas derechas */
     font-size: 14px;
     color: #666;
