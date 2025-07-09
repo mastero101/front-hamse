@@ -9,7 +9,7 @@ export class NotificationService {
   show(message: string) {
     console.log('Snackbar debería mostrar:', message);
     this.snackBar.open(message, 'Cerrar', {
-      duration: 15000,
+      // duration: 15000,
       horizontalPosition: 'right',
       verticalPosition: 'top'
     });
@@ -17,7 +17,7 @@ export class NotificationService {
 
   showHtml(message: string) {
     this.snackBar.open(message.replace(/\n/g, '<br>'), 'Cerrar', {
-      duration: 15000,
+      // duration: 15000,
       horizontalPosition: 'right',
       verticalPosition: 'top',
       panelClass: 'snackbar-html'
@@ -27,7 +27,7 @@ export class NotificationService {
   showCustom(message: string) {
     this.snackBar.openFromComponent(CustomSnackbarComponent, {
       data: message,
-      duration: 15000,
+      // duration: 15000,
       horizontalPosition: 'right',
       verticalPosition: 'top',
       panelClass: 'snackbar-html'
