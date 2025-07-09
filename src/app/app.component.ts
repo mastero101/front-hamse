@@ -10,6 +10,7 @@ import { RequirementService, Requirement } from './services/requirement.service'
 import { NotificationService } from './services/notification.service';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomSnackbarComponent } from './components/custom-snackbar/custom-snackbar.component';
+import { AuthModalComponent } from './components/auth-modal/auth-modal.component';
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,8 @@ import { CustomSnackbarComponent } from './components/custom-snackbar/custom-sna
     WhatsappChatBubbleComponent,
     RemindersModalComponent,
     MatSnackBarModule,
-    CustomSnackbarComponent
+    CustomSnackbarComponent,
+    AuthModalComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -29,6 +31,7 @@ import { CustomSnackbarComponent } from './components/custom-snackbar/custom-sna
 export class AppComponent implements OnInit, OnDestroy {
   title = 'interfaz-hamse';
   showRemindersModal = false;
+  showAuthModalForLogin = false;
   private currentUserSubscription: Subscription | undefined;
 
   constructor(
@@ -42,6 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.currentUserSubscription = this.authService.currentUser.subscribe(user => {
       if (user) {
+        this.showAuthModalForLogin = false;
         if (!sessionStorage.getItem('remindersModalShownThisSession')) {
           setTimeout(() => {
             this.showRemindersModal = true;
@@ -50,6 +54,7 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       } else {
         this.showRemindersModal = false;
+        this.showAuthModalForLogin = true;
         sessionStorage.removeItem('remindersModalShownThisSession');
       }
     });

@@ -1,8 +1,8 @@
-<div class="modal-overlay" (click)="closeModal()">
+<div class="modal-overlay">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>{{ isLogin ? 'Iniciar Sesión' : 'Registro' }}</h2>
-        <button class="close-btn" (click)="closeModal()">×</button>
+        <!-- Botón de cerrar eliminado para modo bloqueante -->
       </div>
       
       @if (errorMessage) {

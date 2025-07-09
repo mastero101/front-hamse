@@ -11,3 +11,9 @@
   <app-reminders-modal [isVisible]="showRemindersModal" (close)="closeRemindersModal()" />
 }
 
+@if (showAuthModalForLogin) {
+  <div class="blocker-overlay">
+    <app-auth-modal />
+  </div>
+}
+

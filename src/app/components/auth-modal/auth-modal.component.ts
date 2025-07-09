@@ -25,7 +25,10 @@ export class AuthModalComponent {
   constructor(private authService: AuthService) {}
 
   closeModal() {
-    this.close.emit();
+    // Solo permitir cerrar si el usuario está autenticado
+    if (this.authService.currentUserValue) {
+      this.close.emit();
+    }
   }
 
   get canRegister(): boolean {
