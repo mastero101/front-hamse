@@ -69,7 +69,7 @@
         <table>
             <thead>
                 <tr>
-                    <th class="activity-column">Actividad</th>
+                    <th class="activity-column sticky-col">Actividad</th>
                     @for (month of months; track month) {
                         <th class="month-column">
                             <div class="month-header">{{month.name}}</div>
@@ -85,7 +85,7 @@
             <tbody>
                 @for (activity of (selectedPeriod ? filteredActivities : activities); track activity.id) {
                     <tr>
-                        <td class="activity-name">{{activity.name}}</td>
+                        <td class="activity-name sticky-col">{{activity.name}}</td>
                         @for (month of months; track month) {
                             <td class="month-cell">
                                 <div class="week-group">

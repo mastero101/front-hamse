@@ -177,15 +177,21 @@
         }
     }
 
-    // Si usaste la primera opción HTML (reemplazar contenido):
-    // .loading-indicator {
-    //   display: flex;
-    //   justify-content: center;
-    //   align-items: center;
-    //   padding: 20px;
-    //   font-size: 1.2em;
-    //   color: #333;
-    // }
+}
+
+.sticky-col {
+  position: sticky;
+  left: 0;
+  background: #fff; // Fondo blanco para las celdas de datos
+  color: #1a237e;   // Texto azul oscuro para las celdas de datos
+  z-index: 2;
+  box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+}
+
+.maintenance-table th.sticky-col {
+  background: #1a237e; // Azul oscuro solo para el encabezado
+  color: white;
+  z-index: 3;
 }
 
 
