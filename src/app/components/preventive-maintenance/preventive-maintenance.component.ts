@@ -75,8 +75,8 @@ export class PreventiveMaintenanceComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkAdminStatus();
-    // Cargar los valores del backend
-    const keys = [
+    // Cargar los valores del backend para mantenimiento
+    const maintenanceKeys = [
       { key: 'maintenanceTitle', prop: 'maintenanceTitle' },
       { key: 'maintenanceImage', prop: 'maintenanceImage' },
       { key: 'maintenanceButtonText', prop: 'maintenanceButtonText' },
@@ -84,36 +84,35 @@ export class PreventiveMaintenanceComponent implements OnInit {
       { key: 'maintenanceDetails', prop: 'maintenanceDetails' },
       { key: 'maintenanceLink', prop: 'maintenanceLink' }
     ];
-    keys.forEach(({ key, prop }) => {
+    maintenanceKeys.forEach(({ key, prop }) => {
       this.settingsService.getSettingByKey(key).subscribe({
         next: (res) => {
           if (res && res.value) {
             (this as any)[prop] = res.value;
           }
-        },
-        error: () => {
-          // Si no existe, se mantiene el valor por defecto
         }
       });
     });
 
-    // --- Notificaciones de recordatorios (ejemplo con requirements) ---
-    // Aquí deberías llamar a tu servicio real de requirements
-    // Simulación:
-    /*
-    this.requirementService.getRequirements().subscribe(res => {
-      const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
-      res.data.forEach(req => {
-        if (Array.isArray(req.reminderDates)) {
-          req.reminderDates.forEach(date => {
-            if (date === today) {
-              this.notificationService.show(`¡Tienes un recordatorio para: ${req.title}!`);
-            }
-          });
+    // Cargar los valores del backend para anuncio
+    const announcementKeys = [
+      { key: 'announcementTitle', prop: 'announcementTitle' },
+      { key: 'announcementImage', prop: 'announcementImage' },
+      { key: 'announcementButtonText', prop: 'announcementButtonText' },
+      { key: 'announcementDeadline', prop: 'announcementDeadline' },
+      { key: 'announcementDetails', prop: 'announcementDetails' },
+      { key: 'announcementLink', prop: 'announcementLink' }
+    ];
+    announcementKeys.forEach(({ key, prop }) => {
+      this.settingsService.getSettingByKey(key).subscribe({
+        next: (res) => {
+          if (res && res.value) {
+            (this as any)[prop] = res.value;
+          }
         }
       });
     });
-    */
+
     this.showAnnouncementModal = true;
   }
 
