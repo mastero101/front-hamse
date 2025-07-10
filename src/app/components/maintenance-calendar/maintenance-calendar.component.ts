@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { ActivityService, Activity, PaginatedActivitiesResponse } from '../../services/activity.service';
 import { ScheduleService, Schedule, ActivityStatusPayload } from '../../services/schedule.service';
 import { SettingsService } from '../../services/settings.service';
+import { AuditLogService, AuditLog } from '../../services/audit-log.service';
 
 type ActivityStatus = 'sin_revision' | 'verificado' | 'no_aplica';
 interface CalendarActivity extends Activity { status: ActivityStatus; }
@@ -64,7 +65,8 @@ export class MaintenanceCalendarComponent implements OnInit {
   constructor(
     private activityService: ActivityService,
     private scheduleService: ScheduleService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private auditLogService: AuditLogService
   ) {}
 
   ngOnInit() {
@@ -363,6 +365,14 @@ export class MaintenanceCalendarComponent implements OnInit {
     // Ahora las actividades visibles ya son las del schedule, así que puedes usar directamente:
     const activitiesToUpdate = this.activities;
 
+    // Llamar al método de auditoría antes de enviar al backend
+    const auditInfo = this.buildAuditInfo(activitiesToUpdate);
+    console.log('AUDITORÍA DE GUARDADO:', auditInfo);
+    this.auditLogService.createAuditLog(auditInfo).subscribe({
+      next: log => console.log('Auditoría registrada en backend:', log),
+      error: err => console.error('Error al registrar auditoría en backend:', err)
+    });
+
     const payload: ActivityStatusPayload = {
       statuses: activitiesToUpdate.map(a => ({ 
         activityId: a.id, 
@@ -647,5 +657,34 @@ export class MaintenanceCalendarComponent implements OnInit {
   cancelEditReminderImage() {
     this.editingReminderImage = false;
     this.reminderImageError = '';
+  }
+
+  // Devuelve el objeto de auditoría
+  private buildAuditInfo(activitiesToUpdate: CalendarActivity[]): AuditLog {
+    let user = { id: '', name: '', role: '' };
+    try {
+      const userData = localStorage.getItem('currentUser');
+      if (userData) {
+        const parsed = JSON.parse(userData);
+        user = {
+          id: parsed.id || '',
+          name: parsed.username || '',
+          role: parsed.role || ''
+        };
+      }
+    } catch {}
+    return {
+      userId: user.id,
+      userName: user.name,
+      userRole: user.role,
+      timestamp: new Date().toISOString(),
+      action: 'update_activity_statuses',
+      scheduleId: this.currentScheduleId!,
+      activities: activitiesToUpdate.map(a => ({
+        id: a.id,
+        name: a.name,
+        status: a.status
+      }))
+    };
   }
 }

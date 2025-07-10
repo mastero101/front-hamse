@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivityService, Activity } from '../../services/activity.service';
+import { AuditLogService, AuditLog } from '../../services/audit-log.service';
+import { FormsModule } from '@angular/forms';
 
 interface ActivityWithActive extends Activity {
   active: boolean;
@@ -9,7 +11,7 @@ interface ActivityWithActive extends Activity {
 @Component({
   selector: 'app-settings-activities',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './settings-activities.component.html',
   styleUrl: './settings-activities.component.scss'
 })
@@ -17,7 +19,21 @@ export class SettingsActivitiesComponent implements OnInit {
   activities: ActivityWithActive[] = [];
   isLoading = false;
 
-  constructor(private activityService: ActivityService) {}
+  
+  auditLogs: AuditLog[] = [];
+  isLoadingLogs = false;
+
+  filtros = {
+    userName: '',
+    action: '',
+    from: '',
+    to: ''
+  };
+
+  constructor(
+    private activityService: ActivityService,
+    private auditLogService: AuditLogService
+  ) {}
 
   ngOnInit() {
     this.isLoading = true;
@@ -33,6 +49,37 @@ export class SettingsActivitiesComponent implements OnInit {
         this.isLoading = false;
       }
     });
+
+    this.cargarLogs();
+  }
+
+  cargarLogs() {
+    this.isLoadingLogs = true;
+    const params: any = {};
+    if (this.filtros.action) params.action = this.filtros.action;
+    if (this.filtros.from) params.from = this.filtros.from;
+    if (this.filtros.to) params.to = this.filtros.to;
+    this.auditLogService.getAuditLogs(params).subscribe({
+      next: (logs) => {
+        // Filtro de usuario por nombre en frontend
+        this.auditLogs = this.filtros.userName
+          ? logs.filter(log => log.userName?.toLowerCase().includes(this.filtros.userName.toLowerCase()))
+          : logs;
+        this.isLoadingLogs = false;
+      },
+      error: () => {
+        this.isLoadingLogs = false;
+      }
+    });
+  }
+
+  filtrarLogs() {
+    this.cargarLogs();
+  }
+
+  limpiarFiltros() {
+    this.filtros = { userName: '', action: '', from: '', to: '' };
+    this.cargarLogs();
   }
 
   toggleActive(activity: any) {

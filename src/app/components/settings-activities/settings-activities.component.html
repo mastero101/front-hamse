@@ -1,7 +1,8 @@
 <div class="settings-activities-container">
-  <h2>Configuración de Actividades</h2>
+  <h2>Bitacora</h2>
   <div *ngIf="isLoading" class="loading">Cargando actividades...</div>
   <div *ngIf="!isLoading && activities.length === 0" class="no-activities">No hay actividades registradas.</div>
+  <!--
   <table *ngIf="!isLoading && activities.length > 0" class="activities-table">
     <thead>
       <tr>
@@ -18,6 +19,61 @@
             <span class="slider round"></span>
           </label>
           <span class="status-label">{{ activity.active ? 'Activa' : 'Inactiva' }}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  -->
+
+  <h3 style="margin-top:2rem;">Bitácora de Operación y Mantenimiento</h3>
+  <form class="log-filters" (ngSubmit)="filtrarLogs()" autocomplete="off">
+    <label>
+      Usuario:
+      <input type="text" [(ngModel)]="filtros.userName" name="userName" placeholder="Usuario">
+    </label>
+    <label>
+      Acción:
+      <select [(ngModel)]="filtros.action" name="action">
+        <option value="">Todas</option>
+        <option value="update_activity_statuses">Actualizar actividades</option>
+        <!-- Puedes agregar más acciones si las tienes -->
+      </select>
+    </label>
+    <label>
+      Desde:
+      <input type="date" [(ngModel)]="filtros.from" name="from">
+    </label>
+    <label>
+      Hasta:
+      <input type="date" [(ngModel)]="filtros.to" name="to">
+    </label>
+    <button type="submit">Filtrar</button>
+    <button type="button" (click)="limpiarFiltros()">Limpiar</button>
+  </form>
+  <div *ngIf="isLoadingLogs" class="loading">Cargando logs de auditoría...</div>
+  <div *ngIf="!isLoadingLogs && auditLogs.length === 0" class="no-logs">No hay registros de auditoría.</div>
+  <table *ngIf="!isLoadingLogs && auditLogs.length > 0" class="logs-table">
+    <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Acción</th>
+        <th>Fecha</th>
+        <th>Schedule</th>
+        <th>Actividades</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let log of auditLogs">
+        <td>{{ log.userName }} ({{ log.userRole }})</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.timestamp | date:'short' }}</td>
+        <td>{{ log.scheduleId }}</td>
+        <td>
+          <ul>
+            <li *ngFor="let act of log.activities">
+              {{ act.name }} ({{ act.status }})
+            </li>
+          </ul>
         </td>
       </tr>
     </tbody>

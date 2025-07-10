@@ -88,4 +88,79 @@ input:checked + .slider:before {
 }
 .slider.round {
   border-radius: 26px;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+
+  th, td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+
+  th {
+    background: #f3f4f6;
+    font-weight: 600;
+    text-align: center;
+    color: #1a237e;
+    font-size: 1.05rem;
+  }
+
+  tr:nth-child(even) {
+    background: #f9fafb;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.2em;
+    list-style: disc;
+  }
+}
+
+.no-logs, .loading {
+  margin: 2rem 0;
+  text-align: center;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+// Filtros de logs
+.log-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1.5rem 0 1rem 0;
+  align-items: flex-end;
+}
+.log-filters label {
+  font-weight: 500;
+  color: #1a237e;
+  margin-right: 0.5rem;
+}
+.log-filters input, .log-filters select {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+.log-filters button {
+  background: #1a237e;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.4rem 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.log-filters button:hover {
+  background: #3949ab;
 } 
