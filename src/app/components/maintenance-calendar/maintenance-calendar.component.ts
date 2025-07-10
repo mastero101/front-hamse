@@ -678,7 +678,7 @@ export class MaintenanceCalendarComponent implements OnInit {
       userName: user.name,
       userRole: user.role,
       timestamp: new Date().toISOString(),
-      action: 'update_activity_statuses',
+      action: 'update_activity_statuses_Calendar',
       scheduleId: this.currentScheduleId!,
       activities: activitiesToUpdate.map(a => ({
         id: a.id,

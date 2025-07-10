@@ -63,13 +63,18 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let log of auditLogs">
+      <tr *ngFor="let log of auditLogs; let i = index">
         <td>{{ log.userName }} ({{ log.userRole }})</td>
         <td>{{ log.action }}</td>
         <td>{{ log.timestamp | date:'short' }}</td>
         <td>{{ log.scheduleId }}</td>
         <td>
-          <ul>
+          <button type="button" (click)="toggleExpandLog(i)" class="expand-btn">
+            <span *ngIf="!isLogExpanded(i)">➕</span>
+            <span *ngIf="isLogExpanded(i)">➖</span>
+            {{ isLogExpanded(i) ? 'Ocultar' : 'Ver' }} ({{ log.activities.length }})
+          </button>
+          <ul *ngIf="isLogExpanded(i)">
             <li *ngFor="let act of log.activities">
               {{ act.name }} ({{ act.status }})
             </li>

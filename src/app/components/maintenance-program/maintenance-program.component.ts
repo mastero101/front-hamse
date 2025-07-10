@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivityService, PaginatedActivitiesResponse, Activity as ServiceActivity } from '../../services/activity.service';
 import { ScheduleService, Schedule } from '../../services/schedule.service';
+import { AuditLogService } from '../../services/audit-log.service';
 
 interface Month {
   name: string;
@@ -53,7 +54,8 @@ export class MaintenanceProgramComponent implements OnInit {
 
   constructor(
     private activityService: ActivityService,
-    private scheduleService: ScheduleService
+    private scheduleService: ScheduleService,
+    private auditLogService: AuditLogService
   ) { }
 
   ngOnInit(): void {
@@ -210,7 +212,7 @@ export class MaintenanceProgramComponent implements OnInit {
           if (createdSchedule && createdSchedule.id) {
             // Cambiar scheduleId a currentProgramScheduleId
             this.currentProgramScheduleId = createdSchedule.id; // Actualizamos el scheduleId en el componente
-            // Cambiar scheduleId a currentProgramScheduleId
+            this.registrarLogDeActividades(activitiesToSave);
             alert('Nuevo programa guardado exitosamente con ID: ' + this.currentProgramScheduleId);
           } else {
             console.error('Schedule created but ID is missing in the response.');
@@ -238,6 +240,7 @@ export class MaintenanceProgramComponent implements OnInit {
       this.scheduleService.updateSchedule(this.currentProgramScheduleId, scheduleUpdatePayload).subscribe({
         next: (updatedSchedule) => {
           console.log('Estado del programa guardado exitosamente. Respuesta del backend:', updatedSchedule);
+          this.registrarLogDeActividades(activitiesToSave);
           alert('Cambios guardados exitosamente.');
           this.isLoading = false;
         },
@@ -249,6 +252,42 @@ export class MaintenanceProgramComponent implements OnInit {
         }
       });
     }
+  }
+
+  private buildAuditInfo(activitiesToUpdate: ProgramActivity[]): any {
+    let user = { id: '', name: '', role: '' };
+    try {
+      const userData = localStorage.getItem('currentUser');
+      if (userData) {
+        const parsed = JSON.parse(userData);
+        user = {
+          id: parsed.id || '',
+          name: parsed.username || '',
+          role: parsed.role || ''
+        };
+      }
+    } catch {}
+    return {
+      userId: user.id,
+      userName: user.name,
+      userRole: user.role,
+      timestamp: new Date().toISOString(),
+      action: 'update_activity_statuses_Program',
+      scheduleId: this.currentProgramScheduleId,
+      activities: activitiesToUpdate.map(a => ({
+        id: a.id,
+        name: a.name,
+        status: a.checkedWeeks && a.checkedWeeks.length > 0 ? 'con_estado' : 'sin_estado'
+      }))
+    };
+  }
+
+  private registrarLogDeActividades(activitiesToUpdate: ProgramActivity[]) {
+    const auditInfo = this.buildAuditInfo(activitiesToUpdate);
+    this.auditLogService.createAuditLog(auditInfo).subscribe({
+      next: log => console.log('Auditoría registrada en backend:', log),
+      error: err => console.error('Error al registrar auditoría en backend:', err)
+    });
   }
 
   isWeekChecked(activity: ProgramActivity, month: Month, week: number): boolean {

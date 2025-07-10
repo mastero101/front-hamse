@@ -30,6 +30,8 @@ export class SettingsActivitiesComponent implements OnInit {
     to: ''
   };
 
+  expandedLogs = new Set<number>(); // Usamos el índice como identificador
+
   constructor(
     private activityService: ActivityService,
     private auditLogService: AuditLogService
@@ -86,5 +88,17 @@ export class SettingsActivitiesComponent implements OnInit {
     activity.active = !activity.active;
     // Aquí podrías llamar al backend para guardar el cambio
     // Por ahora solo cambia en frontend
+  }
+
+  toggleExpandLog(index: number) {
+    if (this.expandedLogs.has(index)) {
+      this.expandedLogs.delete(index);
+    } else {
+      this.expandedLogs.add(index);
+    }
+  }
+
+  isLogExpanded(index: number): boolean {
+    return this.expandedLogs.has(index);
   }
 } 

@@ -1484,3 +1484,13 @@
   background: #bdbdbd;
   color: #1a237e;
 }
+
+.loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #1a237e;
+  font-size: 1.1em;
+  min-height: 80px;
+}

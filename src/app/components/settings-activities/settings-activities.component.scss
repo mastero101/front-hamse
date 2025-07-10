@@ -163,4 +163,20 @@ input:checked + .slider:before {
 }
 .log-filters button:hover {
   background: #3949ab;
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  color: #1a237e;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 0.3em;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  &:hover {
+    text-decoration: underline;
+  }
 } 

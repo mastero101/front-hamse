@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RequirementService, Requirement } from '../../services/requirement.service';
 import { FormsModule } from '@angular/forms';
+import { AuditLogService } from '../../services/audit-log.service';
 
 @Component({
   selector: 'app-dependency-reports',
@@ -40,12 +41,12 @@ export class DependencyReportsComponent implements OnInit {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private requirementService: RequirementService // Asegurarse de que RequirementService está inyectado
+    private requirementService: RequirementService,
+    private auditLogService: AuditLogService
   ) {}
 
   ngOnInit() {
     this.loadRequirements(this.selectedTab);
-    // Inicializar el calendario al mes actual por si se abre directamente
     this.generateCalendarDays(this.calendarViewDate);
   }
 
@@ -86,6 +87,8 @@ export class DependencyReportsComponent implements OnInit {
         if (index !== -1) {
           this.currentRequirements[index].completed = updatedRequirement.completed;
         }
+        // REGISTRO DE AUDITORÍA
+        this.registrarLogDeDependencia(requirement, newStatus);
       },
       error: (error) => {
         console.error('Error al actualizar el requerimiento:', error);
@@ -221,7 +224,9 @@ export class DependencyReportsComponent implements OnInit {
       const reminderDatesISO = this.selectedReminderDates.map(date =>
         date.toISOString().split('T')[0]
       );
-      this.requirementService.updateRequirement(this.currentRequirementForReminder.id, {
+      // Guarda el requerimiento en una variable temporal
+      const req = this.currentRequirementForReminder;
+      this.requirementService.updateRequirement(req.id, {
         reminderDates: reminderDatesISO
       }).subscribe({
         next: (updatedRequirement) => {
@@ -232,6 +237,8 @@ export class DependencyReportsComponent implements OnInit {
             this.currentRequirements[index].reminderDates = updatedRequirement.reminderDates;
           }
           alert('Recordatorio guardado con éxito.');
+          // REGISTRO DE AUDITORÍA
+          this.registrarLogDeDependenciaRecordatorio(req, reminderDatesISO);
         },
         error: (error) => {
           console.error('Error al guardar el recordatorio:', error);
@@ -340,6 +347,8 @@ export class DependencyReportsComponent implements OnInit {
           this.respaldoSuccessMsg = '';
           this.closeRespaldoModal();
         }, 1200);
+        // REGISTRO DE AUDITORÍA
+        this.registrarLogDeDependenciaRespaldo(this.currentRequirementForRespaldo, this.respaldoNota, !!this.respaldoArchivo);
       },
       error: (error) => {
         console.error('Error al guardar el respaldo:', error);
@@ -397,6 +406,111 @@ export class DependencyReportsComponent implements OnInit {
 
   openProviderUrl(url: string) {
     window.open(url, '_blank');
+  }
+
+  private registrarLogDeDependencia(requirement: any, nuevoEstado: boolean) {
+    let user = { id: '', name: '', role: '' };
+    try {
+      const userData = localStorage.getItem('currentUser');
+      if (userData) {
+        const parsed = JSON.parse(userData);
+        user = {
+          id: parsed.id || '',
+          name: parsed.username || '',
+          role: parsed.role || ''
+        };
+      }
+    } catch {}
+    const log = {
+      userId: user.id,
+      userName: user.name,
+      userRole: user.role,
+      timestamp: new Date().toISOString(),
+      action: 'update_requirement_status_Dependency',
+      scheduleId: requirement.id || 'DEPENDENCY', // <-- nunca vacío
+      activities: [
+        {
+          id: requirement.id,
+          name: requirement.title,
+          status: nuevoEstado ? 'completed' : 'not_completed'
+        }
+      ]
+    };
+    console.log('[AUDIT] Enviando log de dependencia:', log);
+    this.auditLogService.createAuditLog(log).subscribe({
+      next: log => console.log('[AUDIT] Respuesta backend:', log),
+      error: err => console.error('[AUDIT] Error al registrar auditoría en backend:', err)
+    });
+  }
+
+  private registrarLogDeDependenciaRespaldo(requirement: any, nota: string, archivoAdjunto: boolean) {
+    let user = { id: '', name: '', role: '' };
+    try {
+      const userData = localStorage.getItem('currentUser');
+      if (userData) {
+        const parsed = JSON.parse(userData);
+        user = {
+          id: parsed.id || '',
+          name: parsed.username || '',
+          role: parsed.role || ''
+        };
+      }
+    } catch {}
+    const log = {
+      userId: user.id,
+      userName: user.name,
+      userRole: user.role,
+      timestamp: new Date().toISOString(),
+      action: 'upload_respaldo_Dependency',
+      scheduleId: requirement.id || 'DEPENDENCY', // <-- nunca vacío
+      activities: [
+        {
+          id: requirement.id,
+          name: requirement.title,
+          status: `nota: ${nota ? 'sí' : 'no'}, archivo: ${archivoAdjunto ? 'sí' : 'no'}`
+        }
+      ]
+    };
+    console.log('[AUDIT] Enviando log de respaldo:', log);
+    this.auditLogService.createAuditLog(log).subscribe({
+      next: log => console.log('[AUDIT] Respuesta backend:', log),
+      error: err => console.error('[AUDIT] Error al registrar auditoría de respaldo:', err)
+    });
+  }
+
+  private registrarLogDeDependenciaRecordatorio(requirement: any, fechas: string[]) {
+    let user = { id: '', name: '', role: '' };
+    try {
+      const userData = localStorage.getItem('currentUser');
+      if (userData) {
+        const parsed = JSON.parse(userData);
+        user = {
+          id: parsed.id || '',
+          name: parsed.username || '',
+          role: parsed.role || ''
+        };
+      }
+    } catch {}
+    const log = {
+      userId: user.id,
+      userName: user.name,
+      userRole: user.role,
+      timestamp: new Date().toISOString(),
+      action: 'update_reminder_dates_Dependency',
+      scheduleId: requirement.id || 'DEPENDENCY', // <-- nunca vacío
+      activities: [
+        {
+          id: requirement.id,
+          name: requirement.title,
+          status: `fechas: ${fechas.join(', ')}`
+        }
+      ]
+    };
+    console.log('[AUDIT] Enviando log de recordatorio:', log);
+    this.auditLogService.createAuditLog(log).subscribe({
+      next: log => console.log('[AUDIT] Respuesta backend:', log),
+      error: err => console.error('[AUDIT] Error al registrar auditoría de recordatorio:', err)
+    });
   }
 
 }
