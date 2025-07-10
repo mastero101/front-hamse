@@ -30,7 +30,7 @@ export class SettingsActivitiesComponent implements OnInit {
     to: ''
   };
 
-  expandedLogs = new Set<number>(); // Usamos el índice como identificador
+  expandedLogs = new Set<number>();
 
   constructor(
     private activityService: ActivityService,
@@ -58,16 +58,34 @@ export class SettingsActivitiesComponent implements OnInit {
   cargarLogs() {
     this.isLoadingLogs = true;
     const params: any = {};
-    if (this.filtros.action) params.action = this.filtros.action;
-    if (this.filtros.from) params.from = this.filtros.from;
-    if (this.filtros.to) params.to = this.filtros.to;
+    // Agregar logs para depuración
+    console.log('[BITÁCORA] Filtros antes de formatear:', this.filtros);
+    if (this.filtros.from) {
+      params.from = this.formatDateISO(this.filtros.from);
+      console.log('[BITÁCORA] Fecha desde (formateada):', params.from);
+    }
+    if (this.filtros.to) {
+      params.to = this.formatDateISO(this.filtros.to);
+      console.log('[BITÁCORA] Fecha hasta (formateada):', params.to);
+    }
     this.auditLogService.getAuditLogs(params).subscribe({
       next: (logs) => {
-        // Filtro de usuario por nombre en frontend
-        this.auditLogs = this.filtros.userName
-          ? logs.filter(log => log.userName?.toLowerCase().includes(this.filtros.userName.toLowerCase()))
-          : logs;
+        let filtered = logs;
+        // Filtro de usuario
+        if (this.filtros.userName) {
+          filtered = filtered.filter(log =>
+            log.userName?.toLowerCase().includes(this.filtros.userName.toLowerCase())
+          );
+        }
+        // Filtro de acción (soporta sufijos)
+        if (this.filtros.action) {
+          filtered = filtered.filter(log =>
+            log.action?.startsWith(this.filtros.action)
+          );
+        }
+        this.auditLogs = filtered;
         this.isLoadingLogs = false;
+        console.log('[BITÁCORA] Logs filtrados:', this.auditLogs);
       },
       error: () => {
         this.isLoadingLogs = false;
@@ -76,6 +94,8 @@ export class SettingsActivitiesComponent implements OnInit {
   }
 
   filtrarLogs() {
+    // Agregar log para depuración
+    console.log('[BITÁCORA] Ejecutando filtrarLogs con filtros:', this.filtros);
     this.cargarLogs();
   }
 
@@ -86,8 +106,6 @@ export class SettingsActivitiesComponent implements OnInit {
 
   toggleActive(activity: any) {
     activity.active = !activity.active;
-    // Aquí podrías llamar al backend para guardar el cambio
-    // Por ahora solo cambia en frontend
   }
 
   toggleExpandLog(index: number) {
@@ -100,5 +118,31 @@ export class SettingsActivitiesComponent implements OnInit {
 
   isLogExpanded(index: number): boolean {
     return this.expandedLogs.has(index);
+  }
+
+  // Función auxiliar para formatear la fecha
+  private formatDateISO(dateStr: string): string {
+    if (!dateStr) return '';
+    // Si ya es formato YYYY-MM-DD, regresa igual
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Si es MM/DD/YYYY o DD/MM/YYYY, intenta parsear
+    const parts = dateStr.split(/[\/\-]/);
+    if (parts.length === 3) {
+      // Si el año es primero
+      if (parts[0].length === 4) {
+        return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      }
+      // Si el año es último (DD/MM/YYYY o MM/DD/YYYY)
+      if (parts[2].length === 4) {
+        // Asume MM/DD/YYYY (por input type date en navegadores en inglés)
+        return `${parts[2]}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+      }
+    }
+    // Último recurso: usar Date
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      return d.toISOString().split('T')[0];
+    }
+    return dateStr;
   }
 } 
