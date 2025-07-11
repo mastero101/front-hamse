@@ -86,4 +86,25 @@
       </tr>
     </tbody>
   </table>
+
+  <div *ngIf="isAdmin" class="cleanup-logs-section">
+    <label>
+      Eliminar logs anteriores a
+      <select [(ngModel)]="mesesEliminar" name="mesesEliminar">
+        <option *ngFor="let m of [1,2,3,6,12]" [value]="m">{{m}} mes{{m>1?'es':''}}</option>
+      </select>
+    </label>
+    <button (click)="confirmarEliminarLogs()" [disabled]="isEliminandoLogs">
+      Limpiar logs
+    </button>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div *ngIf="mostrarConfirmacion" class="modal-confirm">
+    <div class="modal-content">
+      <p>¿Seguro que deseas eliminar los logs anteriores a {{mesesEliminar}} mes{{mesesEliminar>1?'es':''}}? Esta acción no se puede deshacer.</p>
+      <button (click)="eliminarLogs()" [disabled]="isEliminandoLogs">Sí, eliminar</button>
+      <button (click)="mostrarConfirmacion=false" [disabled]="isEliminandoLogs">No, cancelar</button>
+    </div>
+  </div>
 </div> 

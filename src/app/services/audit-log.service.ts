@@ -36,4 +36,13 @@ export class AuditLogService {
         .finally(() => subscriber.complete());
     });
   }
+
+  cleanupOldLogs(months: number): Observable<any> {
+    return new Observable(subscriber => {
+      axios.post('/audit-logs/cleanup-old', { months })
+        .then(response => subscriber.next(response.data))
+        .catch(error => subscriber.error(error))
+        .finally(() => subscriber.complete());
+    });
+  }
 } 

@@ -8,7 +8,26 @@
 
 <!-- Modal de Recordatorios -->
 @if (showRemindersModal) {
-  <app-reminders-modal [isVisible]="showRemindersModal" (close)="closeRemindersModal()" />
+  <app-reminders-modal 
+    [isVisible]="showRemindersModal"
+    (close)="closeRemindersModal()"
+    [isAdmin]="isAdmin"
+    [editMode]="editMode"
+    [tempAnnouncement]="tempAnnouncement"
+    [loadingSave]="loadingSave"
+    [loadingImage]="loadingImage"
+    [imageUploadError]="imageUploadError"
+    [reminderTitle]="reminderTitle"
+    [reminderButtonText]="reminderButtonText"
+    [reminderDeadline]="reminderDeadline"
+    [reminderDetails]="reminderDetails"
+    [externalLink]="externalLink"
+    [reminderImage]="reminderImage"
+    (startEditAnnouncement)="onStartEditAnnouncement()"
+    (saveAnnouncement)="onSaveAnnouncement()"
+    (cancelEditAnnouncement)="onCancelEditAnnouncement()"
+    (imageFileSelected)="onAnnouncementImageSelected($event)"
+  />
 }
 
 @if (showAuthModalForLogin) {

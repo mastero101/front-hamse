@@ -11,6 +11,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CustomSnackbarComponent } from './components/custom-snackbar/custom-snackbar.component';
 import { AuthModalComponent } from './components/auth-modal/auth-modal.component';
 import { UserRequirementService } from './services/user-requirement.service';
+import { SettingsService } from './services/settings.service';
 
 @Component({
   selector: 'app-root',
@@ -34,16 +35,34 @@ export class AppComponent implements OnInit, OnDestroy {
   showAuthModalForLogin = false;
   private currentUserSubscription: Subscription | undefined;
 
+  // Para edición del modal de recordatorios
+  isAdmin = false;
+  editMode = false;
+  tempAnnouncement: any = {};
+  loadingSave = false;
+  loadingImage = false;
+  imageUploadError = '';
+
+  // Datos editables del recordatorio
+  reminderTitle = 'Realizar COA';
+  reminderButtonText = 'Ver COA en soluciones HAMSE';
+  reminderDeadline = 'Limite: 30 de junio 2025';
+  reminderDetails = 'Realiza tu trámite COA con nosotros, obten puntos adicionales de fidelidad y descuentos';
+  externalLink = 'https://soluciones.hamse.com.mx/coa';
+  reminderImage = '../../../assets/images/HAMSE_Cedula_Operacion.png';
+
   constructor(
     private authService: AuthService,
     private userRequirementService: UserRequirementService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private settingsService: SettingsService
   ) {
     sessionStorage.removeItem('remindersModalShownThisSession');
   }
 
   ngOnInit(): void {
     this.currentUserSubscription = this.authService.currentUser.subscribe(user => {
+      this.isAdmin = (user?.role || '').toLowerCase() === 'admin';
       if (user) {
         this.showAuthModalForLogin = false;
         if (!sessionStorage.getItem('remindersModalShownThisSession')) {
@@ -58,8 +77,111 @@ export class AppComponent implements OnInit, OnDestroy {
         sessionStorage.removeItem('remindersModalShownThisSession');
       }
     });
-
     this.checkReminders();
+    const reminderKeys = [
+      { key: 'reminderTitle', prop: 'reminderTitle' },
+      { key: 'reminderImage', prop: 'reminderImage' },
+      { key: 'reminderButtonText', prop: 'reminderButtonText' },
+      { key: 'reminderDeadline', prop: 'reminderDeadline' },
+      { key: 'reminderDetails', prop: 'reminderDetails' },
+      { key: 'reminderLink', prop: 'externalLink' }
+    ];
+    reminderKeys.forEach(({ key, prop }) => {
+      this.settingsService.getSettingByKey(key).subscribe({
+        next: (res) => {
+          if (res && res.value) {
+            (this as any)[prop] = res.value;
+          }
+        }
+      });
+    });
+  }
+
+  onStartEditAnnouncement() {
+    this.editMode = true;
+    this.tempAnnouncement = {
+      title: this.reminderTitle,
+      image: this.reminderImage,
+      buttonText: this.reminderButtonText,
+      deadline: this.reminderDeadline,
+      details: this.reminderDetails,
+      link: this.externalLink
+    };
+  }
+
+  onSaveAnnouncement() {
+    this.loadingSave = true;
+    const updates = [
+      { key: 'reminderTitle', value: this.tempAnnouncement.title },
+      { key: 'reminderImage', value: this.tempAnnouncement.image },
+      { key: 'reminderButtonText', value: this.tempAnnouncement.buttonText },
+      { key: 'reminderDeadline', value: this.tempAnnouncement.deadline },
+      { key: 'reminderDetails', value: this.tempAnnouncement.details },
+      { key: 'reminderLink', value: this.tempAnnouncement.link }
+    ];
+    let completed = 0;
+    updates.forEach(update => {
+      this.settingsService.updateSettingByKey(update.key, update.value).subscribe({
+        next: () => {
+          completed++;
+          if (completed === updates.length) {
+            // Actualizar los valores locales
+            this.reminderTitle = this.tempAnnouncement.title;
+            this.reminderImage = this.tempAnnouncement.image;
+            this.reminderButtonText = this.tempAnnouncement.buttonText;
+            this.reminderDeadline = this.tempAnnouncement.deadline;
+            this.reminderDetails = this.tempAnnouncement.details;
+            this.externalLink = this.tempAnnouncement.link;
+            this.editMode = false;
+            this.loadingSave = false;
+          }
+        },
+        error: () => {
+          this.loadingSave = false;
+          // Aquí podrías mostrar un mensaje de error
+        }
+      });
+    });
+  }
+
+  onCancelEditAnnouncement() {
+    this.editMode = false;
+  }
+
+  onImageFileSelected(file: File) {
+    this.loadingImage = true;
+    // Aquí deberías subir la imagen a S3 o backend y luego asignar la URL:
+    // Simulación de subida exitosa:
+    setTimeout(() => {
+      // this.tempAnnouncement.image = 'URL_DE_LA_IMAGEN_SUBIDA';
+      this.loadingImage = false;
+      this.imageUploadError = '';
+    }, 1500);
+    // Si hay error:
+    // this.imageUploadError = 'Error al subir imagen';
+  }
+
+  onAnnouncementImageSelected(file: File) {
+    if (file) {
+      this.loadingImage = true;
+      this.imageUploadError = '';
+      this.settingsService.uploadImage(file).subscribe({
+        next: (res) => {
+          console.log('[UPLOAD] Respuesta del backend:', res);
+          if (res && res.url) {
+            this.tempAnnouncement.image = res.url;
+          } else {
+            this.imageUploadError = 'No se pudo obtener la URL de la imagen.';
+          }
+          this.loadingImage = false;
+        },
+        error: (err) => {
+          console.error('[UPLOAD] Error al subir la imagen:', err);
+          this.imageUploadError = 'Error al subir la imagen.';
+          this.loadingImage = false;
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {

@@ -179,4 +179,66 @@ input:checked + .slider:before {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.cleanup-logs-section {
+  margin: 2rem 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cleanup-logs-section button {
+  background: #1a237e;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.4rem 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 1rem;
+}
+.cleanup-logs-section button:hover {
+  background: #3949ab;
+}
+
+.cleanup-logs-section label {
+  font-weight: 500;
+  color: #1a237e;
+}
+.cleanup-logs-section select {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.modal-confirm {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(26,35,126,0.25); // azul institucional con transparencia
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  .modal-content {
+    background: #fff;
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(26,35,126,0.18);
+    text-align: center;
+    min-width: 320px;
+    max-width: 90vw;
+    button {
+      margin: 0 1rem;
+      min-width: 110px;
+    }
+    p {
+      color: #1a237e;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+  }
 } 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivityService, Activity } from '../../services/activity.service';
 import { AuditLogService, AuditLog } from '../../services/audit-log.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 interface ActivityWithActive extends Activity {
   active: boolean;
@@ -32,9 +33,15 @@ export class SettingsActivitiesComponent implements OnInit {
 
   expandedLogs = new Set<number>();
 
+  isAdmin = false;
+  mesesEliminar = 2;
+  mostrarConfirmacion = false;
+  isEliminandoLogs = false;
+
   constructor(
     private activityService: ActivityService,
-    private auditLogService: AuditLogService
+    private auditLogService: AuditLogService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -52,6 +59,8 @@ export class SettingsActivitiesComponent implements OnInit {
       }
     });
 
+    // Validar admin igual que navigation
+    this.isAdmin = this.authService.currentUserValue?.role === 'admin';
     this.cargarLogs();
   }
 
@@ -118,6 +127,28 @@ export class SettingsActivitiesComponent implements OnInit {
 
   isLogExpanded(index: number): boolean {
     return this.expandedLogs.has(index);
+  }
+
+  confirmarEliminarLogs() {
+    this.mostrarConfirmacion = true;
+  }
+
+  eliminarLogs() {
+    this.isEliminandoLogs = true;
+    this.auditLogService.cleanupOldLogs(this.mesesEliminar).subscribe({
+      next: (res) => {
+        alert(res.message || 'Logs eliminados correctamente');
+        this.mostrarConfirmacion = false;
+        this.cargarLogs();
+      },
+      error: (err) => {
+        alert('Error al eliminar logs: ' + (err?.error?.message || ''));
+        this.mostrarConfirmacion = false;
+      },
+      complete: () => {
+        this.isEliminandoLogs = false;
+      }
+    });
   }
 
   // Función auxiliar para formatear la fecha
