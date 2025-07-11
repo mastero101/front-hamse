@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { RequirementService, Requirement } from '../../services/requirement.service';
 import { FormsModule } from '@angular/forms';
 import { AuditLogService } from '../../services/audit-log.service';
+import { UserRequirementService } from '../../services/user-requirement.service';
 
 @Component({
   selector: 'app-dependency-reports',
@@ -41,8 +42,9 @@ export class DependencyReportsComponent implements OnInit {
 
   constructor(
     private sanitizer: DomSanitizer,
-    private requirementService: RequirementService,
-    private auditLogService: AuditLogService
+    private userRequirementService: UserRequirementService,
+    private auditLogService: AuditLogService,
+    private requirementService: RequirementService
   ) {}
 
   ngOnInit() {
@@ -63,36 +65,34 @@ export class DependencyReportsComponent implements OnInit {
   }
 
   loadRequirements(dependency: string) {
-    // Modificar para usar el servicio que interactúa con el backend
-    this.requirementService.getRequirements(dependency).subscribe({
+    this.userRequirementService.getAllUserRequirements().subscribe({
       next: (response: any) => {
-        this.currentRequirements = response.data;
-        console.log(`Requerimientos cargados para ${dependency}:`, this.currentRequirements); // Log the array
+        // Filtrar por dependencia seleccionada
+        this.currentRequirements = (response.data || []).filter((req: any) => req.dependency === dependency);
+        // Cada req tiene req.userRequirement con los datos individuales
       },
       error: (error) => {
-        console.error('Error cargando requerimientos desde el backend:', error);
+        console.error('Error cargando requerimientos:', error);
       }
     });
   }
 
   // Nuevo método para actualizar el estado 'completed'
-  updateRequirementStatus(requirement: Requirement, event: any) {
+  updateRequirementStatus(requirement: any, event: any) {
     const newStatus = event.target.checked;
-    console.log(`Actualizando requerimiento ${requirement.id} a completed: ${newStatus}`);
-
-    this.requirementService.updateRequirement(requirement.id, { completed: newStatus }).subscribe({
-      next: (updatedRequirement) => {
-        console.log('Requerimiento actualizado con éxito:', updatedRequirement);
-        const index = this.currentRequirements.findIndex(req => req.id === updatedRequirement.id);
-        if (index !== -1) {
-          this.currentRequirements[index].completed = updatedRequirement.completed;
-        }
-        // REGISTRO DE AUDITORÍA
+    const userReq = requirement.userRequirement || {};
+    this.userRequirementService.upsertUserRequirement({
+      requirementId: requirement.id,
+      completed: newStatus,
+      reminderDates: userReq.reminderDates || [],
+      respaldo: userReq.respaldo || {}
+    }).subscribe({
+      next: (resp) => {
+        requirement.userRequirement = resp.data;
         this.registrarLogDeDependencia(requirement, newStatus);
       },
       error: (error) => {
         console.error('Error al actualizar el requerimiento:', error);
-        // Revertir el estado del checkbox en caso de error
         event.target.checked = !newStatus;
         alert('Error al actualizar el estado del requerimiento.');
       }
@@ -119,8 +119,8 @@ export class DependencyReportsComponent implements OnInit {
     this.calendarViewDate = new Date();
 
     // Cargar todas las fechas guardadas
-    if (Array.isArray(requirement.reminderDates)) {
-      this.selectedReminderDates = requirement.reminderDates.map((dateStr: string) => new Date(dateStr));
+    if (Array.isArray(requirement.userRequirement?.reminderDates)) {
+      this.selectedReminderDates = requirement.userRequirement.reminderDates.map((dateStr: string) => new Date(dateStr));
     } else {
       this.selectedReminderDates = [];
     }
@@ -224,20 +224,17 @@ export class DependencyReportsComponent implements OnInit {
       const reminderDatesISO = this.selectedReminderDates.map(date =>
         date.toISOString().split('T')[0]
       );
-      // Guarda el requerimiento en una variable temporal
       const req = this.currentRequirementForReminder;
-      this.requirementService.updateRequirement(req.id, {
-        reminderDates: reminderDatesISO
+      const userReq = req.userRequirement || {};
+      this.userRequirementService.upsertUserRequirement({
+        requirementId: req.id,
+        completed: userReq.completed || false,
+        reminderDates: reminderDatesISO,
+        respaldo: userReq.respaldo || {}
       }).subscribe({
-        next: (updatedRequirement) => {
-          console.log('Requerimiento actualizado con recordatorio:', updatedRequirement);
-          // Opcional: Actualizar el requerimiento en la lista local si es necesario
-          const index = this.currentRequirements.findIndex(req => req.id === updatedRequirement.id);
-          if (index !== -1) {
-            this.currentRequirements[index].reminderDates = updatedRequirement.reminderDates;
-          }
+        next: (resp) => {
+          req.userRequirement = resp.data;
           alert('Recordatorio guardado con éxito.');
-          // REGISTRO DE AUDITORÍA
           this.registrarLogDeDependenciaRecordatorio(req, reminderDatesISO);
         },
         error: (error) => {
@@ -322,47 +319,70 @@ export class DependencyReportsComponent implements OnInit {
     if (!this.currentRequirementForRespaldo) return;
     this.respaldoErrorMsg = '';
     this.respaldoSuccessMsg = '';
-    // Permitir nota sola, archivo solo, o ambos
     if (!this.respaldoArchivo && !this.respaldoNota.trim()) {
       this.respaldoErrorMsg = 'Debes ingresar una nota, seleccionar un archivo, o ambos.';
       return;
     }
     this.isRespaldoSaving = true;
-    this.requirementService.uploadRespaldo(
-      this.currentRequirementForRespaldo.id,
-      this.respaldoArchivo,
-      this.respaldoNota
-    ).subscribe({
-      next: (response) => {
-        this.respaldoSuccessMsg = 'Respaldo guardado con éxito.';
-        // Actualizar el requerimiento en la lista local si es necesario
-        const index = this.currentRequirements.findIndex(req => req.id === this.currentRequirementForRespaldo.id);
-        if (index !== -1) {
-          this.currentRequirements[index].respaldo = response.respaldo;
+    const req = this.currentRequirementForRespaldo;
+    const userReq = req.userRequirement || {};
+
+    // Función para guardar el respaldo en UserRequirement
+    const saveUserRespaldo = (url: string) => {
+      const respaldoObj = {
+        url: url || '',
+        nota: this.respaldoNota || userReq.respaldo?.nota || ''
+      };
+      this.userRequirementService.upsertUserRequirement({
+        requirementId: req.id,
+        completed: userReq.completed || false,
+        reminderDates: userReq.reminderDates || [],
+        respaldo: respaldoObj
+      }).subscribe({
+        next: (resp) => {
+          req.userRequirement = resp.data;
+          this.respaldoSuccessMsg = 'Respaldo guardado con éxito.';
+          setTimeout(() => {
+            this.respaldoSuccessMsg = '';
+            this.closeRespaldoModal();
+          }, 1200);
+          this.registrarLogDeDependenciaRespaldo(req, this.respaldoNota, !!this.respaldoArchivo);
+        },
+        error: (error) => {
+          console.error('Error al guardar el respaldo:', error);
+          this.respaldoErrorMsg = 'Error al guardar el respaldo. Intenta de nuevo.';
+        },
+        complete: () => {
+          this.isRespaldoSaving = false;
         }
-        // Limpiar campos
-        this.respaldoNota = '';
-        this.respaldoArchivo = null;
-        setTimeout(() => {
-          this.respaldoSuccessMsg = '';
-          this.closeRespaldoModal();
-        }, 1200);
-        // REGISTRO DE AUDITORÍA
-        this.registrarLogDeDependenciaRespaldo(this.currentRequirementForRespaldo, this.respaldoNota, !!this.respaldoArchivo);
-      },
-      error: (error) => {
-        console.error('Error al guardar el respaldo:', error);
-        this.respaldoErrorMsg = 'Error al guardar el respaldo. Intenta de nuevo.';
-      },
-      complete: () => {
-        this.isRespaldoSaving = false;
-      }
-    });
+      });
+    };
+
+    // Si hay archivo, súbelo primero y luego guarda el respaldo
+    if (this.respaldoArchivo) {
+      this.userRequirementService.uploadRespaldo(
+        req.id,
+        this.respaldoArchivo,
+        this.respaldoNota
+      ).subscribe({
+        next: (response) => {
+          const url = response.respaldo?.url || '';
+          saveUserRespaldo(url);
+        },
+        error: (error) => {
+          console.error('Error al subir el archivo de respaldo:', error);
+          this.respaldoErrorMsg = 'Error al subir el archivo. Intenta de nuevo.';
+          this.isRespaldoSaving = false;
+        }
+      });
+    } else {
+      // Solo nota
+      saveUserRespaldo(userReq.respaldo?.url || '');
+    }
   }
 
   openRespaldoViewModal(requirement: any) {
-    // Asegurarse de que respaldo esté parseado
-    let respaldo = requirement.respaldo;
+    let respaldo = requirement.userRequirement?.respaldo;
     if (typeof respaldo === 'string') {
       try {
         respaldo = JSON.parse(respaldo);

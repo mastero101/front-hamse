@@ -48,9 +48,9 @@
           </div>
           <div class="requirement-actions">
             <div class="status-check">
-              <input type="checkbox" [id]="'req-' + requirement.id" [checked]="requirement.completed" (change)="updateRequirementStatus(requirement, $event)">
-              <label [for]="'req-' + requirement.id" [class.completed]="requirement.completed">
-                {{ requirement.completed ? 'Realizado' : 'Sin realizar' }}
+              <input type="checkbox" [id]="'req-' + requirement.id" [checked]="requirement.userRequirement?.completed" (change)="updateRequirementStatus(requirement, $event)">
+              <label [for]="'req-' + requirement.id" [class.completed]="requirement.userRequirement?.completed">
+                {{ requirement.userRequirement?.completed ? 'Realizado' : 'Sin realizar' }}
               </label>
             </div>
             <button class="btn-annotations" (click)="openVideoModal(requirement.videoUrl)" [disabled]="!hasValidVideoUrl(requirement.videoUrl)">Anotaciones</button>
@@ -62,7 +62,7 @@
                 <i class="fas fa-upload"></i> Respaldo
               </button>
               <button
-                *ngIf="hasRespaldoContent(requirement.respaldo)"
+                *ngIf="hasRespaldoContent(requirement.userRequirement?.respaldo)"
                 class="btn-action ver-respaldo-btn"
                 (click)="openRespaldoViewModal(requirement)">
                 <i class="fas fa-file"></i> Ver respaldo
