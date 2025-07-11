@@ -5,6 +5,7 @@ import { DependencyReportsComponent } from './components/dependency-reports/depe
 import { ServicesOfferedComponent } from './components/services-offered/services-offered.component';
 import { PreventiveMaintenanceComponent } from './components/preventive-maintenance/preventive-maintenance.component';
 import { SettingsActivitiesComponent } from './components/settings-activities/settings-activities.component';
+import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
     {
@@ -29,7 +30,8 @@ export const routes: Routes = [
     },
     {
         path: 'configuracion-actividades',
-        component: SettingsActivitiesComponent
+        component: SettingsActivitiesComponent,
+        canActivate: [AdminGuard]
     },
     {
         path: '',

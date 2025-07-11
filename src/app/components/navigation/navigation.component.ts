@@ -17,7 +17,7 @@ export class NavigationComponent {
     { path: 'reportes-dependencias', label: 'Reportes a dependencias', icon: 'file-text' },
     { path: 'servicios', label: 'Productos y Servicios', icon: 'clipboard' },
     { path: 'mantenimiento-preventivo', label: 'Mantenimiento Preventivo', icon: 'book' },
-    { path: 'configuracion-actividades', label: 'Configuración', icon: 'cog' }
+    { path: 'configuracion-actividades', label: 'Bitacora', icon: 'cog', adminOnly: true }
   ];
 
   showAuthModal = false;
@@ -27,6 +27,10 @@ export class NavigationComponent {
 
   get isAdmin(): boolean {
     return this.authService.currentUserValue?.role === 'admin';
+  }
+
+  get visibleNavItems() {
+    return this.navItems.filter(item => !item.adminOnly || this.isAdmin);
   }
 
   openRegisterModal() {
