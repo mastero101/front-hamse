@@ -5,14 +5,28 @@
     <ul class="nav-items">
       @for (item of visibleNavItems; track item.path) {
         <li>
-          <a [routerLink]="item.path" 
-             routerLinkActive="active"
-             [routerLinkActiveOptions]="{exact: true}">
-            <div class="icon-wrapper">
-              <i class="fa-solid fa-{{item.icon}}"></i>
-            </div>
-            <span>{{item.label}}</span>
-          </a>
+          @if (item.isExternal) {
+            <!-- Enlace EXTERNO (Portal Embarques) -->
+            <a [href]="item.externalUrl" 
+               target="_blank"
+               rel="noopener noreferrer"
+               class="external-link">
+              <div class="icon-wrapper">
+                <i class="fa-solid fa-{{item.icon}}"></i>
+              </div>
+              <span>{{item.label}} <i class="fa-solid fa-up-right-from-square external-icon"></i></span>
+            </a>
+          } @else {
+            <!-- Enlaces INTERNOS normales -->
+            <a [routerLink]="item.path" 
+               routerLinkActive="active"
+               [routerLinkActiveOptions]="{exact: true}">
+              <div class="icon-wrapper">
+                <i class="fa-solid fa-{{item.icon}}"></i>
+              </div>
+              <span>{{item.label}}</span>
+            </a>
+          }
         </li>
       }
     </ul>
@@ -27,7 +41,6 @@
           }
           <button class="btn-logout" (click)="logout()">
             <i class="fa-solid fa-sign-out-alt"></i>
-            
           </button>
         </div>
       } @else {
