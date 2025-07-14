@@ -130,31 +130,41 @@
       </div>
     </div>
   </div>
-
-  <!-- Modal de Respaldo -->
-  <div class="modal-overlay" *ngIf="isRespaldoModalVisible" (click)="closeRespaldoModal()">
-    <div class="modal-container" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Logo.png')">
-        <span>Respaldo</span>
-        <button class="close-button" (click)="closeRespaldoModal()" aria-label="Cerrar modal">
-          <i class="fas fa-times"></i>
-        </button>
+  
+  <!-- Modal de Respaldo (actualizado) -->
+<div class="modal-overlay" *ngIf="isRespaldoModalVisible" (click)="closeRespaldoModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <img src="../../../assets/images/HAMSE_Logo.png" alt="Hamse Logo" class="header-logo" (error)="setFallback($event, '/calendario-preventivo/assets/images/HAMSE_Logo.png')">
+      <span>Respaldo</span>
+      <button class="close-button" (click)="closeRespaldoModal()" aria-label="Cerrar modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-content" style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+      <label for="respaldoNota">Nota:</label>
+      <textarea id="respaldoNota" [(ngModel)]="respaldoNota" rows="3" placeholder="Escribe una nota sencilla..."></textarea>
+      <label for="respaldoArchivo">Archivo (PDF, JPG, PNG, etc.):</label>
+      <input id="respaldoArchivo" type="file" (change)="onRespaldoFileChange($event)" accept=".pdf,.jpg,.jpeg,.png">
+      <div *ngIf="respaldoErrorMsg" class="error-msg">{{ respaldoErrorMsg }}</div>
+      <div *ngIf="respaldoSuccessMsg" class="success-msg">{{ respaldoSuccessMsg }}</div>
+      
+      <!-- Nuevo: Enlace al aviso de privacidad -->
+      <div style="align-self: flex-end; margin-top: -10px; margin-bottom: 10px;">
+        <a href="https://www.hamse.mx/documents/AvisoPrivacidadHamse.pdf" 
+           target="_blank" 
+           style="color: #666; font-size: 0.8rem; text-decoration: none;">
+          <i class="fas fa-shield-alt" style="margin-right: 5px;"></i> Ver Aviso de Privacidad
+        </a>
       </div>
-      <div class="modal-content" style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
-        <label for="respaldoNota">Nota:</label>
-        <textarea id="respaldoNota" [(ngModel)]="respaldoNota" rows="3" placeholder="Escribe una nota sencilla..."></textarea>
-        <label for="respaldoArchivo">Archivo (PDF, JPG, PNG, etc.):</label>
-        <input id="respaldoArchivo" type="file" (change)="onRespaldoFileChange($event)" accept=".pdf,.jpg,.jpeg,.png">
-        <div *ngIf="respaldoErrorMsg" class="error-msg">{{ respaldoErrorMsg }}</div>
-        <div *ngIf="respaldoSuccessMsg" class="success-msg">{{ respaldoSuccessMsg }}</div>
-        <button class="btn-action" (click)="guardarRespaldo()" [disabled]="isRespaldoSaving">
-          <span *ngIf="isRespaldoSaving">Guardando...</span>
-          <span *ngIf="!isRespaldoSaving">Guardar Respaldo</span>
-        </button>
-      </div>
+      
+      <button class="btn-action" (click)="guardarRespaldo()" [disabled]="isRespaldoSaving">
+        <span *ngIf="isRespaldoSaving">Guardando...</span>
+        <span *ngIf="!isRespaldoSaving">Guardar Respaldo</span>
+      </button>
     </div>
   </div>
+</div>
 
   <!-- Modal de visualización de respaldo -->
   <div class="modal-overlay" *ngIf="isRespaldoViewModalVisible" (click)="closeRespaldoViewModal()">
