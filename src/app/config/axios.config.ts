@@ -44,7 +44,7 @@ axiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         localStorage.removeItem('currentUser');
-        window.location.href = '/login';
+        window.location.href = 'https://www.hamse.mx/main_app/';
         return Promise.reject(refreshError);
       }
     }
