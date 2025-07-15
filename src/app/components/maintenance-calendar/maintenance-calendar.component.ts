@@ -183,10 +183,14 @@ export class MaintenanceCalendarComponent implements OnInit {
     this.selectedDate = date;
     this.scheduleService.getSchedules().subscribe({
       next: schedules => {
-        const match = schedules.find(s =>
-          s.type === this.currentView &&
-          new Date(s.startDate) <= date && new Date(s.endDate) >= date
-        );
+        const match = schedules.find(s => {
+          const typeMatch = (s.type || '').toLowerCase() === this.currentView.toLowerCase();
+          const start = new Date(s.startDate);
+          const end = new Date(s.endDate);
+          // Normaliza la fecha para comparar solo año, mes, día
+          const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+          return typeMatch && start <= target && end >= target;
+        });
         if (match) {
           this.loadSchedule(match.id);
         } else {
