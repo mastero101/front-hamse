@@ -99,7 +99,7 @@ export class ServicesOfferedComponent implements OnInit{
   }
 
   applyFilters(): void {
-    let filtered = this.products;
+    let filtered = this.products.filter(p => p.stock === 1);
     // Búsqueda por nombre o proveedor
     if (this.searchTerm.trim()) {
       const term = this.searchTerm.trim().toLowerCase();
