@@ -17,7 +17,13 @@ export class NavigationComponent {
     { path: 'reportes-dependencias', label: 'Reportes a dependencias', icon: 'file-text' },
     { path: 'servicios', label: 'Productos y Servicios', icon: 'clipboard' },
     { path: 'mantenimiento-preventivo', label: 'Mantenimiento Preventivo', icon: 'book' },
-    { path: 'configuracion-actividades', label: 'Bitacora', icon: 'cog', adminOnly: true }
+    { path: 'configuracion-actividades', label: 'Bitacora', icon: 'cog', adminOnly: true },
+    { 
+    externalUrl: 'https://www.hamse.mx/main_app/', 
+    label: 'Portal Embarques', 
+    icon: 'https://fontawesome.com/icons/truck-moving?f=classic&s=solid', 
+    isExternal: true 
+    }
   ];
 
   showAuthModal = false;

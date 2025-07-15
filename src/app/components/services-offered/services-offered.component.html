@@ -7,15 +7,15 @@
   </select>
   <input type="number" [(ngModel)]="minPrice" (input)="applyFilters()" placeholder="Precio mínimo" min="0" />
   <input type="number" [(ngModel)]="maxPrice" (input)="applyFilters()" placeholder="Precio máximo" min="0" />
-  <input type="number" [(ngModel)]="minStock" (input)="applyFilters()" placeholder="Stock mínimo" min="0" />
-  <input type="number" [(ngModel)]="maxStock" (input)="applyFilters()" placeholder="Stock máximo" min="0" />
+  <!-- <input type="number" [(ngModel)]="minStock" (input)="applyFilters()" placeholder="Stock mínimo" min="0" />
+  <input type="number" [(ngModel)]="maxStock" (input)="applyFilters()" placeholder="Stock máximo" min="0" /> -->
   <button class="reset-btn" (click)="resetFilters()">Limpiar filtros</button>
 
   <!-- Ordenamiento -->
   <select [(ngModel)]="sortField" (change)="applyFilters()">
     <option value="name">Nombre</option>
     <option value="price">Precio</option>
-    <option value="stock">Stock</option>
+    <!-- <option value="stock">Stock</option> -->
   </select>
   <select [(ngModel)]="sortDirection" (change)="applyFilters()">
     <option value="asc">Ascendente</option>
@@ -41,10 +41,10 @@
                 <span>Precio: {{ product.price | currency }}</span>
             </div>
             <div>
-                <span>Stock: {{ product.stock }}</span>
+                <!-- <span>Stock: {{ product.stock }}</span>
                 <span *ngIf="product.stock <= lowStockThreshold && product.stock > 0" class="low-stock-warning">¡Pocos disponibles!</span>
                 <span *ngIf="product.stock === 0" class="out-stock-warning">Sin stock</span>
-            </div>
+            </div> -->
             <button *ngIf="product.url" class="cart-btn" (click)="goToProductUrl(product.url)" title="Comprar">
                 <i class="fas fa-shopping-cart"></i> Comprar
             </button>
