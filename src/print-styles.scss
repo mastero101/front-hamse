@@ -1,0 +1,37 @@
+/* Ocultar botones de impresión en la versión impresa */
+@media print {
+  .btn-orange, 
+  .btn-nav, 
+  .btn-save, 
+  .edit-reminder-btn,
+  .tab-group,
+  .button-actions,
+  .notification-box {
+    display: none !important;
+  }
+
+  /* Ajustar estilos para mejor legibilidad en papel */
+  body {
+    background-image: none !important;
+    background-color: white !important;
+  }
+
+  /* Asegurar que el contenido use todo el ancho */
+  .calendar-container, 
+  .cards-wrapper, 
+  .left-column, 
+  .right-column {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Mejorar visibilidad de textos */
+  .activity-row, 
+  .month-cell, 
+  .week-day {
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

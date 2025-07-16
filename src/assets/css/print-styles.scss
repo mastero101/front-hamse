@@ -1,0 +1,11 @@
+@media print {
+  /* Ocultar navbar */
+  .navbar, app-navbar, [class*="main-nav"] {
+    display: none !important;
+  }
+
+  /* Ocultar otros elementos no deseados (opcional) */
+  button, .no-print {
+    display: none !important;
+  }
+}

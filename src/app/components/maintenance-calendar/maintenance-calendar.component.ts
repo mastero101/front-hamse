@@ -530,10 +530,23 @@ export class MaintenanceCalendarComponent implements OnInit {
     this.currentScheduleHasActivities = false;
   }
 
-  printCalendar(): void {
-    console.log('Activando impresión del calendario...');
-    window.print();
+printCalendar() {
+  // 1. Ocultar el navbar antes de imprimir
+  const navbar = document.querySelector('nav.main-nav') as HTMLElement;
+  const originalDisplay = navbar?.style.display;
+  
+  if (navbar) {
+    navbar.style.display = 'none';
   }
+
+  // 2. Disparar la impresión inmediatamente
+  window.print();
+
+  // 3. Restaurar el navbar después de imprimir
+  if (navbar) {
+    navbar.style.display = originalDisplay || '';
+  }
+}
 
   // Método para manejar el botón 'Indicar periodo'
   openPeriodSelector(): void {
