@@ -16,7 +16,7 @@ export class NavigationComponent {
     { path: 'programa-mantenimiento', label: 'Programa de mantenimiento', icon: 'wrench' },
     { path: 'reportes-dependencias', label: 'Reportes a dependencias', icon: 'file-text' },
     { path: 'servicios', label: 'Productos y Servicios', icon: 'clipboard' },
-    { path: 'mantenimiento-preventivo', label: 'Mantenimiento Preventivo', icon: 'book' },
+    { path: 'mantenimiento-preventivo', label: 'Soluciones Hamse', icon: 'book' },
     { path: 'configuracion-actividades', label: 'Bitacora', icon: 'cog', adminOnly: true },
     { 
     externalUrl: 'https://www.hamse.mx/main_app/', 
