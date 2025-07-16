@@ -22,4 +22,8 @@ export class ProductService {
     return response.data;
   }
 
+  async syncPrices(): Promise<any> {
+    const response = await axiosInstance.post(this.apiUrl + '/sync-prices');
+    return response.data;
+  }
 } 

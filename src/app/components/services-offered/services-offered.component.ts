@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser'; 
 import { ProductService, IProduct } from '../../services/product.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 interface IService {
   id: string;
@@ -29,6 +30,8 @@ export class ServicesOfferedComponent implements OnInit{
   safeVideoUrlForInfoModal: SafeResourceUrl | null = null;
   products: IProduct[] = [];
   filteredProducts: IProduct[] = [];
+  isAdmin: boolean = false;
+  isSyncing: boolean = false;
 
   // Búsqueda y filtros
   searchTerm: string = '';
@@ -67,13 +70,18 @@ export class ServicesOfferedComponent implements OnInit{
     '#F44336', // Rojo
   ];
 
-  constructor(private sanitizer: DomSanitizer, private productService: ProductService) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private productService: ProductService,
+    private authService: AuthService
+  ) { }
 
   async ngOnInit(): Promise<void> {
     try {
       this.products = await this.productService.getProducts();
       this.providers = Array.from(new Set(this.products.map(p => p.supplier).filter((s): s is string => !!s)));
       this.applyFilters();
+      this.isAdmin = this.authService.currentUserValue?.role === 'admin';
       console.log('[ServicesOfferedComponent] Productos obtenidos:', this.products);
     } catch (err) {
       console.error('Error al obtener productos:', err);
@@ -226,6 +234,20 @@ export class ServicesOfferedComponent implements OnInit{
   goToPageIfNumber(page: number | string) {
     if (typeof page === 'number') {
       this.goToPage(page);
+    }
+  }
+
+  async syncPrices() {
+    this.isSyncing = true;
+    try {
+      const res = await this.productService.syncPrices();
+      alert('Sincronización completada: ' + res.updated + ' productos actualizados');
+      this.products = await this.productService.getProducts();
+      this.applyFilters();
+    } catch (err: any) {
+      alert('Error al sincronizar precios: ' + (err?.response?.data?.error || err.message));
+    } finally {
+      this.isSyncing = false;
     }
   }
 }

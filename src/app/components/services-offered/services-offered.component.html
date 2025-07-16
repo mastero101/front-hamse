@@ -1,26 +1,33 @@
 <!-- Filtros SIEMPRE arriba -->
 <div class="filters-container">
-  <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="Buscar por nombre o proveedor..." />
-  <select [(ngModel)]="selectedProvider" (change)="applyFilters()">
-    <option value="">Todos los proveedores</option>
-    <option *ngFor="let prov of providers" [value]="prov">{{ prov }}</option>
-  </select>
-  <input type="number" [(ngModel)]="minPrice" (input)="applyFilters()" placeholder="Precio mínimo" min="0" />
-  <input type="number" [(ngModel)]="maxPrice" (input)="applyFilters()" placeholder="Precio máximo" min="0" />
-  <!-- <input type="number" [(ngModel)]="minStock" (input)="applyFilters()" placeholder="Stock mínimo" min="0" />
-  <input type="number" [(ngModel)]="maxStock" (input)="applyFilters()" placeholder="Stock máximo" min="0" /> -->
-  <button class="reset-btn" (click)="resetFilters()">Limpiar filtros</button>
-
-  <!-- Ordenamiento -->
-  <select [(ngModel)]="sortField" (change)="applyFilters()">
-    <option value="name">Nombre</option>
-    <option value="price">Precio</option>
-    <!-- <option value="stock">Stock</option> -->
-  </select>
-  <select [(ngModel)]="sortDirection" (change)="applyFilters()">
-    <option value="asc">Ascendente</option>
-    <option value="desc">Descendente</option>
-  </select>
+  <div class="filters-group">
+    <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()" placeholder="Buscar por nombre o proveedor..." />
+    <select [(ngModel)]="selectedProvider" (change)="applyFilters()">
+      <option value="">Todos los proveedores</option>
+      <option *ngFor="let prov of providers" [value]="prov">{{ prov }}</option>
+    </select>
+    <input type="number" [(ngModel)]="minPrice" (input)="applyFilters()" placeholder="Precio mínimo" min="0" />
+    <input type="number" [(ngModel)]="maxPrice" (input)="applyFilters()" placeholder="Precio máximo" min="0" />
+    <button class="reset-btn" (click)="resetFilters()">Limpiar filtros</button>
+    <select [(ngModel)]="sortField" (change)="applyFilters()">
+      <option value="name">Nombre</option>
+      <option value="price">Precio</option>
+    </select>
+    <select [(ngModel)]="sortDirection" (change)="applyFilters()">
+      <option value="asc">Ascendente</option>
+      <option value="desc">Descendente</option>
+    </select>
+  </div>
+  <div class="admin-actions" *ngIf="isAdmin">
+    <button class="sync-btn" 
+        (click)="syncPrices()" 
+        [disabled]="isSyncing"
+        [class.syncing]="isSyncing">
+      <span *ngIf="isSyncing" class="spinner"></span>
+      <i class="fas fa-sync" [class.fa-spin]="isSyncing"></i>
+      {{ isSyncing ? 'Sincronizando...' : 'Sincronizar precios' }}
+    </button>
+  </div>
 </div>
 
 <!-- Lista de productos paginada -->
@@ -75,7 +82,7 @@
 </div>
 
 <!-- Paginador avanzado -->
-<div class="paginator" *ngIf="totalPages > 1">
+<div class="paginator" *ngIf="totalPages > 1 && !isSyncing">
   <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Anterior</button>
   <ng-container *ngFor="let page of pageNumbers">
     <button *ngIf="page !== '...'" (click)="goToPageIfNumber(page)" [class.active]="page === currentPage">{{ page }}</button>
