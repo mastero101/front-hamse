@@ -183,10 +183,14 @@ export class MaintenanceCalendarComponent implements OnInit {
     this.selectedDate = date;
     this.scheduleService.getSchedules().subscribe({
       next: schedules => {
-        const match = schedules.find(s =>
-          s.type === this.currentView &&
-          new Date(s.startDate) <= date && new Date(s.endDate) >= date
-        );
+        const match = schedules.find(s => {
+          const typeMatch = (s.type || '').toLowerCase() === this.currentView.toLowerCase();
+          const start = new Date(s.startDate);
+          const end = new Date(s.endDate);
+          // Normaliza la fecha para comparar solo año, mes, día
+          const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+          return typeMatch && start <= target && end >= target;
+        });
         if (match) {
           this.loadSchedule(match.id);
         } else {
@@ -271,21 +275,16 @@ export class MaintenanceCalendarComponent implements OnInit {
     this.scheduleService.getSchedule(id).subscribe({
       next: (d: any) => {
         console.log('Schedule cargado:', d);
-
         if ('Activities' in d) {
           const detailed = d as DetailedSchedule;
-          console.log('Activities en schedule:', detailed.Activities);
           this.completionPercentage = detailed.progress || 0;
           this.currentScheduleHasActivities = (detailed.Activities?.length ?? 0) > 0;
 
           // No necesitamos una comprobación general de hasValidStates aquí para decidir cómo mapear.
           // Cada actividad se mapea basada en sus propios estados.
-          this.activities = (detailed.Activities || [])
-  // TEMPORAL: ignora el filtro de frecuencia para pruebas
-  //.filter(a => a.frequency === this.currentView)
 
-          // this.activities = (detailed.Activities || [])
-          //   .filter(a => a.frequency === this.currentView)
+          this.activities = (detailed.Activities || [])
+            .filter(a => a.frequency === this.currentView)
             .map(a => ({
               ...a,
               // Para cada actividad, usa el último estado si existe, de lo contrario, usa 'sin_revision'.
@@ -296,11 +295,14 @@ export class MaintenanceCalendarComponent implements OnInit {
 
           // Si después de filtrar y mapear no hay actividades, resetea.
           if (!this.activities || this.activities.length === 0) {
-  console.warn('No hay actividades visibles en la vista actual. Se mantiene el estado anterior.');
-} else {
-  console.log('Actividades cargadas y mapeadas:', this.activities);
-}
-
+             console.log('No hay actividades relevantes para la vista en el schedule cargado. Reseteando.');
+             this.resetAllActivitiesStatus(); // Esto limpiará y reseteará this.activities a base vacía o sin revision
+          } else {
+             console.log('Actividades cargadas y mapeadas:', this.activities);
+             // Opcional: si quieres que allActivities refleje los estados del schedule cargado
+             // this.updateActivityStatuses(detailed.Activities || []);
+             // Sin embargo, si allActivities se usa como base limpia, mejor no actualizarla aquí.
+          }
 
         } else {
            console.log('Schedule cargado no tiene el formato esperado (falta Activities). Reseteando estados.');
