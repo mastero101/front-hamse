@@ -2,7 +2,9 @@
 
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
+/* Aplica Nunito a todo el proyecto */
 body {
+  font-family: 'Nunito', sans-serif; /* Fuente principal */
   min-height: 100%;
   height: auto;
   background-image: url('https://i.imgur.com/iE2IVeX.png');
@@ -11,13 +13,20 @@ body {
   background-position: center;
 }
 
-// Aumenta el z-index y personaliza colores y tamaño
+/* Asegura que los componentes de Material también usen Nunito */
+.mat-snack-bar-container,
+.mat-simple-snackbar-action,
+button, input, textarea, select {
+  font-family: 'Nunito', sans-serif !important;
+}
+
+/* Personalización del snackbar (manteniendo tus estilos) */
 .mat-snack-bar-container {
-  z-index: 3000 !important; // Más alto que modales comunes
-  background: #1a237e !important; // Fondo azul oscuro
+  z-index: 3000 !important;
+  background: #1a237e !important;
   color: #fff !important;
   font-size: 1.2rem !important;
-  font-weight: bold;
+  font-weight: 600; /* Usando un peso de Nunito */
   box-shadow: 0 4px 24px 0 rgba(0,0,0,0.4);
   border-radius: 8px !important;
   border: 2px solid #ffb300;
@@ -26,15 +35,10 @@ body {
   padding: 18px 32px !important;
   min-width: 350px;
   max-width: 90vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: pre-line !important;
 }
 
-// Botón de cerrar
 .mat-simple-snackbar-action {
   color: #ffb300 !important;
-  font-weight: bold;
+  font-weight: 700; /* Peso bold de Nunito */
   font-size: 1.1rem;
 }
