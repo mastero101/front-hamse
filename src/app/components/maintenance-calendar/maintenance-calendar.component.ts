@@ -39,10 +39,20 @@ export class MaintenanceCalendarComponent implements OnInit {
   weekDays: Date[] = [];
   activities: CalendarActivity[] = [];
   allActivities: CalendarActivity[] = [];
-  months = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ].map(name => ({ name, completed: false }));
+months = [
+  { name: 'enero', completed: false },
+  { name: 'febrero', completed: false },
+  { name: 'marzo', completed: false },
+  { name: 'abril', completed: false },
+  { name: 'mayo', completed: false },
+  { name: 'junio', completed: false },
+  { name: 'julio', completed: false },
+  { name: 'agosto', completed: false },
+  { name: 'septiembre', completed: false },
+  { name: 'octubre', completed: false },
+  { name: 'noviembre', completed: false },
+  { name: 'diciembre', completed: false }
+];
 
   currentScheduleId: string | null = null;
   isLoadingActivities = false;

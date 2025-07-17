@@ -108,7 +108,7 @@
                                      [class.active]="month.name === currentMonthName"
                                      [class.completed]="month.completed"
                                      (click)="selectMonth(month.name)">
-                                    <span class="month-name">{{month.name}}</span>
+                                    <span class="month-name">{{ month.name | titlecase }}</span>
                                     <i *ngIf="month.completed" class="fas fa-check"></i>
                                 </div>
                             }
