@@ -67,11 +67,38 @@
                     </div>
                 </div>
             </div>
-             <div class="notification-box">
-                    <p>CRE amplía plazo para regularizaciones de estaciones de servicio. Dicho acuerdo amplía el plazo
-                        para regularizar dichas acciones del 17 de diciembre de 2024 al 17 de marzo de 2025.</p>
+            
+            <!-- Imagen editable de notificación/banner -->
+            <div class="notification-image-box">
+              <ng-container *ngIf="!notificationImageLoadError && notificationImageUrl">
+                <img [src]="notificationImageUrl"
+                     alt="Notificación"
+                     class="notification-banner"
+                     (error)="setFallback($event, '', 'notification')">
+              </ng-container>
+              <ng-container *ngIf="notificationImageLoadError || !notificationImageUrl">
+                <div class="notification-error">
+                  No hay imagen de notificación cargada.
                 </div>
-                <p></p>
+              </ng-container>
+              <ng-container *ngIf="isAdmin">
+                <button *ngIf="!editingNotificationImage"
+                        class="edit-reminder-btn"
+                        (click)="onEditNotificationImage()">
+                  {{ notificationImageLoadError || !notificationImageUrl ? 'Subir imagen' : 'Editar imagen' }}
+                </button>
+                <div *ngIf="editingNotificationImage" class="edit-image-upload">
+                  <label class="edit-reminder-btn" style="margin-bottom: 0;">
+                    <input type="file" accept="image/*" (change)="onNotificationImageFileSelected($event)" [disabled]="loadingNotificationImage" style="display: none;">
+                    Seleccionar imagen
+                    <button class="btn-cancel" (click)="cancelEditNotificationImage()" [disabled]="loadingNotificationImage" style="margin-top: 8px;">Cancelar</button>
+                  </label>
+                  <div *ngIf="loadingNotificationImage" style="color: #1a237e; font-weight: 600; margin-top: 8px;">Subiendo imagen...</div>
+                  <div *ngIf="notificationImageError" style="color: #ef4444; font-weight: 600; margin-top: 8px;">{{ notificationImageError }}</div>
+                </div>
+              </ng-container>
+            </div>
+
             <!-- Calendar Card -->
             <div class="card calendar-card">
                 @if (currentView === 'weekly') {

@@ -72,6 +72,13 @@ months = [
   loadingReminderImage: boolean = false;
   reminderImageError: string = '';
 
+  // --- Imagen de notificación ---
+  notificationImageUrl: string = '../../../assets/images/notification_default.png';
+  editingNotificationImage: boolean = false;
+  loadingNotificationImage: boolean = false;
+  notificationImageError: string = '';
+  notificationImageLoadError: boolean = false;
+
   constructor(
     private activityService: ActivityService,
     private scheduleService: ScheduleService,
@@ -83,6 +90,7 @@ months = [
     if (!this.isAuthenticated()) return;
     this.checkAdminStatus();
     this.loadReminderImage();
+    this.loadNotificationImage(); // <-- nueva carga de imagen de notificación
     this.initCalendar();
   }
 
@@ -600,10 +608,14 @@ printCalendar() {
     this.closePeriodModal();
   }
 
-  setFallback(event: Event, fallbackUrl: string) {
+  setFallback(event: Event, fallbackUrl: string, type: 'reminder' | 'notification' = 'reminder') {
     const img = event.target as HTMLImageElement | null;
     if (img) {
-      img.src = fallbackUrl;
+      if (type === 'reminder') {
+        img.src = fallbackUrl;
+      } else {
+        this.notificationImageLoadError = true;
+      }
     }
   }
 
@@ -684,6 +696,68 @@ printCalendar() {
   cancelEditReminderImage() {
     this.editingReminderImage = false;
     this.reminderImageError = '';
+  }
+
+  loadNotificationImage() {
+    this.settingsService.getSettingByKey('calendarNotificationImage').subscribe({
+      next: (res) => {
+        if (res && res.value) {
+          this.notificationImageUrl = res.value;
+          this.notificationImageLoadError = false;
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar la imagen de notificación:', err);
+      }
+    });
+  }
+
+  onEditNotificationImage() {
+    this.editingNotificationImage = true;
+    this.notificationImageError = '';
+  }
+
+  onNotificationImageFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.loadingNotificationImage = true;
+      this.notificationImageError = '';
+      this.settingsService.uploadImage(file).subscribe({
+        next: (res) => {
+          if (res && res.url) {
+            this.saveNotificationImageUrl(res.url);
+          } else {
+            this.notificationImageError = 'No se pudo obtener la URL de la imagen.';
+            this.loadingNotificationImage = false;
+          }
+        },
+        error: () => {
+          this.notificationImageError = 'Error al subir la imagen.';
+          this.loadingNotificationImage = false;
+        }
+      });
+    }
+  }
+
+  saveNotificationImageUrl(url: string) {
+    this.settingsService.updateSettingByKey('calendarNotificationImage', url).subscribe({
+      next: () => {
+        this.notificationImageUrl = url;
+        this.editingNotificationImage = false;
+        this.loadingNotificationImage = false;
+        this.notificationImageLoadError = false; // Reinicia el error al subir imagen exitosa
+      },
+      error: () => {
+        this.notificationImageError = 'Error al guardar la URL de la imagen.';
+        this.loadingNotificationImage = false;
+      }
+    });
+  }
+
+  cancelEditNotificationImage() {
+    this.editingNotificationImage = false;
+    this.notificationImageError = '';
   }
 
   // Devuelve el objeto de auditoría
