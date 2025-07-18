@@ -61,6 +61,7 @@ export class MaintenanceProgramComponent implements OnInit {
   ngOnInit(): void {
     // Modificamos ngOnInit para cargar el schedule del programa anual
     this.loadProgramScheduleForCurrentYear();
+    this.filteredMonths = [...this.months]; // <-- YA LO TIENES, ESTÁ BIEN AQUÍ
   }
 
   // Método para cargar actividades genéricas (sin estado de schedule)
@@ -77,6 +78,7 @@ export class MaintenanceProgramComponent implements OnInit {
             expectedDuration: serviceActivity.expectedDuration,
             category: serviceActivity.category
           }));
+          this.filteredActivities = [...this.activities]; // <-- AGREGA ESTA LÍNEA AQUÍ
           console.log('Actividades de PROGRAMA genéricas cargadas:', this.activities.length);
           this.isLoading = false; // Mover isLoading aquí para este caso
           resolve();
@@ -157,6 +159,7 @@ export class MaintenanceProgramComponent implements OnInit {
         }
       });
       console.log(`Estados de actividades fusionados desde el schedule ${schedule.id}.`);
+      this.filteredActivities = [...this.activities]; // <-- AGREGA ESTO AL FINAL DEL MÉTODO
     } else if (this.activities.length === 0) {
        console.warn('No generic activities loaded to merge schedule states into.');
        // Esto no debería ocurrir si loadGenericProgramActivities se completó correctamente
@@ -332,6 +335,7 @@ export class MaintenanceProgramComponent implements OnInit {
   showPeriodSelector: boolean = false;
   selectedPeriod: { startMonth: string; startWeek: number; endMonth: string; endWeek: number } | null = null;
   filteredActivities: ProgramActivity[] = [];
+  filteredMonths: Month[] = []; // Added this line
 
   togglePeriodSelector(): void {
     this.showPeriodSelector = !this.showPeriodSelector;
@@ -343,24 +347,29 @@ export class MaintenanceProgramComponent implements OnInit {
 
   applyPeriodFilter(period: { startMonth: string; startWeek: number; endMonth: string; endWeek: number }): void {
     this.selectedPeriod = period;
-    
+
     const startMonthIndex = this.months.findIndex(m => m.name === period.startMonth);
     const endMonthIndex = this.months.findIndex(m => m.name === period.endMonth);
 
     if (startMonthIndex === -1 || endMonthIndex === -1) return;
 
-    this.filteredActivities = this.activities.filter(activity => {
-      return activity.checkedWeeks.some(check => {
-        const monthIndex = this.months.findIndex(m => m.name === check.month);
-        if (monthIndex === -1) return false;
+    // Filtra los meses y semanas a mostrar
+    this.filteredMonths = this.months
+      .slice(startMonthIndex, endMonthIndex + 1)
+      .map((month, idx) => {
+        let weeks = [...month.weeks];
+        if (idx === 0) {
+          weeks = weeks.filter(w => w >= period.startWeek);
+        }
+        if (idx === (endMonthIndex - startMonthIndex)) {
+          weeks = weeks.filter(w => w <= period.endWeek);
+        }
+        return { ...month, weeks };
+      })
+      .filter(month => month.weeks.length > 0);
 
-        if (monthIndex < startMonthIndex || monthIndex > endMonthIndex) return false;
-        if (monthIndex === startMonthIndex && check.week < period.startWeek) return false;
-        if (monthIndex === endMonthIndex && check.week > period.endWeek) return false;
-
-        return true;
-      });
-    });
+    // No filtrar actividades, mostrar todas
+    this.filteredActivities = [...this.activities];
 
     this.showPeriodSelector = false;
   }
@@ -368,5 +377,6 @@ export class MaintenanceProgramComponent implements OnInit {
   clearPeriodFilter(): void {
     this.selectedPeriod = null;
     this.filteredActivities = [...this.activities];
+    this.filteredMonths = [...this.months];
   }
 }
