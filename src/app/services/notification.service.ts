@@ -7,7 +7,6 @@ export class NotificationService {
   constructor(private snackBar: MatSnackBar) {}
 
   show(message: string) {
-    console.log('Snackbar debería mostrar:', message);
     this.snackBar.open(message, 'Cerrar', {
       // duration: 15000,
       horizontalPosition: 'right',
