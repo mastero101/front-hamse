@@ -50,9 +50,9 @@
                     <div class="info-container">
                         <div class="title-section">
                             <h2>{{ currentView === 'weekly' ? 'Actividades Semanales' : 'Avance de Actividades' }}</h2>
-                            <p>{{ currentView === 'weekly' ? 
-                                'Semana del ' + (currentWeekStart | date:'d') + ' al ' + (currentWeekEnd | date:'d') + ' de ' + (currentWeekEnd | date:'MMMM yyyy') :
-                                '' }}</p>
+                           <p *ngIf="currentView === 'weekly'">
+  Semana del {{ currentWeekStart | date:'d' }} al {{ currentWeekEnd | date:'d' }} de {{ currentWeekEnd | date:'MMMM yyyy' }}
+</p>
                         </div>
                         <div class="button-group">
                             <button class="btn-orange" (click)="openPeriodSelector()">
