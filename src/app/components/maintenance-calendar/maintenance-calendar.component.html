@@ -90,7 +90,7 @@
                 <div *ngIf="editingNotificationImage" class="edit-image-upload">
                   <label class="edit-reminder-btn" style="margin-bottom: 0;">
                     <input type="file" accept="image/*" (change)="onNotificationImageFileSelected($event)" [disabled]="loadingNotificationImage" style="display: none;">
-                    Seleccionar imagen
+                    Seleccionar imagen (800x100px)
                     <button class="btn-cancel" (click)="cancelEditNotificationImage()" [disabled]="loadingNotificationImage" style="margin-top: 8px;">Cancelar</button>
                   </label>
                   <div *ngIf="loadingNotificationImage" style="color: #1a237e; font-weight: 600; margin-top: 8px;">Subiendo imagen...</div>
@@ -263,7 +263,7 @@
                             <div *ngIf="editingReminderImage" class="edit-image-upload">
                                 <label class="edit-reminder-btn" style="margin-bottom: 0;">
                                     <input type="file" accept="image/*" (change)="onReminderImageFileSelected($event)" [disabled]="loadingReminderImage" style="display: none;">
-                                    Seleccionar imagen
+                                    Seleccionar imagen (552x517px)
                                     <button class="btn-cancel" (click)="cancelEditReminderImage()" [disabled]="loadingReminderImage" style="margin-top: 8px;">Cancelar</button>
                                 </label>
                                 <div *ngIf="loadingReminderImage" style="color: #1a237e; font-weight: 600; margin-top: 8px;">Subiendo imagen...</div>

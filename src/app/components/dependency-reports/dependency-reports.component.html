@@ -144,7 +144,7 @@
     <div class="modal-content" style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
       <label for="respaldoNota">Nota:</label>
       <textarea id="respaldoNota" [(ngModel)]="respaldoNota" rows="3" placeholder="Escribe una nota sencilla..."></textarea>
-      <label for="respaldoArchivo">Archivo (PDF, JPG, PNG, etc.):</label>
+      <label for="respaldoArchivo">Archivo (PDF, JPG, PNG, etc.) Tamaño Maximo 32 MB:</label>
       <input id="respaldoArchivo" type="file" (change)="onRespaldoFileChange($event)" accept=".pdf,.jpg,.jpeg,.png">
       <div *ngIf="respaldoErrorMsg" class="error-msg">{{ respaldoErrorMsg }}</div>
       <div *ngIf="respaldoSuccessMsg" class="success-msg">{{ respaldoSuccessMsg }}</div>
