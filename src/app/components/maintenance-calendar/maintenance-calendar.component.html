@@ -1,296 +1,772 @@
 <div class="calendar-container">
-    <div class="cards-wrapper" [class.yearly-view]="currentView === 'yearly'">
-        <!-- Left Column -->
-        <div class="left-column" *ngIf="currentView !== 'yearly'">
-            <!-- Activities Card -->
-            <div class="card activities-card">
-                <div class="circle-container">
-                    <div class="progress-circle">
-                        <svg width="120" height="120" style="position: relative;">
-                            <!-- Círculo azul exterior (más grueso) -->
-                            <circle
-                                cx="60" cy="60" r="58"
-                                stroke="#1a237e"
-                                stroke-width="8"
-                                fill="white"
-                            />
-                            <!-- Círculo de fondo gris (más delgado) -->
-                            <circle
-                                cx="60" cy="60" r="50"
-                                stroke="#e0e0e0"
-                                stroke-width="12"
-                                fill="none"
-                            />
-                            <!-- Círculo de progreso amarillo -->
-                            <circle
-                                cx="60" cy="60" r="50"
-                                [attr.stroke-dasharray]="314.159"
-                                [attr.stroke-dashoffset]="314.159 - (completionPercentage / 100) * 314.159"
-                                stroke="#ffa000"
-                                stroke-width="12"
-                                fill="none"
-                                stroke-linecap="round"
-                                style="transition: stroke-dashoffset 0.5s;"
-                                transform="rotate(-90 60 60)"
-                            />
-                            <!-- Bolita amarilla dinámica -->
-                            <circle
-                                [attr.cx]="progressDotCx"
-                                [attr.cy]="progressDotCy"
-                                r="10"
-                                fill="#ffa000"
-                                stroke="#fff"
-                                stroke-width="3"
-                                style="transition: cx 0.5s, cy 0.5s;"
-                            />
-                            <!-- Porcentaje centrado -->
-                            <text x="60" y="70" text-anchor="middle" font-size="32" fill="#1a237e" font-weight="500">{{completionPercentage}}%</text>
-                        </svg>
-                    </div>
-                    <div class="info-container">
-                        <div class="title-section">
-                            <h2>{{ currentView === 'weekly' ? 'Actividades Semanales' : 'Avance de Actividades' }}</h2>
-                           <p *ngIf="currentView === 'weekly'">
-  Semana del {{ currentWeekStart | date:'d' }} al {{ currentWeekEnd | date:'d' }} de {{ currentWeekEnd | date:'MMMM yyyy' }}
-</p>
-                        </div>
-                        <div class="button-group">
-                            <button class="btn-orange" (click)="openPeriodSelector()">
-                                <i class="fas fa-calendar"></i>
-                                <span>Indicar periodo ({{ currentYear }})</span>
-                            </button>
-                            <button class="btn-orange" (click)="printCalendar()">
-                                <i class="fas fa-print"></i>
-                                <span>Imprimir</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+  <div class="cards-wrapper" [class.yearly-view]="currentView === 'yearly'">
+    <!-- Left Column -->
+    <div class="left-column" *ngIf="currentView !== 'yearly'">
+      <!-- Activities Card -->
+      <div class="card activities-card">
+        <div class="circle-container">
+          <div class="progress-circle">
+            <svg width="120" height="120" style="position: relative">
+              <!-- Círculo azul exterior (más grueso) -->
+              <circle
+                cx="60"
+                cy="60"
+                r="58"
+                stroke="#1a237e"
+                stroke-width="8"
+                fill="white"
+              />
+              <!-- Círculo de fondo gris (más delgado) -->
+              <circle
+                cx="60"
+                cy="60"
+                r="50"
+                stroke="#e0e0e0"
+                stroke-width="12"
+                fill="none"
+              />
+              <!-- Círculo de progreso amarillo -->
+              <circle
+                cx="60"
+                cy="60"
+                r="50"
+                [attr.stroke-dasharray]="314.159"
+                [attr.stroke-dashoffset]="
+                  314.159 - (completionPercentage / 100) * 314.159
+                "
+                stroke="#ffa000"
+                stroke-width="12"
+                fill="none"
+                stroke-linecap="round"
+                style="transition: stroke-dashoffset 0.5s"
+                transform="rotate(-90 60 60)"
+              />
+              <!-- Bolita amarilla dinámica -->
+              <circle
+                [attr.cx]="progressDotCx"
+                [attr.cy]="progressDotCy"
+                r="10"
+                fill="#ffa000"
+                stroke="#fff"
+                stroke-width="3"
+                style="transition: cx 0.5s, cy 0.5s"
+              />
+              <!-- Porcentaje centrado -->
+              <text
+                x="60"
+                y="70"
+                text-anchor="middle"
+                font-size="32"
+                fill="#1a237e"
+                font-weight="500"
+              >
+                {{ completionPercentage }}%
+              </text>
+            </svg>
+          </div>
+          <div class="info-container">
+            <div class="title-section">
+              <h2>
+                {{
+                  currentView === "weekly"
+                    ? "Actividades Semanales"
+                    : "Avance de Actividades"
+                }}
+              </h2>
+              <p *ngIf="currentView === 'weekly'">
+                Semana del {{ currentWeekStart | date : "d" }} al
+                {{ currentWeekEnd | date : "d" }} de
+                {{ currentWeekEnd | date : "MMMM yyyy" }}
+              </p>
             </div>
-            
-            <!-- Imagen editable de notificación/banner -->
-            <div class="notification-image-box">
-              <ng-container *ngIf="!notificationImageLoadError && notificationImageUrl">
-                <img [src]="notificationImageUrl"
-                     alt="Notificación"
-                     class="notification-banner"
-                     (error)="setFallback($event, '', 'notification')">
-              </ng-container>
-              <ng-container *ngIf="notificationImageLoadError || !notificationImageUrl">
-                <div class="notification-error">
-                  No hay imagen de notificación cargada.
-                </div>
-              </ng-container>
-              <ng-container *ngIf="isAdmin">
-                <button *ngIf="!editingNotificationImage"
-                        class="edit-reminder-btn"
-                        (click)="onEditNotificationImage()">
-                  {{ notificationImageLoadError || !notificationImageUrl ? 'Subir imagen' : 'Editar imagen' }}
-                </button>
-                <div *ngIf="editingNotificationImage" class="edit-image-upload">
-                  <label class="edit-reminder-btn" style="margin-bottom: 0;">
-                    <input type="file" accept="image/*" (change)="onNotificationImageFileSelected($event)" [disabled]="loadingNotificationImage" style="display: none;">
-                    Seleccionar imagen (800x100px)
-                    <button class="btn-cancel" (click)="cancelEditNotificationImage()" [disabled]="loadingNotificationImage" style="margin-top: 8px;">Cancelar</button>
-                  </label>
-                  <div *ngIf="loadingNotificationImage" style="color: #1a237e; font-weight: 600; margin-top: 8px;">Subiendo imagen...</div>
-                  <div *ngIf="notificationImageError" style="color: #ef4444; font-weight: 600; margin-top: 8px;">{{ notificationImageError }}</div>
-                </div>
-              </ng-container>
+            <div class="button-group">
+              <button class="btn-orange" (click)="openPeriodSelector()">
+                <i class="fas fa-calendar"></i>
+                <span>Indicar periodo ({{ currentYear }})</span>
+              </button>
+              <button class="btn-orange" (click)="printCalendar()">
+                <i class="fas fa-print"></i>
+                <span>Imprimir</span>
+              </button>
+              <!-- NUEVO: Botón Manual de Usuario -->
+              <button class="btn-orange" (click)="openUserManual()">
+                <i class="fas fa-book"></i>
+                <span>Manual de Usuario</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Imagen editable de notificación/banner con enlace a YouTube -->
+      <div class="notification-image-box">
+        <ng-container
+          *ngIf="!notificationImageLoadError && notificationImageUrl"
+        >
+          <!-- Imagen clickeable -->
+          <div class="notification-banner-container">
+            <img
+              [src]="notificationImageUrl"
+              alt="Notificación"
+              class="notification-banner clickeable-banner"
+              (click)="openYouTubeModal()"
+              (error)="setFallback($event, '', 'notification')"
+              title="Click para ver video"
+            />
+
+            <!-- Indicador de video solo si hay URL configurada -->
+            <div
+              class="video-indicator"
+              *ngIf="
+                notificationYouTubeUrl && notificationYouTubeUrl.length > 0
+              "
+              (click)="openYouTubeModal()"
+            >
+              <i class="fab fa-youtube"></i>
+              <span>Ver video</span>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-container
+          *ngIf="notificationImageLoadError || !notificationImageUrl"
+        >
+          <div class="notification-error">
+            No hay imagen de notificación cargada.
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="isAdmin">
+          <button
+            *ngIf="!editingNotificationImage"
+            class="edit-reminder-btn"
+            (click)="onEditNotificationImage()"
+          >
+            {{
+              notificationImageLoadError || !notificationImageUrl
+                ? "Subir imagen"
+                : "Editar imagen"
+            }}
+          </button>
+
+          <!-- Campo para URL de YouTube -->
+          <div class="youtube-url-section" *ngIf="!editingNotificationImage">
+            <label class="youtube-label">URL del video de YouTube:</label>
+            <div class="youtube-input-group">
+              <input
+                type="url"
+                [(ngModel)]="notificationYouTubeUrl"
+                placeholder="https://www.youtube.com/watch?v=..."
+                class="youtube-url-input"
+              />
+              <button class="btn-youtube" (click)="saveYouTubeUrl()">
+                <i class="fab fa-youtube"></i>
+                Guardar
+              </button>
             </div>
 
-            <!-- Calendar Card -->
-            <div class="card calendar-card">
-                @if (currentView === 'weekly') {
-                    <div class="week-view">
-                        <div class="week-header">
-                            <button class="btn-nav" (click)="previousWeek()">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <div class="week-label">Semana {{ currentWeekStart | date:'w' }}</div>
-                            <button class="btn-nav" (click)="nextWeek()">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                        <div class="week-days">
-                            @for (day of weekDays; track day) {
-                                <div class="week-day" [class.today]="isToday(day)" >
-                                    <span class="day-name">{{ day | date:'EEE':'':'es' | titlecase }}</span>
-                                    <span class="day-number">{{ day | date:'d' }}</span>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                } @else if (currentView === 'monthly') {
-                    <div class="month-view">
-                        <div class="year-header">
-                            <span class="year-label">{{ currentYear }}</span>
-                        </div>
-                        <div class="selected-month-label" style="text-align: center; margin-bottom: 18px;">
-                            <strong>Mes seleccionado:</strong> {{ currentMonthName | titlecase }} de {{ currentYear }}
-                        </div>
-                        <div class="months-grid">
-                            @for (month of months; track month.name) {
-                                <div class="month-cell"
-                                     [class.active]="month.name === currentMonthName"
-                                     [class.completed]="month.completed"
-                                     (click)="selectMonth(month.name)">
-                                    <span class="month-name">{{ month.name | titlecase }}</span>
-                                    <i *ngIf="month.completed" class="fas fa-check"></i>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                } @else {
-                    <!-- Asumiendo que este bloque es para la vista mensual detallada -->
-                    <div class="month-view-calendar"> <!-- Usando la estructura sugerida anteriormente -->
-                        <div class="month-header">
-                            <button class="btn-nav" (click)="previousMonth()">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <!-- Asegúrate que currentMonthName and currentYear se actualizan correctamente -->
-                            <span class="month-year-label">{{ currentMonthName | titlecase }} {{ currentYear }}</span>
-                            <button class="btn-nav" (click)="nextMonth()">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                        <div class="calendar-grid">
-                            <div class="weekdays">
-                                <span>Lun</span>
-                                <span>Mar</span>
-                                <span>Mie</span>
-                                <span>Jue</span>
-                                <span>Vie</span>
-                                <span>Sab</span>
-                                <span>Dom</span>
-                            </div>
-                            <div class="days-grid monthly"> <!-- Usando la clase 'monthly' -->
-                                <!-- Corregido el @for y las propiedades -->
-                                @for (day of calendarDays; track day.date) {
-                                <div class="day-cell"
-                                     [class.other-month]="!day.isCurrentMonth"
-                                     [class.today]="day.isToday"
-                                     [class.selected]="day.isSelected"
-                                     (click)="selectDayFromMonthView(day)">
-                                    {{ day.dayOfMonth }} <!-- Usar dayOfMonth -->
-                                    <!-- Ícono de campana eliminado de aquí, 'today' ya aplica clase -->
-                                    <!-- Lógica de 'completed' eliminada, no está en la interfaz -->
-                                </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-               
+            <!-- DEBUG: Botón de prueba (remover en producción) -->
+            <button
+              class="btn-test"
+              (click)="testYouTubeModal()"
+              style="
+                margin-top: 5px;
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+              "
+            >
+              🧪 Probar Modal
+            </button>
+          </div>
+
+          <div *ngIf="editingNotificationImage" class="edit-image-upload">
+            <label class="edit-reminder-btn" style="margin-bottom: 0">
+              <input
+                type="file"
+                accept="image/*"
+                (change)="onNotificationImageFileSelected($event)"
+                [disabled]="loadingNotificationImage"
+                style="display: none"
+              />
+              Seleccionar imagen (800x100px)
+              <button
+                class="btn-cancel"
+                (click)="cancelEditNotificationImage()"
+                [disabled]="loadingNotificationImage"
+                style="margin-top: 8px"
+              >
+                Cancelar
+              </button>
+            </label>
+            <div
+              *ngIf="loadingNotificationImage"
+              style="color: #1a237e; font-weight: 600; margin-top: 8px"
+            >
+              Subiendo imagen...
             </div>
+            <div
+              *ngIf="notificationImageError"
+              style="color: #ef4444; font-weight: 600; margin-top: 8px"
+            >
+              {{ notificationImageError }}
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Modal para YouTube Video -->
+      <div
+        class="youtube-modal-overlay"
+        *ngIf="showYouTubeModal"
+        (click)="closeYouTubeModal()"
+      >
+        <div class="youtube-modal-content" (click)="$event.stopPropagation()">
+          <div class="youtube-modal-header">
+            <h3>Hamse Stream</h3>
+            <button class="close-btn" (click)="closeYouTubeModal()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="youtube-container">
+            <iframe
+              *ngIf="safeYouTubeUrl"
+              [src]="safeYouTubeUrl"
+              frameborder="0"
+              allowfullscreen
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            >
+            </iframe>
+            <div *ngIf="!safeYouTubeUrl" class="loading-video">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Cargando video...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar Card -->
+      <div class="card calendar-card">
+        @if (currentView === 'weekly') {
+        <div class="week-view">
+          <div class="week-header">
+            <button class="btn-nav" (click)="previousWeek()">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="week-label">
+              Semana {{ currentWeekStart | date : "w" }}
+            </div>
+            <button class="btn-nav" (click)="nextWeek()">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="week-days">
+            @for (day of weekDays; track day) {
+            <div class="week-day" [class.today]="isToday(day)">
+              <span class="day-name">{{
+                day | date : "EEE" : "" : "es" | titlecase
+              }}</span>
+              <span class="day-number">{{ day | date : "d" }}</span>
+            </div>
+            }
+          </div>
+        </div>
+        } @else if (currentView === 'monthly') {
+        <div class="month-view">
+          <div class="year-header">
+            <span class="year-label">{{ currentYear }}</span>
+          </div>
+          <div
+            class="selected-month-label"
+            style="text-align: center; margin-bottom: 18px"
+          >
+            <strong>Mes seleccionado:</strong>
+            {{ currentMonthName | titlecase }} de {{ currentYear }}
+          </div>
+          <div class="months-grid">
+            @for (month of months; track month.name) {
+            <div
+              class="month-cell"
+              [class.active]="month.name === currentMonthName"
+              [class.completed]="month.completed"
+              (click)="selectMonth(month.name)"
+            >
+              <span class="month-name">{{ month.name | titlecase }}</span>
+              <i *ngIf="month.completed" class="fas fa-check"></i>
+            </div>
+            }
+          </div>
+        </div>
+        } @else {
+        <!-- Asumiendo que este bloque es para la vista mensual detallada -->
+        <div class="month-view-calendar">
+          <!-- Usando la estructura sugerida anteriormente -->
+          <div class="month-header">
+            <button class="btn-nav" (click)="previousMonth()">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <!-- Asegúrate que currentMonthName and currentYear se actualizan correctamente -->
+            <span class="month-year-label"
+              >{{ currentMonthName | titlecase }} {{ currentYear }}</span
+            >
+            <button class="btn-nav" (click)="nextMonth()">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+          <div class="calendar-grid">
+            <div class="weekdays">
+              <span>Lun</span>
+              <span>Mar</span>
+              <span>Mie</span>
+              <span>Jue</span>
+              <span>Vie</span>
+              <span>Sab</span>
+              <span>Dom</span>
+            </div>
+            <div class="days-grid monthly">
+              <!-- Usando la clase 'monthly' -->
+              <!-- Corregido el @for y las propiedades -->
+              @for (day of calendarDays; track day.date) {
+              <div
+                class="day-cell"
+                [class.other-month]="!day.isCurrentMonth"
+                [class.today]="day.isToday"
+                [class.selected]="day.isSelected"
+                (click)="selectDayFromMonthView(day)"
+              >
+                {{ day.dayOfMonth }}
+                <!-- Usar dayOfMonth -->
+                <!-- Ícono de campana eliminado de aquí, 'today' ya aplica clase -->
+                <!-- Lógica de 'completed' eliminada, no está en la interfaz -->
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="right-column" [class.expanded]="currentView === 'yearly'">
+      <div class="card activities-list-card">
+        <div class="tab-group">
+          <button
+            class="tab"
+            [class.active]="currentView === 'daily'"
+            (click)="changeView('daily')"
+          >
+            Diarias
+          </button>
+          <button
+            class="tab"
+            [class.active]="currentView === 'weekly'"
+            (click)="changeView('weekly')"
+          >
+            Semanal
+          </button>
+          <button
+            class="tab"
+            [class.active]="currentView === 'monthly'"
+            (click)="changeView('monthly')"
+          >
+            Mensual
+          </button>
+          <button
+            class="tab"
+            [class.active]="currentView === 'yearly'"
+            (click)="changeView('yearly')"
+          >
+            Anual
+          </button>
+        </div>
+        <div class="list-header">
+          <h3>{{ getViewTitle() }}</h3>
+          <div class="button-actions">
+            @if (currentView === 'yearly') {
+            <button class="btn-orange" (click)="printCalendar()">
+              <i class="fas fa-print"></i>
+              <span>Imprimir</span>
+            </button>
+            <button class="btn-orange" (click)="openUserManual()">
+              <i class="fas fa-book"></i>
+              <span>Manual de Usuario</span>
+            </button>
+            }
+            <button
+              class="btn-save"
+              (click)="saveActivities()"
+              [disabled]="!currentScheduleId"
+            >
+              <i class="fas fa-save"></i>
+              Guardar
+            </button>
+          </div>
+        </div>
+        <div class="activities-list" [ngClass]="currentView">
+          <div *ngIf="isLoadingSchedule" class="loading-message">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>Cargando actividades...</span>
+          </div>
+          <ng-container *ngIf="!isLoadingSchedule">
+            @if (activities.length === 0) {
+            <div class="loading-message">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Cargando actividades...</span>
+            </div>
+            } @else { @for (activity of activities; track activity.id) {
+            <div class="activity-row">
+              <div class="activity-text">
+                <i class="fas fa-arrow-right"></i>
+                <span>{{ activity.name }}</span>
+              </div>
+              <div class="status-group">
+                <span class="status-text" [ngClass]="activity.status">
+                  {{
+                    activity.status === "sin_revision"
+                      ? "Sin revisión"
+                      : activity.status === "verificado"
+                      ? "Verificado"
+                      : "No aplica"
+                  }}
+                </span>
+                <div
+                  class="checkbox"
+                  [ngClass]="activity.status"
+                  (click)="toggleActivityStatus(activity)"
+                >
+                  <i class="fas fa-check check-icon"></i>
+                  <i class="fas fa-times times-icon"></i>
+                </div>
+              </div>
+            </div>
+            } }
+          </ng-container>
         </div>
 
-        <!-- Right Column -->
-        <div class="right-column" [class.expanded]="currentView === 'yearly'">
-            <div class="card activities-list-card">
-                <div class="tab-group">
-                    <button class="tab" [class.active]="currentView === 'daily'" (click)="changeView('daily')">Diarias</button>
-                    <button class="tab" [class.active]="currentView === 'weekly'" (click)="changeView('weekly')">Semanal</button>
-                    <button class="tab" [class.active]="currentView === 'monthly'" (click)="changeView('monthly')">Mensual</button>
-                    <button class="tab" [class.active]="currentView === 'yearly'" (click)="changeView('yearly')">Anual</button>
-                </div>
-                <div class="list-header">
-                    <h3>{{ getViewTitle() }}</h3>
-                    <div class="button-actions">
-                        @if (currentView === 'yearly') {
-                            <button class="btn-orange" (click)="printCalendar()">
-                                <i class="fas fa-print"></i>
-                                <span>Imprimir</span>
-                            </button>
-                        }
-                        <button class="btn-save" (click)="saveActivities()" [disabled]="!currentScheduleId">
-                            <i class="fas fa-save"></i>
-                            Guardar
-                        </button>
-                    </div>
-                </div>
-                <div class="activities-list" [ngClass]="currentView">
-                    <div *ngIf="isLoadingSchedule" class="loading-message">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>Cargando actividades...</span>
-                    </div>
-                    <ng-container *ngIf="!isLoadingSchedule">
-                        @if (activities.length === 0) {
-                            <div class="loading-message">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                <span>Cargando actividades...</span>
-                            </div>
-                        } @else {
-                            @for (activity of activities; track activity.id) {
-                                <div class="activity-row">
-                                    <div class="activity-text">
-                                        <i class="fas fa-arrow-right"></i>
-                                        <span>{{activity.name}}</span>
-                                    </div>
-                                    <div class="status-group">
-                                        <span class="status-text" [ngClass]="activity.status">
-                                            {{ activity.status === 'sin_revision' ? 'Sin revisión' :
-                                            activity.status === 'verificado' ? 'Verificado' : 'No aplica' }}
-                                        </span>
-                                        <div class="checkbox" [ngClass]="activity.status" (click)="toggleActivityStatus(activity)">
-                                            <i class="fas fa-check check-icon"></i>
-                                            <i class="fas fa-times times-icon"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </ng-container>
-                </div>
-
-                <!-- Reminder Section -->
-                <div class="reminder-section">
-                    <div class="reminder-content" style="position: relative;">
-                        <div class="reminder-header">
-                            <!-- <i class="fas fa-bell"></i> -->
-                            <!-- <div class="reminder-text">
+        <!-- Reminder Section -->
+        <div class="reminder-section">
+          <div class="reminder-content" style="position: relative">
+            <div class="reminder-header">
+              <!-- <i class="fas fa-bell"></i> -->
+              <!-- <div class="reminder-text">
                                 <h4>Recordatorio:</h4>
                                 <p>Actividad ASEA 1</p>
                             </div> -->
-                        </div>
-                        <img [src]="reminderImageUrl" alt="Recordatorio" (error)="setFallback($event, '/calendario-preventivo/assets/images/ASEA1_Actividad.png')">
-                        <ng-container *ngIf="isAdmin">
-                        <button *ngIf="!editingReminderImage"
-                                    class="edit-reminder-btn"
-                                    (click)="onEditReminderImage()">
-                                Editar imagen
-                            </button>
-                            <div *ngIf="editingReminderImage" class="edit-image-upload">
-                                <label class="edit-reminder-btn" style="margin-bottom: 0;">
-                                    <input type="file" accept="image/*" (change)="onReminderImageFileSelected($event)" [disabled]="loadingReminderImage" style="display: none;">
-                                    Seleccionar imagen (552x517px)
-                                    <button class="btn-cancel" (click)="cancelEditReminderImage()" [disabled]="loadingReminderImage" style="margin-top: 8px;">Cancelar</button>
-                                </label>
-                                <div *ngIf="loadingReminderImage" style="color: #1a237e; font-weight: 600; margin-top: 8px;">Subiendo imagen...</div>
-                                <div *ngIf="reminderImageError" style="color: #ef4444; font-weight: 600; margin-top: 8px;">{{ reminderImageError }}</div>
-                            </div>
-                        </ng-container>
-                    </div>
-                </div>
             </div>
+            <img
+              [src]="reminderImageUrl"
+              alt="Recordatorio"
+              (error)="
+                setFallback(
+                  $event,
+                  '/calendario-preventivo/assets/images/ASEA1_Actividad.png'
+                )
+              "
+            />
+            <ng-container *ngIf="isAdmin">
+              <button
+                *ngIf="!editingReminderImage"
+                class="edit-reminder-btn"
+                (click)="onEditReminderImage()"
+              >
+                Editar imagen
+              </button>
+              <div *ngIf="editingReminderImage" class="edit-image-upload">
+                <label class="edit-reminder-btn" style="margin-bottom: 0">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    (change)="onReminderImageFileSelected($event)"
+                    [disabled]="loadingReminderImage"
+                    style="display: none"
+                  />
+                  Seleccionar imagen (552x517px)
+                  <button
+                    class="btn-cancel"
+                    (click)="cancelEditReminderImage()"
+                    [disabled]="loadingReminderImage"
+                    style="margin-top: 8px"
+                  >
+                    Cancelar
+                  </button>
+                </label>
+                <div
+                  *ngIf="loadingReminderImage"
+                  style="color: #1a237e; font-weight: 600; margin-top: 8px"
+                >
+                  Subiendo imagen...
+                </div>
+                <div
+                  *ngIf="reminderImageError"
+                  style="color: #ef4444; font-weight: 600; margin-top: 8px"
+                >
+                  {{ reminderImageError }}
+                </div>
+              </div>
+            </ng-container>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- Modal para seleccionar periodo -->
 @if (showPeriodModal) {
-    <div class="modal-overlay" (click)="closePeriodModal()"></div>
-    <div class="modal-content">
-        <h3>Seleccionar Periodo</h3>
-        <!-- Aquí iría el selector de fechas, por ahora usamos campos de entrada -->
-        <div class="form-group">
-            <label for="selectedDateInput">Fecha:</label>
-            <input type="date" id="selectedDateInput" #selectedDateInput>
-        </div>
-        
-        <div class="modal-actions">
-            <button class="btn-secondary" (click)="closePeriodModal()">Cancelar</button>
-            <button class="btn-primary" (click)="processPeriodSelection()">Seleccionar</button>
-        </div>
-    </div>
+<div class="modal-overlay" (click)="closePeriodModal()"></div>
+<div class="modal-content">
+  <h3>Seleccionar Periodo</h3>
+  <!-- Aquí iría el selector de fechas, por ahora usamos campos de entrada -->
+  <div class="form-group">
+    <label for="selectedDateInput">Fecha:</label>
+    <input type="date" id="selectedDateInput" #selectedDateInput />
+  </div>
+
+  <div class="modal-actions">
+    <button class="btn-secondary" (click)="closePeriodModal()">Cancelar</button>
+    <button class="btn-primary" (click)="processPeriodSelection()">
+      Seleccionar
+    </button>
+  </div>
+</div>
 }
+<style>
+  /* Estilos corregidos */
+  .notification-banner-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .notification-banner.clickeable-banner {
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+    width: 100%;
+    display: block;
+  }
+
+  .notification-banner.clickeable-banner:hover {
+    transform: scale(1.02);
+    opacity: 0.9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .video-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 0, 0, 0.9);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .video-indicator:hover {
+    background: rgba(255, 0, 0, 1);
+    transform: scale(1.05);
+  }
+
+  .youtube-url-section {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #e9ecef;
+  }
+
+  .youtube-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+  }
+
+  .youtube-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .youtube-url-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 0;
+  }
+
+  .youtube-url-input:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  .btn-youtube {
+    background: #ff0000;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-youtube:hover {
+    background: #cc0000;
+  }
+
+  .btn-youtube:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+
+  /* Modal styles */
+  .youtube-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .youtube-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .youtube-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+  }
+
+  .youtube-modal-header h3 {
+    margin: 0;
+    color: #1a237e;
+    font-size: 18px;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close-btn:hover {
+    background: #e9ecef;
+    color: #333;
+  }
+
+  .youtube-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    background: #000;
+  }
+
+  .youtube-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .loading-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+  }
+
+  .loading-video i {
+    font-size: 30px;
+    margin-bottom: 10px;
+  }
+
+  /* Animaciones */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .youtube-modal-content {
+      width: 95%;
+      margin: 20px;
+    }
+
+    .youtube-input-group {
+      flex-direction: column;
+    }
+
+    .youtube-url-input {
+      margin-bottom: 8px;
+    }
+
+    .btn-youtube {
+      justify-content: center;
+    }
+  }
+</style>

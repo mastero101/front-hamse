@@ -3,69 +3,311 @@
     <h2>Soluciones Hamse</h2>
   </div>
 
-  <!-- 👇 FORMULARIO DE CONTACTO (VERSIÓN ÚNICA) -->
- <div class="contact-section" style="text-align: center;">
-    <h3 style="color: white;">¿Necesitas más información?</h3>
-    <p style="color: white;">Completa el formulario y te contactaremos a la brevedad</p>
+
+
+  <!-- Contenido integrado del modal -->
+  <div class="maintenance-content" *ngIf="showMaintenanceContent">
+    <!-- Modo visualización -->
+    <div *ngIf="!editMode" class="view-mode">
+      <!-- Imagen -->
+      <div class="maintenance-image-container">
+        <img
+          [src]="maintenanceImage"
+          [alt]="maintenanceTitle"
+          class="maintenance-image"
+        />
+      </div>
+      
+
+      <!-- Título -->
+      <h3 class="maintenance-title">{{ maintenanceTitle }}</h3>
+
+      <!-- Fecha límite -->
+      <p class="maintenance-deadline">{{ maintenanceDeadline }}</p>
+
+      <!-- Detalles -->
+      <p class="maintenance-details">{{ maintenanceDetails }}</p>
+
+      <!-- Botones de acción alineados -->
+      <div class="button-group">
+        <button
+          class="maintenance-action-button"
+          (click)="onExternalLinkClick()"
+        >
+          {{ maintenanceButtonText }}
+        </button>
+        <button
+          *ngIf="isAdmin"
+          class="edit-button"
+          (click)="startEditMaintenance()"
+        >
+          Editar Contenido
+        </button>
+      </div>
+    </div>
+    
+
+    <!-- Modo edición -->
+    <div *ngIf="editMode" class="edit-mode">
+      <h3>Editar Contenido</h3>
+
+      <!-- Título -->
+      <div class="form-group">
+        <label for="title">Título:</label>
+        <input
+          type="text"
+          id="title"
+          [(ngModel)]="tempMaintenance.title"
+          class="form-input"
+          placeholder="Título del contenido"
+        />
+      </div>
+
+      <!-- Imagen -->
+      <div class="form-group">
+        <label for="image">Imagen (700x289px):</label>
+        <div class="image-upload-container">
+          <img
+            [src]="tempMaintenance.image"
+            [alt]="tempMaintenance.title"
+            class="preview-image"
+            *ngIf="tempMaintenance.image"
+          />
+          <input
+            type="file"
+            id="image"
+            accept="image/*"
+            (change)="onMaintenanceImageSelected($event)"
+            class="file-input"
+          />
+          <label for="image" class="file-label">
+            {{
+              tempMaintenance.image ? "Cambiar imagen" : "Seleccionar imagen"
+            }}
+          </label>
+        </div>
+        <div *ngIf="loadingImage" class="loading">Subiendo imagen...</div>
+        <div *ngIf="imageUploadError" class="error">{{ imageUploadError }}</div>
+      </div>
+
+      <!-- Texto del botón -->
+      <div class="form-group">
+        <label for="buttonText">Texto del botón:</label>
+        <input
+          type="text"
+          id="buttonText"
+          [(ngModel)]="tempMaintenance.buttonText"
+          class="form-input"
+          placeholder="Texto del botón"
+        />
+      </div>
+
+      <!-- Fecha límite -->
+      <div class="form-group">
+        <label for="deadline">Fecha límite:</label>
+        <input
+          type="text"
+          id="deadline"
+          [(ngModel)]="tempMaintenance.deadline"
+          class="form-input"
+          placeholder="Fecha límite"
+        />
+      </div>
+
+      <!-- Detalles -->
+      <div class="form-group">
+        <label for="details">Detalles:</label>
+        <textarea
+          id="details"
+          [(ngModel)]="tempMaintenance.details"
+          class="form-textarea"
+          placeholder="Detalles del contenido"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Enlace -->
+      <div class="form-group">
+        <label for="link">Enlace:</label>
+        <input
+          type="url"
+          id="link"
+          [(ngModel)]="tempMaintenance.link"
+          class="form-input"
+          placeholder="URL del enlace"
+        />
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="edit-actions">
+        <button
+          class="save-button"
+          (click)="saveMaintenance()"
+          [disabled]="loadingSave"
+        >
+          {{ loadingSave ? "Guardando..." : "Guardar" }}
+        </button>
+        <button class="cancel-button" (click)="cancelEditMaintenance()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+    <!-- 👇 FORMULARIO DE CONTACTO (VERSIÓN ÚNICA) -->
+  <div class="contact-section" style="text-align: center">
+    <h3 style="color: white">¿Necesitas más información?</h3>
+    <p style="color: white">
+      Completa el formulario y te contactaremos a la brevedad
+    </p>
 
     <!-- Mensaje de éxito -->
-    <div *ngIf="contactSuccess" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <div
+      *ngIf="contactSuccess"
+      style="
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      "
+    >
       ✅ ¡Mensaje enviado exitosamente! Te contactaremos pronto.
-      <br><br>
-      <button (click)="resetContactForm()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+      <br /><br />
+      <button
+        (click)="resetContactForm()"
+        style="
+          background: #28a745;
+          color: white;
+          border: none;
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+        "
+      >
         Enviar otro mensaje
       </button>
     </div>
 
     <!-- Mensaje de error -->
-    <div *ngIf="contactError" style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    <div
+      *ngIf="contactError"
+      style="
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+      "
+    >
       ⚠️ {{ contactError }}
     </div>
 
     <!-- Formulario -->
-    <form *ngIf="!contactSuccess" (ngSubmit)="onContactSubmit()" #contactForm="ngForm" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-      
+    <form
+      *ngIf="!contactSuccess"
+      (ngSubmit)="onContactSubmit()"
+      #contactForm="ngForm"
+      style="
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      "
+    >
       <!-- Primera fila: Nombre y Email -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+      <div
+        style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 15px;
+        "
+      >
         <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre *</label>
-          <input 
-            type="text" 
-            [(ngModel)]="contactData.name" 
+          <label style="display: block; margin-bottom: 5px; font-weight: bold"
+            >Nombre *</label
+          >
+          <input
+            type="text"
+            [(ngModel)]="contactData.name"
             name="name"
             required
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
-            placeholder="Tu nombre completo">
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              box-sizing: border-box;
+            "
+            placeholder="Tu nombre completo"
+          />
         </div>
         <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email *</label>
-          <input 
-            type="email" 
-            [(ngModel)]="contactData.email" 
+          <label style="display: block; margin-bottom: 5px; font-weight: bold"
+            >Email *</label
+          >
+          <input
+            type="email"
+            [(ngModel)]="contactData.email"
             name="email"
             required
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
-            placeholder="tu@email.com">
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              box-sizing: border-box;
+            "
+            placeholder="tu@email.com"
+          />
         </div>
       </div>
 
       <!-- Segunda fila: Teléfono y Servicio -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+      <div
+        style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 15px;
+        "
+      >
         <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Teléfono</label>
-          <input 
-            type="tel" 
-            [(ngModel)]="contactData.phone" 
+          <label style="display: block; margin-bottom: 5px; font-weight: bold"
+            >Teléfono *</label
+          >
+          <input
+            type="tel"
+            [(ngModel)]="contactData.phone"
             name="phone"
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
-            placeholder="+52 123 456 7890">
+            required
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              box-sizing: border-box;
+            "
+            placeholder="+52 123 456 7890"
+          />
         </div>
         <div>
-          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Servicio</label>
-          <select 
-            [(ngModel)]="contactData.service" 
+          <label style="display: block; margin-bottom: 5px; font-weight: bold"
+            >Servicio</label
+          >
+          <select
+            [(ngModel)]="contactData.service"
             name="service"
-            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+            style="
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              box-sizing: border-box;
+            "
+          >
             <option value="">Seleccionar servicio</option>
             <option value="mantenimiento">Mantenimiento Preventivo</option>
             <option value="dictamenes">Dictámenes</option>
@@ -79,35 +321,69 @@
       </div>
 
       <!-- Tercera fila: Mensaje -->
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Mensaje *</label>
-        <textarea 
-          [(ngModel)]="contactData.message" 
+      <div style="margin-bottom: 15px">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold"
+          >Mensaje *</label
+        >
+        <textarea
+          [(ngModel)]="contactData.message"
           name="message"
           required
           rows="4"
-          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; box-sizing: border-box;"
-          placeholder="Describe tu consulta o necesidad..."></textarea>
+          style="
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            box-sizing: border-box;
+          "
+          placeholder="Describe tu consulta o necesidad..."
+        ></textarea>
       </div>
 
       <!-- Botones -->
-      <div style="text-align: center;">
-        <button 
-          type="submit" 
+      <div style="text-align: center">
+        <button
+          type="submit"
           [disabled]="contactForm.invalid || contactSubmitting"
-          style="background: #1c296a; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-right: 10px; opacity: 1;"
-          [style.opacity]="(contactForm.invalid || contactSubmitting) ? '0.6' : '1'"
-          [style.cursor]="(contactForm.invalid || contactSubmitting) ? 'not-allowed' : 'pointer'">
+          style="
+            background: #1c296a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+            opacity: 1;
+          "
+          [style.opacity]="
+            contactForm.invalid || contactSubmitting ? '0.6' : '1'
+          "
+          [style.cursor]="
+            contactForm.invalid || contactSubmitting ? 'not-allowed' : 'pointer'
+          "
+        >
           <span *ngIf="!contactSubmitting">Enviar mensaje</span>
           <span *ngIf="contactSubmitting">Enviando...</span>
         </button>
-        <button 
-          type="button" 
+        <button
+          type="button"
           (click)="resetContactForm()"
           [disabled]="contactSubmitting"
-          style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer;"
+          style="
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+          "
           [style.opacity]="contactSubmitting ? '0.6' : '1'"
-          [style.cursor]="contactSubmitting ? 'not-allowed' : 'pointer'">
+          [style.cursor]="contactSubmitting ? 'not-allowed' : 'pointer'"
+        >
           Limpiar
         </button>
       </div>
@@ -125,132 +401,8 @@
       }
     </style>
   </div>
-
-  <!-- Contenido integrado del modal -->
-  <div class="maintenance-content" *ngIf="showMaintenanceContent">
-    
-    <!-- Modo visualización -->
-    <div *ngIf="!editMode" class="view-mode">
-      
-      <!-- Imagen -->
-      <div class="maintenance-image-container">
-        <img [src]="maintenanceImage" [alt]="maintenanceTitle" class="maintenance-image">
-      </div>
-
-      <!-- Título -->
-      <h3 class="maintenance-title">{{ maintenanceTitle }}</h3>
-
-      <!-- Fecha límite -->
-      <p class="maintenance-deadline">{{ maintenanceDeadline }}</p>
-
-      <!-- Detalles -->
-      <p class="maintenance-details">{{ maintenanceDetails }}</p>
-
-      <!-- Botones de acción alineados -->
-      <div class="button-group">
-        <button class="maintenance-action-button" (click)="onExternalLinkClick()">
-          {{ maintenanceButtonText }}
-        </button>
-        <button *ngIf="isAdmin" class="edit-button" (click)="startEditMaintenance()">
-          Editar Contenido
-        </button>
-      </div>
-    </div>
-
-    <!-- Modo edición -->
-    <div *ngIf="editMode" class="edit-mode">
-      
-      <h3>Editar Contenido</h3>
-
-      <!-- Título -->
-      <div class="form-group">
-        <label for="title">Título:</label>
-        <input 
-          type="text" 
-          id="title" 
-          [(ngModel)]="tempMaintenance.title" 
-          class="form-input"
-          placeholder="Título del contenido">
-      </div>
-
-      <!-- Imagen -->
-      <div class="form-group">
-        <label for="image">Imagen (700x289px):</label>
-        <div class="image-upload-container">
-          <img [src]="tempMaintenance.image" [alt]="tempMaintenance.title" class="preview-image" *ngIf="tempMaintenance.image">
-          <input 
-            type="file" 
-            id="image" 
-            accept="image/*" 
-            (change)="onMaintenanceImageSelected($event)"
-            class="file-input">
-          <label for="image" class="file-label">
-            {{ tempMaintenance.image ? 'Cambiar imagen' : 'Seleccionar imagen' }}
-          </label>
-        </div>
-        <div *ngIf="loadingImage" class="loading">Subiendo imagen...</div>
-        <div *ngIf="imageUploadError" class="error">{{ imageUploadError }}</div>
-      </div>
-
-      <!-- Texto del botón -->
-      <div class="form-group">
-        <label for="buttonText">Texto del botón:</label>
-        <input 
-          type="text" 
-          id="buttonText" 
-          [(ngModel)]="tempMaintenance.buttonText" 
-          class="form-input"
-          placeholder="Texto del botón">
-      </div>
-
-      <!-- Fecha límite -->
-      <div class="form-group">
-        <label for="deadline">Fecha límite:</label>
-        <input 
-          type="text" 
-          id="deadline" 
-          [(ngModel)]="tempMaintenance.deadline" 
-          class="form-input"
-          placeholder="Fecha límite">
-      </div>
-
-      <!-- Detalles -->
-      <div class="form-group">
-        <label for="details">Detalles:</label>
-        <textarea 
-          id="details" 
-          [(ngModel)]="tempMaintenance.details" 
-          class="form-textarea"
-          placeholder="Detalles del contenido"
-          rows="3"></textarea>
-      </div>
-
-      <!-- Enlace -->
-      <div class="form-group">
-        <label for="link">Enlace:</label>
-        <input 
-          type="url" 
-          id="link" 
-          [(ngModel)]="tempMaintenance.link" 
-          class="form-input"
-          placeholder="URL del enlace">
-      </div>
-
-      <!-- Botones de acción -->
-      <div class="edit-actions">
-        <button 
-          class="save-button" 
-          (click)="saveMaintenance()" 
-          [disabled]="loadingSave">
-          {{ loadingSave ? 'Guardando...' : 'Guardar' }}
-        </button>
-        <button class="cancel-button" (click)="cancelEditMaintenance()">
-          Cancelar
-        </button>
-      </div>
-    </div>
-  </div>
 </div>
+
 
 <!-- Modal de anuncio original -->
 <app-reminders-modal
