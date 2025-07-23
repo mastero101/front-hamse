@@ -45,7 +45,7 @@
                 {{ product.description }}
             </div>
             <div>
-                <span>Precio: {{ product.price | currency }}</span>
+                <span>Precio: {{ product.price | currency:'MXN':'symbol':'1.2-2' }}</span>
             </div>
             <div>
                 <!-- <span>Stock: {{ product.stock }}</span>
@@ -90,3 +90,5 @@
   </ng-container>
   <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Siguiente</button>
 </div>
+
+<!-- debuger -->
