@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RemindersModalComponent } from '../reminders-modal/reminders-modal.component'; // Comentado por si se necesita implementar nuevamente
+import { RemindersModalComponent } from '../reminders-modal/reminders-modal.component';
 import { SettingsService } from '../../services/settings.service';
 import { AuthService } from '../../services/auth.service';
 import { NotificationService } from '../../services/notification.service';
@@ -9,7 +9,7 @@ import { NotificationService } from '../../services/notification.service';
 @Component({
   selector: 'app-preventive-maintenance',
   standalone: true,
-  imports: [CommonModule, FormsModule, RemindersModalComponent], // RemindersModalComponent comentado por si se necesita implementar nuevamente
+  imports: [CommonModule, FormsModule, RemindersModalComponent],
   templateUrl: './preventive-maintenance.component.html',
   styleUrl: './preventive-maintenance.component.scss'
 })
@@ -33,7 +33,7 @@ export class PreventiveMaintenanceComponent implements OnInit {
   maintenanceDetails = 'Descubre nuestro nuevo servicio de mantenimiento preventivo con beneficios exclusivos.';
   maintenanceLink = 'https://www.hamse.mx/public/contacto/';
 
-  // --- Variables del modal original (comentadas por si se necesita implementar nuevamente) ---
+  // Variables del modal original
   showAnnouncementModal = false;
   announcementTitle = '¡Nuevo Servicio Disponible!';
   announcementImage = '../../../assets/images/HAMSE_Cedula_Operacion.png';
@@ -42,7 +42,19 @@ export class PreventiveMaintenanceComponent implements OnInit {
   announcementDetails = 'Descubre nuestro nuevo servicio de mantenimiento preventivo con beneficios exclusivos.';
   announcementLink = 'https://www.hamse.mx/public/contacto/';
 
-  // --- Edición del contenido ---
+  // 👇 Variables del formulario de contacto
+  contactData = {
+    name: '',
+    email: '',
+    phone: '',
+    service: '',
+    message: ''
+  };
+  contactSubmitting = false;
+  contactSuccess = false;
+  contactError = '';
+
+  // Edición del contenido
   isAdmin = false;
   editMode = false;
   tempMaintenance = {
@@ -57,7 +69,7 @@ export class PreventiveMaintenanceComponent implements OnInit {
   loadingImage = false;
   imageUploadError = '';
 
-  // --- Variables temporales del modal original (comentadas por si se necesita implementar nuevamente) ---
+  // Variables temporales del modal original
   tempAnnouncement = {
     title: '',
     image: '',
@@ -75,6 +87,7 @@ export class PreventiveMaintenanceComponent implements OnInit {
 
   ngOnInit(): void {
     this.checkAdminStatus();
+    
     // Cargar los valores del backend para mantenimiento
     const maintenanceKeys = [
       { key: 'maintenanceTitle', prop: 'maintenanceTitle' },
@@ -84,6 +97,7 @@ export class PreventiveMaintenanceComponent implements OnInit {
       { key: 'maintenanceDetails', prop: 'maintenanceDetails' },
       { key: 'maintenanceLink', prop: 'maintenanceLink' }
     ];
+    
     maintenanceKeys.forEach(({ key, prop }) => {
       this.settingsService.getSettingByKey(key).subscribe({
         next: (res) => {
@@ -103,6 +117,7 @@ export class PreventiveMaintenanceComponent implements OnInit {
       { key: 'announcementDetails', prop: 'announcementDetails' },
       { key: 'announcementLink', prop: 'announcementLink' }
     ];
+    
     announcementKeys.forEach(({ key, prop }) => {
       this.settingsService.getSettingByKey(key).subscribe({
         next: (res) => {
@@ -113,9 +128,65 @@ export class PreventiveMaintenanceComponent implements OnInit {
       });
     });
 
-    this.showAnnouncementModal = true;
+    this.showAnnouncementModal = false;
   }
 
+  // 👇 MÉTODOS DEL FORMULARIO DE CONTACTO
+  onContactSubmit(): void {
+    if (this.contactSubmitting) return;
+
+    this.contactSubmitting = true;
+    this.contactError = '';
+    this.contactSuccess = false;
+
+    const formData = new FormData();
+    formData.append('name', this.contactData.name);
+    formData.append('email', this.contactData.email);
+    formData.append('phone', this.contactData.phone || '');
+    formData.append('service', this.contactData.service || 'No especificado');
+    formData.append('message', this.contactData.message);
+
+    const self = this;
+
+    fetch('https://hamse.mx/public/api/contact.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      if (data.success) {
+        self.contactSuccess = true;
+        self.contactError = '';
+        console.log('✅ Mensaje enviado exitosamente');
+      } else {
+        self.contactError = data.message || 'Error al enviar el mensaje';
+        console.error('❌ Error:', self.contactError);
+      }
+      self.contactSubmitting = false;
+    })
+    .catch(function(error) {
+      self.contactError = 'Error de conexión. Por favor, intenta nuevamente.';
+      console.error('❌ Error de conexión:', error);
+      self.contactSubmitting = false;
+    });
+  }
+
+  resetContactForm(): void {
+    this.contactData = {
+      name: '',
+      email: '',
+      phone: '',
+      service: '',
+      message: ''
+    };
+    this.contactSuccess = false;
+    this.contactError = '';
+    this.contactSubmitting = false;
+  }
+
+  // 👇 RESTO DE MÉTODOS EXISTENTES
   checkAdminStatus(): void {
     const currentUser = this.authService.currentUserValue;
     this.isAdmin = currentUser?.role === 'admin';
@@ -153,7 +224,6 @@ export class PreventiveMaintenanceComponent implements OnInit {
         next: () => {
           completed++;
           if (completed === updates.length) {
-            // Actualizar los valores locales
             this.maintenanceTitle = this.tempMaintenance.title;
             this.maintenanceImage = this.tempMaintenance.image;
             this.maintenanceButtonText = this.tempMaintenance.buttonText;
@@ -166,7 +236,6 @@ export class PreventiveMaintenanceComponent implements OnInit {
         },
         error: () => {
           this.loadingSave = false;
-          // Aquí podrías mostrar un mensaje de error
         }
       });
     });
@@ -198,7 +267,6 @@ export class PreventiveMaintenanceComponent implements OnInit {
     window.open(this.maintenanceLink, '_blank');
   }
 
-  // --- Métodos del modal original (comentados por si se necesita implementar nuevamente) ---
   closeAnnouncementModal(): void {
     this.showAnnouncementModal = false;
   }
@@ -235,7 +303,6 @@ export class PreventiveMaintenanceComponent implements OnInit {
         next: () => {
           completed++;
           if (completed === updates.length) {
-            // Actualizar los valores locales
             this.announcementTitle = this.tempAnnouncement.title;
             this.announcementImage = this.tempAnnouncement.image;
             this.announcementButtonText = this.tempAnnouncement.buttonText;
@@ -248,13 +315,12 @@ export class PreventiveMaintenanceComponent implements OnInit {
         },
         error: () => {
           this.loadingSave = false;
-          // Aquí podrías mostrar un mensaje de error
         }
       });
     });
   }
 
-  onAnnouncementImageSelected(file: File) {
+  onAnnouncementImageSelected(file: File): void {
     this.loadingImage = true;
     this.imageUploadError = '';
     this.settingsService.uploadImage(file).subscribe({

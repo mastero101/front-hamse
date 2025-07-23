@@ -3,6 +3,129 @@
     <h2>Soluciones Hamse</h2>
   </div>
 
+  <!-- 👇 FORMULARIO DE CONTACTO (VERSIÓN ÚNICA) -->
+ <div class="contact-section" style="text-align: center;">
+    <h3 style="color: white;">¿Necesitas más información?</h3>
+    <p style="color: white;">Completa el formulario y te contactaremos a la brevedad</p>
+
+    <!-- Mensaje de éxito -->
+    <div *ngIf="contactSuccess" style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 5px; margin: 15px 0;">
+      ✅ ¡Mensaje enviado exitosamente! Te contactaremos pronto.
+      <br><br>
+      <button (click)="resetContactForm()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+        Enviar otro mensaje
+      </button>
+    </div>
+
+    <!-- Mensaje de error -->
+    <div *ngIf="contactError" style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;">
+      ⚠️ {{ contactError }}
+    </div>
+
+    <!-- Formulario -->
+    <form *ngIf="!contactSuccess" (ngSubmit)="onContactSubmit()" #contactForm="ngForm" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      
+      <!-- Primera fila: Nombre y Email -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Nombre *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="contactData.name" 
+            name="name"
+            required
+            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+            placeholder="Tu nombre completo">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email *</label>
+          <input 
+            type="email" 
+            [(ngModel)]="contactData.email" 
+            name="email"
+            required
+            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+            placeholder="tu@email.com">
+        </div>
+      </div>
+
+      <!-- Segunda fila: Teléfono y Servicio -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Teléfono</label>
+          <input 
+            type="tel" 
+            [(ngModel)]="contactData.phone" 
+            name="phone"
+            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;"
+            placeholder="+52 123 456 7890">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; font-weight: bold;">Servicio</label>
+          <select 
+            [(ngModel)]="contactData.service" 
+            name="service"
+            style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+            <option value="">Seleccionar servicio</option>
+            <option value="mantenimiento">Mantenimiento Preventivo</option>
+            <option value="dictamenes">Dictámenes</option>
+            <option value="refacciones">Refacciones</option>
+            <option value="uniformes">Uniformes</option>
+            <option value="aceites">Aceites y Aditivos</option>
+            <option value="papeleria">Papelería</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tercera fila: Mensaje -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Mensaje *</label>
+        <textarea 
+          [(ngModel)]="contactData.message" 
+          name="message"
+          required
+          rows="4"
+          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; box-sizing: border-box;"
+          placeholder="Describe tu consulta o necesidad..."></textarea>
+      </div>
+
+      <!-- Botones -->
+      <div style="text-align: center;">
+        <button 
+          type="submit" 
+          [disabled]="contactForm.invalid || contactSubmitting"
+          style="background: #1c296a; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer; margin-right: 10px; opacity: 1;"
+          [style.opacity]="(contactForm.invalid || contactSubmitting) ? '0.6' : '1'"
+          [style.cursor]="(contactForm.invalid || contactSubmitting) ? 'not-allowed' : 'pointer'">
+          <span *ngIf="!contactSubmitting">Enviar mensaje</span>
+          <span *ngIf="contactSubmitting">Enviando...</span>
+        </button>
+        <button 
+          type="button" 
+          (click)="resetContactForm()"
+          [disabled]="contactSubmitting"
+          style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-size: 16px; cursor: pointer;"
+          [style.opacity]="contactSubmitting ? '0.6' : '1'"
+          [style.cursor]="contactSubmitting ? 'not-allowed' : 'pointer'">
+          Limpiar
+        </button>
+      </div>
+    </form>
+
+    <!-- Estilos responsive -->
+    <style>
+      @media (max-width: 768px) {
+        .contact-section form > div[style*="grid-template-columns"] {
+          display: block !important;
+        }
+        .contact-section form > div[style*="grid-template-columns"] > div {
+          margin-bottom: 15px;
+        }
+      }
+    </style>
+  </div>
+
   <!-- Contenido integrado del modal -->
   <div class="maintenance-content" *ngIf="showMaintenanceContent">
     
@@ -127,19 +250,9 @@
       </div>
     </div>
   </div>
-
-  <div class="content-card">
-    <ul>
-      <li *ngFor="let item of maintenanceItems">{{ item }}</li>
-    </ul>
-  </div>
-
-  <div class="actions-container">
-    <a href="https://www.hamse.mx/public/contacto/" target="_blank" class="info-button">Solicitar información</a>
-  </div>
 </div>
 
-<!-- Modal de anuncio original (comentado por si se necesita implementar nuevamente) -->
+<!-- Modal de anuncio original -->
 <app-reminders-modal
   [isVisible]="showAnnouncementModal"
   (close)="closeAnnouncementModal()"
