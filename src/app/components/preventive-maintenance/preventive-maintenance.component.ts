@@ -132,46 +132,59 @@ export class PreventiveMaintenanceComponent implements OnInit {
   }
 
   // 👇 MÉTODOS DEL FORMULARIO DE CONTACTO
-  onContactSubmit(): void {
-    if (this.contactSubmitting) return;
+ onContactSubmit(): void {
+  if (this.contactSubmitting) return;
 
-    this.contactSubmitting = true;
-    this.contactError = '';
-    this.contactSuccess = false;
+  this.contactSubmitting = true;
+  this.contactError = '';
+  this.contactSuccess = false;
 
-    const formData = new FormData();
-    formData.append('name', this.contactData.name);
-    formData.append('email', this.contactData.email);
-    formData.append('phone', this.contactData.phone || '');
-    formData.append('service', this.contactData.service || 'No especificado');
-    formData.append('message', this.contactData.message);
+  const formData = new FormData();
+  formData.append('name', this.contactData.name);
+  formData.append('email', this.contactData.email);
+  formData.append('phone', this.contactData.phone || '');
+  formData.append('service', this.contactData.service || 'No especificado');
+  formData.append('message', this.contactData.message);
 
-    const self = this;
+  const self = this;
+  
+  // 👇 URL CORREGIDA PARA TU SERVIDOR
+  const apiUrl = 'https://www.hamse.mx/public/api/contact.php';
+  
+  console.log('🚀 Enviando a:', apiUrl);
 
-    fetch('https://hamse.mx/public/api/contact.php', {
-      method: 'POST',
-      body: formData
-    })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(data) {
-      if (data.success) {
-        self.contactSuccess = true;
-        self.contactError = '';
-        console.log('✅ Mensaje enviado exitosamente');
-      } else {
-        self.contactError = data.message || 'Error al enviar el mensaje';
-        console.error('❌ Error:', self.contactError);
-      }
-      self.contactSubmitting = false;
-    })
-    .catch(function(error) {
-      self.contactError = 'Error de conexión. Por favor, intenta nuevamente.';
-      console.error('❌ Error de conexión:', error);
-      self.contactSubmitting = false;
-    });
-  }
+  fetch(apiUrl, {
+    method: 'POST',
+    body: formData
+  })
+  .then(function(response) {
+    console.log('📡 Respuesta:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+  })
+  .then(function(data) {
+    console.log('📦 Datos:', data);
+    
+    if (data.success) {
+      self.contactSuccess = true;
+      self.contactError = '';
+      console.log('✅ Mensaje enviado exitosamente');
+    } else {
+      self.contactError = data.message || 'Error al enviar el mensaje';
+      console.error('❌ Error del servidor:', self.contactError);
+    }
+    self.contactSubmitting = false;
+  })
+  .catch(function(error) {
+    console.error('🚨 Error:', error);
+    self.contactError = 'Error de conexión. Por favor, intenta nuevamente.';
+    self.contactSubmitting = false;
+  });
+}
 
   resetContactForm(): void {
     this.contactData = {
