@@ -363,6 +363,21 @@
                 background: #f4c180;
               }
             }
+            .btn-red {
+  background-color: #ff0000;  /* Rojo sólido */
+  padding: 12px 24px;         /* Más grande */
+  font-size: 1.1em;           /* Texto más grande */
+  color: white;               /* Texto blanco */
+  border: none;               /* Sin borde */
+  border-radius: 4px;         /* Esquinas redondeadas */
+  cursor: pointer;            /* Cursor tipo mano */
+  transition: all 0.3s ease;  /* Transición suave */
+}
+
+.btn-red:hover {
+  background-color: #ff6659;  /* Rojo más oscuro al pasar el mouse */
+  transform: scale(1.05);     /* Efecto de zoom */
+}
           }
         }
       }
